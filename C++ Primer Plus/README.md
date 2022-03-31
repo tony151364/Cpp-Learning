@@ -1,3 +1,6 @@
+## 计划每天至少20页
+- day1（3.31） 1-28
+
 ## 第 1 章 预备知识
 ### 1.1 C++简介
 - C++融合了3种不同的编程方式：
@@ -72,3 +75,187 @@ int main()
 - C++新式风格，使用 namespace std
 
 #### 2.1.5 名称空间
+```C++
+using namespace std;  // using编译指令
+```
+- cout变量实际上是 std::cout, endl实际上是std::endl;
+- using 编译指令使得std命名空间中的所有名称都可用，这是一种偷懒的做法。
+
+#### 2.1.6 使用cout进行C++输出
+- <<符号表示该语句把这个字符串发送给cout；该符号指出了信息流动的路径。
+- cout是一个预定义的对象，知道如何显示字符串、数字和单个字符等（对象是类的特点实例，而类定义了数据的存储和使用方式）
+- 插入运算符 ( << )，它可以将其右侧的信息插入到流中。
+
+```C++
+cout << "Come up and C++ me some time.";  // 它 (<<) 将一个字符串插入到数据流中
+```
+- 插入运算符看上去像一个左移运算符。这是一个运算符重载的例子。
+- endl是一个特殊的C++符号，表示一个重要的概念：重起一行；导致屏幕光标移动到下一行开头。
+- endl 等对于cout来说有特殊含义的特殊符号被称为控制符(manipulator)
+
+```C++
+cout << "pluto is a drawf planet.\n";
+cout << "pluto is a drawf planet" << endl;
+```
+- 一个差别：endl确保程序运行前刷新输出（将其立即显示在屏幕上）；而"\n"不能提供这样的保证
+
+#### 2.1.7 C++源代码的格式化
+- 每条语句占一行
+- 每个函数都有一个开始花括号和一个结束花括号，这两个花括号各占一行
+- 函数中的语句都相对花括号缩进。
+- 与函数名词相关的圆括号周围没有空白
+
+### 2.2 C++语句
+#### 2.2.1 声明语句和变量
+```C++
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int carrots;  // 编译器负责分配int大小的内存，并标记为carrots
+
+    carrots = 25;
+    cout << "I have";
+    cout << carrots;
+    cout << "carrots";
+    cout << endl;
+    carrots = carrots - 1;
+    cout << "Crunch, crunch. Now I hava " << carrots << " carrots." << endl;
+
+    return 0;
+}
+```
+- C++通常的做法是：在首次使用之前声明它。缺点就是无法对函数使用了那些变量一目了然
+- 
+#### 2.2.2 赋值语句
+- C++ 与 C 不同的特性在于——可以连续使用赋值运算符（python也可以）。
+```C++
+// 以下语句是合法的
+int steinway;
+int baldwin;
+int yammaha;
+yamaha = baldwin = steinway = 88;
+```
+#### 2.2.3 cout新花样
+- 对于 cout << carrots;实际上，这将两个操作合二为一了。首先，cout将carrots替换为当前值25；然后，把值转换为合适的输出字符。
+- 在打印之前，cout必须将整数形式的数字转换为字符串形式。cout很聪明，知道carrots是一个需要转换的整数。
+- 相比于老式C语言的printf，cout更聪明。这源自于C++面向对象的特性。实际上，C++插入运算符(<<)将根据其后的数据类型相应地调整其行为，这是一个运算符重载的例子。
+
+### 2.3 其他 C++语句
+```C++
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int carrots;
+
+    cout << "How many carrots do you have?" << endl;
+    cin >> carrots;  // C++ input
+    cout << "Here are too more. ";
+
+    carrots = carrots + 2;
+
+    cout << "Now you have " << carrots << " carrots." << endl;
+    return 0;
+}
+```
+#### 2.3.1 使用 cin 
+- cin >> carrots; 从这条语句可知，信息从cin流向carrots。可以看做流入程序的字符流
+
+#### 2.3.1 使用cout进行拼接
+```C++
+cout << "Now you have " << carrots << " carrots." << endl;
+
+cout << "Now you have " 
+     << carrots 
+     << " carrots." 
+     << endl;
+```
+- 这是由于C++的自由格式规则将标记间的换行符和空格看作是可相互替换的。当代码很长，限制输出的风格时，最后一种技术很方便。
+
+#### 2.3.3 类简介
+- 类是用户定义的一种数据类型。要定义类，需要描述它能够表示什么信息和可对数据执行哪些操作。
+- 类之于对象就像类型之于变量。
+- 也就是说，类定义描述的是数据格式及其用法，而对象则是根据数据格式规范创建的实体。
+- cout是一个ostream类对象。ostream类定义(iostream文件的另一个成员)描述了ostream对象表示的数据以及可以对它执行的操作，如将数字或字符串插入到输出流中。同样，cin是一个istream类对象，也是在iostream中定义的。
+
+- 类描述了一种数据类型的全部属性（包括可使用它执行的操作），对象是根据这些描述创建的实体
+
+- 类描述了可对类对象执行的所有操作。要对特定对象执行这些允许的操作，需要给该对象发送一条消息。例如，如果希望cout对象显示一个字符串，应向它发送一条消息，告诉它，“对象！显示这些内容！”
+
+- C++提供两种发送消息的方式：
+    - 一种方式是使用类方法（本质上就是稍后将介绍的函数调用）  
+    - 另一种是重新定义运算符，cin，cout采用的就是这种发生
+
+
+### 2.4 函数
+#### 2.4.1 使用有返回值的函数
+- 参数是发送给函数的信息，返回值是从函数中发送回去的值
+- 在使用函数之前，C++编译器必须知道函数的参数类型和返回值类型。
+- C++程序中应当为程序中使用的每个函数提供原型。函数原型之于函数，就像变量声明之于变量。
+- 不要混淆函数原型和函数定义。原型只描述函数接口。也就是说，它描述的是发送给函数的信息和返回的信息。
+- C和C++中将原型和定义这两项特性分开了。库函数包含了函数的编译代码，而头文件中则包含了原型。
+
+```C++
+// 2.4 sqrt.cpp -- using the sqrt() function
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+int main()
+{
+	double area;
+	cout << "Enter the floor area, in square feet, of your home: ";
+	cin >> area;
+
+	double side;
+	side = sqrt(area);
+	cout << "That's the equivalent of a square " << side
+		<< " feet to the side." << endl;
+	cout << "How fascinating!" << endl;
+	return 0;
+}
+```
+- 编译器编译程序时，必须在库文件搜索您使用的函数。
+```C++
+// C++运行在创建变量时对她进行赋值，因此可以这样做
+double side = sqrt(area);
+```
+#### 2.4.2 函数变体
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 第3章 处理数据
+
+## 第4章 复合类型
+
+## 第5章 循环和关系表达式
+
+## 第6章 分支语句和逻辑运算符
+
+## 第7章 函数——C++的编程模块
+
+## 第8章 函数探幽
+
+## 第9章 内存模型和命名空间
+
+## 第10章 对象和类
+
+
+
+
+
+
+
