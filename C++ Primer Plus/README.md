@@ -19,4 +19,56 @@
 
 #### 1.2.5 C++的起源
 - C++是C的超集，任何有效的C程序都是C++程序
+
+#### 1.4程序创建的技巧
+``` g++ -std=c++0x usr_autp.cpp ```
+
 ## 第 2 章 开始学习C++
+- 本章内容包括：
+  - 创建C++程序
+  - C++程序的一般格式
+  - #include编译指令
+  - main()函数
+  - 使用cout对象进行输出
+  - 在C++加入注释
+  - 何时以及如何使用endl
+  - 声明和使用变量
+  - 使用cin对象进行输入
+  - 定义和使用简单函数 
+  
+### 2.1进入C++
+```C++
+// 2.1 myfirst.cpp -- displays a message
+
+#include <iostream>
+using namespace std;  // 便一直来
+
+int main()
+{  // start of function body
+    cout << "Come up and C++ me some time.";
+    cout << endl;
+    cout << "Your won't regret it!" << endl;
+    cin.get();
+    
+    return 0;  // terminate main()
+}  // end of function body
+```
+#### 2.1.1 函数头
+- 函数头描述了函数与调用它的函数之间的接口
+- main()通常被启动代码调用，而启动代码是由编译器添加到程序中的，是程序和操作系统之间的桥梁。事实上，该函数体描述的是main()和操作系统之间的接口。
+- 空括号意味着main()不接受任何参数
+- int main(void) 与 int main() 在C++中等效，在C中，让括号空着意味着对是否接受参数保存沉默
+- main() 末尾没有返回语句时，默认main()函数以 return 0; 结尾。这只适用于main()函数
+- 函数体指出函数应做什么样的计算机指令
+
+
+#### 2.1.3 C++预处理器和iostream文件
+- 预处理器的典型操作：在源代码被编译之前，替换或添加文本
+- 原始文件没有被修改，而是将源代码文件和iostream组合成一个复合文件，编译的下一阶段将使用该文件
+
+#### 2.1.4 头文件名
+- C++头文件没有扩展名。
+- 有些C头文件被转化为C++头文件。如C++版本的 math.h 为 cmath
+- C++新式风格，使用 namespace std
+
+#### 2.1.5 名称空间
