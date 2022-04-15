@@ -248,9 +248,71 @@ auto z = 0;  // opps, z is int because 0 is int
 ### 3.7 编程练习
 - 3
 ```C++
+// 用户以度、分、秒的方式输入一个纬度，然后以度为单位显示该纬度
+// 
+#include <iostream>
+using namespace std;
+int main()
+{
+	cout << "Enter a latitude in degree, minutes, and seconds:" << endl;
+	double degree, minute, second, result;
 
+	cout << "First, enter the degrees: " ;
+	cin >> degree;
+
+
+	cout << "Next, enter the minuetes of arc: ";
+	cin >> minute;
+	
+
+	cout << "Finally, enter the seconds of arc: ";
+	cin >> second;
+	
+	result = degree + minute / 60 + second / (60 * 60);
+	cout << degree << " degrees, " << minute << " minutes, "
+	     << second << " seconds = " << result << " degrees." 
+		 << endl;
+	return 0;
+}	
 ```
 - 4
+```C++
+#include <iostream>
+using namespace std;
+const int DAY_HOURS = 24;
+const int HOUR_MINUTES = 60;
+const int MINUTE_SECONDS = 60;
 
+int main()
+{
+	cout << "Enter the number of seconds:";
+	long seconds;
+	cin >> seconds;
+	cout << seconds << " seconds = " 
+		<< seconds / (DAY_HOURS * HOUR_MINUTES * MINUTE_SECONDS)<< " days, " 
+		<< (seconds / (HOUR_MINUTES * MINUTE_SECONDS)) % 24 << " hours, " 
+		<< (seconds / MINUTE_SECONDS) % HOUR_MINUTES <<" minutes, " 
+		<< seconds % MINUTE_SECONDS << " seconds" << endl;
+	return 0;
+}
+```
 
 - 5
+```C++
+#include <iostream>
+using namespace std;
+
+int main()
+{
+	long long world, us;
+	cout << "Enter the world's population: ";
+	cin >> world;
+	cout << "Enter the population of the US:";
+	cin >> us;
+	double result = us / (world * 1.0);
+	cout << "The population of the US is " << result * 100
+		<< "% of the world population." << endl;;
+	return 0;
+}
+// 6898758899   310783781
+```
