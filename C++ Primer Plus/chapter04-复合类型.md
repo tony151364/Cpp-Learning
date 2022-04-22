@@ -224,12 +224,64 @@ int main()
 	return 0;
 }
 ```
+- 与字符数组的相同
+	- 可使用C风格字符串来初始化string对象
+	- 可以使用cin和cout输入输出string对象
+	- 可以使用下标访问string对象中的字符
 
+- 区别：
+	- 可以将string对象声明为简单变量，而不是数组 
 
+- 可以将char数组视为一组用于存储一个字符串的char存储单元，而string类变量是一个表示字符串的实体
 
+#### 4.3.1 C++11 字符串初始化
+- 列表初始化可用于C-风格字符串和string对象
+```C++
+char first_data[] = {'Le chapon Dodu"};
+char second_date[] {"The Elegant Plate"};
+string third_date = {"The Bread Bowl"};
+string fourth_date {"Hank`s Fine Eats"};
+```
 
+#### 4.3.2 赋值、拼接和附加
+- 不能将一个数组赋给另一个数组，但可以将一个string对象赋给另一个string对象
+- string 类简化了字符串合并操作。可以使用运算符+将两个string对象合并起来，还可以使用运算符+=将字符串附加到string对象的末尾。
+```C++
+string str3;
+str3 = str1 + str2;
+str1 += str2;
+```
 
+```C++
+// 4.8 strtype2.cpp -- assigning, adding, and appending
+#include <iostream>
+#include <string>
+int main()
+{
+	using namespace std;
+	string s1 = "penguin";
+	string s2, s3;
 
+	cout << "You can assign one strng object to another: s2 = s1\n";
+	s2 = s1;
+	cout << "s1: " << s1 << ", s2: " << s2 << endl;
+	cout << "You can assign a C-style string to a string object.\n";
+	cout << "s2 = \"buzzard\"\n";
+	s2 = "buzzard";
+	cout << "s2: " << s2 << endl;
+	cout << "You can concatenate strings: s3 = s1 + s2\n";
+	s3 = s1 + s2;
+	cout << "s3: " << s3 << endl;
+	cout << "You can append  strings.\n";
+	s1 += s2;
+	cout << "s1 += s2 yields s1 = " << s1 << endl;
+	s2 += " for a day";
+	cout << "s2 += \"for a day\" yields s2 = " << s2 << endl;
 
+	return 0;
+}
+```
+
+### 4.3.3 string类的其他操作
 
 
