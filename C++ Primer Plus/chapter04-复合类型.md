@@ -318,3 +318,67 @@ int main()
 }
 ```
 - 对于字符数组，copy时，可能超出所给的内存范围。但是string类会自动调整大小，不用担心超出范围
+
+```C++
+//  确定字符数的两种方法
+int len1 = str1.size();  // 表明str1是一个对象，而size是一个类方法。方法是一个函数，只能通过其所属类的对象进行调用。str1是一个string对象，而size()是string类的一个方法。
+int len2 = strlen(charrr1);
+```
+
+### 4.3.4 string类I/O
+```C++
+// 4.10 strtype4.cpp
+#include <iostream>
+#include <string>
+#include <cstring>
+
+int main()
+{
+	using namespace std;
+	char charr[20];
+	string str;
+
+	cout << "Length of string in charr before input: "
+		<< strlen(charr) << endl;
+	cout << "length of string in str before input: "
+		<< str.size() << endl;
+	cout << "Enter a line of text:\n";
+	cin.getline(charr, 20);  // indicate maximum length
+	cout << "You entered: " << charr << endl;
+	
+	cout << "Enter another line of text:\n";
+	getline(cin, str);  // cin now an argument:no length specifier
+	cout << "You entered: " << str << endl;
+	
+	cout << "Length of string in charr after input: "
+		<< strlen(charr) << endl;
+	cout << "Length of string in str after input: "
+		<< str.size() << endl;
+	return 0;
+}
+```
+- 对于为被初始化的字符数组，第一个空字符的出现位置是随机的；
+- 用户输入之前，str的字符串长度为0。这是因为string类对未被初始化的对象设置的
+- ```C++ getline(cin, str); ```; 这个getline不是类方法，她没用句点表示法。它将cin作为参数，指出到哪里去查找输入，string对象根据字符串长度自动调整自己的大小。具体看第11章
+
+### 4.3.5 其他形式的字符串字面值
+- 对于wchar_t、char16_t、char32_t这三种类型，创建时分别使用不同的前缀
+```C++
+wchar_t title[] = L"Chief Astrogator";  // w_char string
+char16_t name[] = u"Felonia Ripova";  // char_16 string
+char32_t car[] = U"Humber Super Snipe";  // char_32 string
+```
+- C++ 11新增原始(raw)字符串。\n不表示换行符。而是两个常规字符——斜杠和n。用"(和)"做界定符并用前缀R来标识
+- 输入原始字符串时，按回车不会移到下一行，还将在原始字符串中添加回车符
+```C++
+cout << R"(Jim "king" Tutt uses "\n" instead of endl.)" << '\n';
+// print: Jim "king" Tutt uses "\n" instead of endl.
+```
+- 如果要输出"(和)"在"(之间添加其他字符,)"之间也是同样的。
+- 在自定义定界符时，在默认定界符之间添加任意数量的基本字符，但空格、左括号、有括号、斜杠和控制字符（如制表符和换行符）除外
+```C++
+cout << R"+*("(Who wouldn't?)", she whispered.)+*" << endl;
+// print: "(Who wouldn't?)", she whispered.
+```
+
+## 4.4 结构简介
