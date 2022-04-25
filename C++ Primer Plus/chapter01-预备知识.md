@@ -23,3 +23,9 @@
 #### 1.4程序创建的技巧
 ``` g++ -std=c++0x usr_autp.cpp ```
 
+形参：parameter，formal argument
+实参：argument，actual argument
+
+-----
+编译四个步骤：预处理、编译、汇编、链接（**都成什么文件？**）
+编译器与编辑器：编辑器只用来写代码
