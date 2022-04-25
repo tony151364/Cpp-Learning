@@ -62,7 +62,7 @@ int num_elements = sizeof things / sizeof(short);  // 计算元素个数
  char tlifs[4] {'h', 'i', 112, '\0'};  // allowed,112在char取值范围之内
  ```
  
- ### 4.2 字符串
+ ## 4.2 字符串
 - C++处理字符串的两种方式：
 	- C style string
 	- 基于string类库的方法
@@ -74,7 +74,7 @@ char dog[8] = {'b', 'e', 'a', 'u', 'x', ' ', 'I', 'I', '\0'};  // a string!
 char bird[11] = "Mr.Cheeps";   // a string 
 char fish[] = "Bubbles";  // let the compiler count
 ```
-#### 4.2.1 拼接字符串常量
+### 4.2.1 拼接字符串常量
 ```C++
 // 下面所有输出语句都是等效的
 cout << "I like you," " you like me.\n";
@@ -83,7 +83,7 @@ cout << "I like you, you"
 " like me.\n";
 // 第一个字符串中的\0字符将被第二个字符串的第一个字符取代
 ```
-#### 4.2.2 在数组中使用字符串
+### 4.2.2 在数组中使用字符串
 ```C+++
 // 4.2 string.cpp -- storing strings in an array
 #include <iostream>
@@ -132,11 +132,11 @@ int main()
 ```
 - cin使用空白(空格、制表符和换行符)来确定字符串的结束位置.这意味着cin在获取字符数组时，只读取一个单词。
 
-#### 4.2.4 每次读入一行字符串输入
+### 4.2.4 每次读入一行字符串输入
 - getline()和get() 这两个函数都读取一行输入，直到达到换行符。
 - 然而，随后getline()将丢弃换行符，而get()将换行符保留在输入序列中。
 
-##### 1.面向行的输入：getline()
+#### 1.面向行的输入：getline()
 ```C++
 // 以回车为结尾。如果参数为20，则函数最多读取19个字符，自动末尾添加空字符
 cin.getline(name, 20);
@@ -171,10 +171,10 @@ cin.get(dessert, Arsize);  // read second line
 cin.get(name, ArSize).get();  // concatenate member functions
 ```
 
-##### 3.空行和其他问题
+#### 3.空行和其他问题
 - [ ] 没太看懂
 
-#### 4.2.5 混合输入字符串和数字
+### 4.2.5 混合输入字符串和数字
 ```C++
 // 4.6 numstr.cpp -- following number input with line input
 #include <iostream>
@@ -195,7 +195,7 @@ int main()
 ```
 - C++程序常使用指针来处理字符串
 
-### 4.3 string类简介
+## 4.3 string类简介
 ```C++
 // 4.7 strtype1.cpp --using the C++ string class
 #include <iostream>
@@ -234,7 +234,7 @@ int main()
 
 - 可以将char数组视为一组用于存储一个字符串的char存储单元，而string类变量是一个表示字符串的实体
 
-#### 4.3.1 C++11 字符串初始化
+### 4.3.1 C++11 字符串初始化
 - 列表初始化可用于C-风格字符串和string对象
 ```C++
 char first_data[] = {'Le chapon Dodu"};
@@ -243,7 +243,7 @@ string third_date = {"The Bread Bowl"};
 string fourth_date {"Hank`s Fine Eats"};
 ```
 
-#### 4.3.2 赋值、拼接和附加
+### 4.3.2 赋值、拼接和附加
 - 不能将一个数组赋给另一个数组，但可以将一个string对象赋给另一个string对象
 - string 类简化了字符串合并操作。可以使用运算符+将两个string对象合并起来，还可以使用运算符+=将字符串附加到string对象的末尾。
 ```C++
@@ -382,3 +382,248 @@ cout << R"+*("(Who wouldn't?)", she whispered.)+*" << endl;
 ```
 
 ## 4.4 结构简介
+- 结构也是C++OOP的基石，学习有关结构的知识将使我们离C++的核心OOP更近
+- 关键字struct表明，这些代码定义的是一个结构布局。
+- 标识符inflatable是这种数据格式的名称（新的类型名）
+- 访问类成员函数（如cin.getline()）的方式是从访问结构成员变量（如hat.price）的方式衍生而来的
+
+### 4.4.1 在程序中使用结构
+- 两种方式的声明：
+	- 内部声明：声明在函数中，只能被该函数使用
+	- 外部声明：声明在函数前，所有的函数都可以使用（更常用）
+
+- 变量和常量的声明：
+	- 变量提倡定义在内部（第9章详细介绍）
+	- 常量提倡定义在外部（外部意味着共享）
+
+```C++
+// 4.11 structur.cpp -- a simple structure
+#include <iostream>
+struct inflatable  // structure declaration
+{
+	char name[20];
+	float volume;
+	double price;
+};
+
+int main()
+{
+	using namespace std;
+	inflatable guest =
+	{
+		"Glorious Gloria",  // name value
+		1.88,  // volume value
+		29.99
+	};  // 第1种初始化方式
+
+	inflatable pal = { "Audacious Arthur", 3.12, 32.99 };  // 第2种初始化方式
+
+	cout << "Expand your guest list with " << guest.name;
+	cout << " and " << pal.name << "!\n";
+	cout << "You can have both for $";
+	cout << guest.price + pal.price << "!\n";
+	return 0;
+}
+```
+### 4.4.2 C++11 结构初始化
+- 1. C++11支持列表初始化用于结构，且等号（=）是可选的
+- 2. 若大括号内为包含任何东西，各个成员都将设置为零
+- 3. 不允许缩窄转换（大类型转小类型）
+```C++
+inflatable duck {"Daphne", 0.12, 9.98};   // can omit = in C++ 11
+inflatable mayor {};  // initialize every element to zero
+```
+### 4.4.3 结构可以将string类作为成员吗
+- 答案是肯定对。但是一定要让结构定义能够访问名称空间std。
+	- 可以将编译指令using移到结构定义之前
+	- 也可以想下面那样，将name的类型声明为std::string
+
+```C++
+#include <iostream>
+struct inflable
+{
+	std::string name;
+	float volume;
+	double price;
+};
+```
+### 4.4.4 其他结构属性
+- 可以将结构作为参数传递，也可以让函数返回一个结构
+- 可以用赋值运算符(=)将结构赋给另一个同类型的结构。每个成员都被设置为另一个成员的值，包括数组。这被称为**成员赋值**(memberwise assignment)（有道翻译：成员逐一赋值）
+
+```C++
+// 4.12 assgn_st.cpp -- assing structures
+#include <iostream>
+struct inflatable
+{
+	char name[20];
+	float volum;
+	double price;
+};
+
+int main()
+{
+	using namespace std;
+	inflatable bouquet =
+	{
+		"sunflowers",
+		0.20,
+		12.49
+	};
+	inflatable choice;
+	cout << "bouquet: " << bouquet.name << " for $";
+	cout << bouquet.price << endl;
+
+	choice = bouquet;  // assign one structure to another
+	cout << "choice: " << choice.name << " for $";
+	cout << choice.price << endl;
+	return 0;
+}
+```
+- 可以同时完成定义结构和创建变量的工作
+```C++
+struct perks
+{
+	int key_number;
+	char car[12];
+} mr_smith, ms_jones;  // two perks variables
+```
+- 甚至可以初始化以这种方式创建的变量。但是，将定义和变量声明分开可以使程序更易于阅读和理解。
+
+```C++
+struct perks
+{
+	int key_numbers;
+	char car[12];
+} mr_glitz = 
+{
+	7,
+	"packard"
+};
+- ↓ 创建了一个名为position的结构变量，可以访问成员，但后续无法创建这种类型的变量
+```C++
+struct  // no tag
+{
+	int x;  // 2 members
+	int y;
+} position;  // a structure variable
+```
+- 与C不同的是C++结构除了成员变量之外，还是以有成员函数。这被应用于类，第10章讨论
+
+### 4.4.5 结构数组
+```C++
+// 4.13 arrstruc.cpp
+#include <iostream>
+struct inflatable
+{
+	char name[20];
+	float volume;
+	double price;
+};
+int main()
+{
+	using namespace std;
+	inflatable guests[2] =   // initializing an array of structs
+	{
+		{"Bambi", 0.5, 21.99},  // first structure in array
+		{"Godzailla", 2000, 565.99}  // next structure in array
+	};
+
+	cout << "The guests " << guests[0].name << " and " << guests[1].name
+		<< "\nhave a combined volume of "
+		<< guests[0].volume + guests[1].volume << " cubic feet.\n";
+	return 0;
+}
+```
+### 4.4.6 结构中的位字段
+- 与C一样，C++也可以指定占用特定位数的结构成员，这使得创建与某个硬件设备上的寄存器对应的数据结构非常方便。
+- 字段的类型应为整型和枚举，接下来是冒号，冒号后是数字，它指定了使用的位数
+- 可以使用没有名称的字段来提供间距。每个成员都被称为位字段(bit field)
+```C++
+struct torgle_register
+{
+	unsigned int SN : 4;  // 4 bits for SN value
+	unsigned int : 4; // 4 bits unused
+	bool goodIn : 1;  // valid input (1 bit)
+	bool goodTorgle : 1;  // successful torgling
+};
+```
+- 可以像通常那样初始化，还可以像通常那样访问
+```C++
+torgle_register tr = { 14, true, false };
+...
+if (tr.goodIn)  // if statement covered in Chapter 6
+...
+```
+## 4.5 共同体
+- 共同体(union)是一种数据格式，能存储不同的数据类型，但只能存储其中一种数据类型。句法与结构相似，但含义不同
+- 每次只能存储一个值，所以共同体的长度为最大成员长度
+- 共同体的用途之一是，当数据项使用两种或更多种格式(但不会同时使用)时,可节省空间。例如：假设管理一个小商品目录，其中有一些商品的ID为整数，而另一些的ID为字符串。这种情况下，可以这么做
+```C++
+struct widget
+{
+	char brand[20];
+	int type;
+	union id  // format depends on widget type
+	{
+		long id_num;  // type 1 widgets
+		char id_char[20];  // other widgets
+	} id_val;
+};
+...
+if (prize.type == 1)
+	cin >> prize.id_val.id_num;
+else
+	cin >> prize.id_val.id_char;
+```
+- 匿名共同体(anonymous union)没有名称，其成员将位于相同地址处的变量。显然，每次只有一个成员是当前成员：
+```C++
+struct widget
+{
+	char brand[20];
+	int type;
+	union  // anonymous union
+	{
+		long id_num;  // type 1 widgets
+		char id_char[20];  // other widgets
+	};
+};
+...
+widget prize;
+...
+if (prize.type == 1)
+	cin >> prize.id_num;
+else
+	cin >> prize.id_char;
+```
+- 由于共同体是匿名的，因此id_num 和 id_char 被视为prize的两个成员，它们的地址相同，所以U币需要中间标识符id_val.**程序员**负责确定当前那个成员是活动的。
+- 共同体常用于（但并非只能用于）节省内存。对嵌入式系统来说，内存是很宝贵的，就很有用。另外，共同体常用于操作数据结构或硬件数据结构
+
+
+## 4.6 枚举(enumeration)
+- C++的enum工具提供另一种创建符号常量的方式，这种方式可代替const。
+- 它还允许定义新类型，但必须按照严格的限制进行。
+```C++
+enum spectrum {red, orange, yellow, green, blue, voilet, indigo, ultraviolet};
+```
+这条语句完成两项工作:
+	- 让spectrum称为类型名（新），spectrum被称为枚举，就像struct变量被称为结构一样；
+	- 将red、orange、yellow等作为符号常量，他们对应整数值0~7。这些常量叫做枚举量
+	
+- 默认情况下、将整数值赋给枚举量、第一个0，第二个1，也可以覆盖，后面讲。
+```C++
+spectrum band;   // band是一个spectrum类型的变量
+
+// 在不进行强制转换的情况下，只能将定义枚举时使用的枚举量赋给这种枚举的变量
+band = blue;  // 可以，blue是个枚举量
+band = 2000;  // 不行，2000不是；spectrum受到限制，只有8个可能的值，否则编译报错
+```
+- 枚举只定义了赋值运算符，没有算数运算符
+```C++
+
+```
+
+
+
+
+
