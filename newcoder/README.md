@@ -1,3 +1,9 @@
+## 未解决
+- [文件相关问题](https://www.nowcoder.com/test/question/done?tid=55835812&qid=157342#summary)
+- [函数指针问题](https://www.nowcoder.com/test/question/done?tid=55835812&qid=304674#summary)
+- [原码等1](https://www.nowcoder.com/test/question/done?tid=55846227&qid=247568#summary)
+- [原码等2](https://www.nowcoder.com/test/question/done?tid=55846227&qid=111131#summary)
+
 ## 1.内存
 ### 1分区
 - 程序代码区
