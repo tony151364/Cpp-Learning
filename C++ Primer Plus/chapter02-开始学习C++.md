@@ -4,7 +4,7 @@
 // 2.1 myfirst.cpp -- displays a message
 
 #include <iostream>
-using namespace std;  // 便一直来
+using namespace std;  // 名称空间
 
 int main()
 {  // start of function body
@@ -23,6 +23,7 @@ int main()
 - int main(void) 与 int main() 在C++中等效，在C中，让括号空着意味着对是否接受参数保存沉默
 - main() 末尾没有返回语句时，默认main()函数以 return 0; 结尾。这只适用于main()函数
 - 函数体指出函数应做什么样的计算机指令
+- 函数名其实也是一个地址
 
 
 #### 2.1.3 C++预处理器和iostream文件
@@ -50,7 +51,7 @@ using namespace std;  // using编译指令
 cout << "Come up and C++ me some time.";  // 它 (<<) 将一个字符串插入到数据流中
 ```
 - 插入运算符看上去像一个左移运算符。这是一个运算符重载的例子。
-- endl是一个特殊的C++符号，表示一个重要的概念：重起一行；导致屏幕光标移动到下一行开头。
+- endl(end line)是一个特殊的C++符号，表示一个重要的概念：重起一行；导致屏幕光标移动到下一行开头。
 - endl 等对于cout来说有特殊含义的特殊符号被称为控制符(manipulator)
 
 ```C++
@@ -87,7 +88,7 @@ int main()
 }
 ```
 - C++通常的做法是：在首次使用之前声明它。缺点就是无法对函数使用了那些变量一目了然
-- 
+
 #### 2.2.2 赋值语句
 - C++ 与 C 不同的特性在于——可以连续使用赋值运算符（python也可以）。
 ```C++
