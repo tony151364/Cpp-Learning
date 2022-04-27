@@ -919,28 +919,238 @@ short* pas [20] = &tell;  // 指针数组，包含20个元素
 ```
 
 ### 4.8.3 指针和字符串
+```C++
+char flower[10] = "rose";
+cout << flower << "s are red\n";  
+```
+- 如果给cout提供一个字符的地址，则它将从该字符开始打印，直到遇到空字符为止
+- 后面的"s are red\n"也是将第一个字符的地址传给cout
+- 注意：在cout和多数C++表达式中，插入数组名、char指针以及用引号括起的字符串常量都被解释为字符串第一个字符的地址
 
+```C++
+// 4.20 ptrstr.cpp -- using pointers to strings
+#include <iostream>
+#include <cstring>  // declare strlen(), strcpy()
+#pragma warning(disable:4996)
+using namespace std;
+int main()
+{
+	char animal[20] = "bear";  // animal holds bear
+	const char* bird = "wren";  // bird holds address of string
+	char* ps;  // uninitialized
 
+	cout << animal << " and";
+	cout << bird << "\n";
+	// cout << ps << "\n";  // may display garbage, may cause a crash
+	cout << "Enter a kind of animal: ";
+	cin >> animal;  // ok, if input < 20 chars
+	// cin >> ps; Too horrible a blunder to try;
+	// ps doesn't point to allocated space
 
+	ps = animal;
+	cout << ps << "!\n";
+	cout << "Before using strcpy():\n";
+	cout << animal << " at " << (int*)animal << endl;
+	cout << ps << " at " << (int*)ps << endl;
 
+	ps = new char[strlen(animal) + 1];  // get new storage
+	strcpy(ps, animal);
+	cout << "After using strcpy():\n";
+	cout << animal << " at " << (int*)animal << endl;
+	cout << ps << " at " << (int*)ps << endl;
+	delete[] ps;
+	return 0;
+}
+```
+- 不要使用字符串常量或未被初始化的指针来接收输入。为了为了避免这种情况可以使用std::string，而不是数组
+- 将字符串读入程序时，应使用已分配的内存地址。该地址可以是数组名，也可以是使用new初始化过的指针
 
+### 4.8.4 使用new创建动态结构
+- 将new用于结构由两步组成：创建结构和访问其成员。
+```C++
+inflatable * ps = new inflatable;  // 创建结构
+```
+- 在创建动态结构是，不能将成员运算符句点用于结构名，因为这种结构没名称，只是知道它的地址。而是使用箭头成员运算符(->)，用于指向结构的指针，就像点运算符用于结构名一样。（图4.11 解释的非常清晰）
+- ps->price, (* ps).price
+```C++
+// 4.21 new strct.cpp -- using new with a structure
+#include <iostream>
+struct inflatable
+{
+	char name[20];
+	float volume;
+	double price;
+};
+int main()
+{
+	using namespace std;
+	inflatable* ps = new inflatable;
+	
+	cout << "Enter name of inflatable item: ";
+	cin.get(ps->name, 20);  // method 1 foe member access
+	cout << "Enter volumn in cubic feet: ";
+	cin >> (*ps).volume;  // method 2
+	cout << "Enter price: $";
+	cin >> ps->price;
+	cout << "Name: " << (*ps).name << endl;  // method 2
+	cout << "Volume: " << ps->volume << " cubic feet\n";  // method 1
+	cout << "Price: $" << ps->price << endl;  // method 1
+	delete ps;
+	return 0;
 
+}
+```
+- 1.一个使用new和delete的示例
+```C++
+// 4.22 delete.cpp -- using the delete operator
+#include <iostream>
+#include <cstring>
+#pragma warning(disable:4996)
+using namespace std;
+char* getname(void);  // function prototype
+int main()
+{
+	char* name;
 
+	name = getname();
+	cout << name << " at " << (int*)name << "\n";
+	delete [] name;
 
+	name = getname();  // reuse freed memory
+	cout << name << " at " << (int*)name << "\n";
+	delete[] name;
+	return 0;
+}
+char* getname()
+{
+	char temp[80];
+	cout << "Enter last name: ";
+	cin >> temp;
+	char* pn = new char[strlen(temp) + 1];
+	strcpy(pn, temp);
 
+	return pn;
+}
+```
+### 4.8.5 自动存储、静态存储和动态存储
+- C++有3种管理内存的方式
+	- 自动存储
+	- 静态存储
+	- 动态存储（有时也叫作自由存储空间或堆）
+	- 线程存储（C++新增的第四种类型，第9章介绍） 
+#### 1.自动存储
+- 函数内定义的常规变量使用自动存储空间，被称为自动变量(automatic variable)。它在函数调用时产生，函数结束时消亡。
+- 自动变量是一个局部变量。作用域……。存储在栈(stack)中
+#### 2.静态存储
+- 静态存储是整个程序执行期间都存在的存储方式。
+- 使变量变为静态的两种方式：
+	- 在函数外面定义它
+	- 声明时使用static关键字 
+#### 3.动态存储
+- new和delete管理了一个内存池，在C++中被称为自由存储空间(free store)或堆(heap)
+- 数据的寿命不完全受程序或函数的生存时间控制
+- 与使用常规变量相比，使用new和delete让程序员对程序如何使用内存有更大的控制权。
+- 但内存管理复杂，new和delete的相互影响可能导致占用的自由存储区不连续，这使得跟踪新分配内存的位置更困难
 
+- 内存泄露：略，16章讲C++智能指针。记得new和delete同时用
+- 指针，既强大，又危险
 
+## 4.9 类型组合
+```C++
+#include <iostream>
 
+struct antarctica_years_end
+{
+	int year;
+};
 
+int main()
+{
+	antarctica_years_end s01, s02, s03;  // s01, s02, s03 are structure
+	s01.year = 1998;
 
+	antarctica_years_end* pa = &s02;  // 这种结构的指针
+	pa->year = 1999;
 
+	antarctica_years_end trio[3]; // 这种结构的数组
+	trio[0].year = 2003;  // 用成员运算符访问
+	(trio + 1)->year = 2004;  // 用间接运算符访问
 
+	const antarctica_years_end* arp[3] = { &s01, &s02, &s03 };  // 可以创建指针数组
+	std::cout << arp[1]->year << std::endl; 
 
+	const antarctica_years_end** ppa = arp;  // ppa是一个指向const antarctica_years_end的指针
+	auto ppb = arp;  // C++版本的auto可以提供方便；编译器知道arp的类型，能够正确地推断出ppb的类型。
+	// ppa是一个指向结构指针的指针，因此*ppa是一个结构指针，以此来访问数据
+	std::cout << (*ppa)->year << std::endl;
+	std::cout << (*(ppb + 1))->year << std::endl;
+}
+```
 
+## 4.10 数组的代替品
+- 模板类vector和array是数组的替代品
 
+### 4.10.1 模板类vector
+- 类似于string类，也是一种动态数组；是new创建动态数组的替代品
+- 可在运行阶段设置vector长度，在末尾、中间插入数据
+```C++
+#include <vector>
+...
+using namespace std; // vector 包含在std中
+vector<typeName> vt(n_elem);  // 可存储n_elem个类型为typeName的元素
 
-
-
+vector<int> vi;  // 长度为0
+vector<double> vd(n);  // 长度为n
+```
+### 4.10.2 模板类array(C++11)
+- vector类的功能比数组强大，但是效率低。用长度固定的数组，还是用数组好，代价就是不方便和安全。
+- array对象的长度固定，使用栈(静态分配内存)，而不是自由存储区
+```C++
+#include <array>
+...
+using namespace std;
+array<int, 5> ai;  // create array object of 5 ints
+array<double, 4> ad = {1.2, 2.1, 3.43, 4.3};
+array<typeName, n_elem> arr;  // n_elem不能是变量
+```
+- C++11中列表初始化可用于vector和array
+### 4.10.3 比较数组、vector对象和array对象
+```C++
+// 4.24 choices.cpp
+#include <iostream>
+#include <vector>  // STL C++98
+#include <array>  // C++11
+int main()
+{
+	using namespace std;
+	// C, original C++
+	double a1[4] = { 1.2, 2.4, 3.6, 4.8 };
+	
+	// C++98 STL
+	vector<double> a2(4);  // create vector with 4 elements
+	// no simple way to initialize in C98
+	a2[0] = 1.0 / 3.0;
+	a2[1] = 1.0 / 5.0;
+	a2[2] = 1.0 / 7.0;
+	a2[3] = 1.0 / 9.0;
+	
+	// C++11 -- create and initialize array object
+	array<double, 4> a3 = { 3.14, 2.72, 1.62, 1.41 };
+	array<double, 4> a4;
+	a4 = a3;  // valid for array objects of same size?
+	// use array notation
+	cout << "a1[2]: " << a1[2] << " at " << &a1[2] << endl;
+	cout << "a2[2]: " << a2[2] << " at " << &a2[2] << endl;
+	cout << "a3[2]: " << a3[2] << " at " << &a3[2] << endl;
+	cout << "a4[2]: " << a4[2] << " at " << &a4[2] << endl;
+	// misdeed
+	a1[-2] = 20.2;  // 越界了
+	cout << "a1[-2]: " << a1[-2] << " at " << &a1[-2] << endl;
+	cout << "a3[2]: " << a3[2] << " at " << &a3[2] << endl;
+	cout << "a4[2]: " << a4[2] << " at " << &a4[2] << endl;
+	return 0;
+}
+```
 
 
 
