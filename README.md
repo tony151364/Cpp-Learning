@@ -11,7 +11,6 @@
 - [浙江大学翁恺](https://www.bilibili.com/video/BV1dE41167hJ)
 
 ## 游戏
-- [【游戏开发】新人如何用unity做出第一个属于自己的游戏Demo](https://www.bilibili.com/video/BV1WK4y1a7Hq)
 - [虚幻引擎5(UE5) 全套零基础入门到实战课程](https://www.bilibili.com/video/BV1zY4y1H7PF)
 - [【虚幻4】UE4初学者系列教程合集-全中文新手入门教程](https://www.bilibili.com/video/BV164411Y732)
 
