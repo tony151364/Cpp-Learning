@@ -1151,20 +1151,131 @@ int main()
 	return 0;
 }
 ```
+- 程序说明：
+	- 1.无论数组、vector还是array对象，都可以使用标准数组表示方来访问各个元素
+	- 2.其次，从地址可知，array对象和数组存储在相同的内存区域（即栈）中，而vector对象存储在拎一个区域（自由存储区或堆）中
+	- 3.可以将一个array对象赋给另一个array对象；但是对于数组，必须这个元素复制。 
 
+- at()。就像可以使用cin对象的成员函数getline()一样，您也可以使用vector和array对象的成员函数at()
+```C++
+a2.at(1) = 2.3;  // assign 2.3 to a2[1]
+```
+- 中括号表示法和成员函数at()的差别在于，使用at()时，将在程序运行期间捕获非法索引，而程序默认将其中断。代价是运行是将更长。还有它们包含的成员函数begin()和end()，让您能够确定边界，以免越界，16章讨论。
 
+## 4.11 总结
+- 略
 
-
-
-
-
-
-
-
-
-
-
-
+## 4.12 复习题
+- [ ] 第13题
+- [ ] 第14题
+- [ ] 第16题
+- [ ] 第17题
+```C++
+// 1
+char actor2[30];
+short betsie[100];
+float chuck[13];
+long double dipsea[64];
+// 2
+array<char, 30> actors;
+array<short, 100> betsie;
+array<float, 13> chuck;
+array<long double, 64> dipsea;
+// 3
+int odds01[] { 1, 3, 5, 7, 9};
+int odds02[] = { 1, 3, 5, 7, 9};
+int odds03[5] = { 1, 3, 5, 7, 9};
+int odds04[5];
+odds04[0] = 1;
+odds04[1] = 3;
+odds04[2] = 5;
+odds04[3] = 7;
+odds04[4] = 9;
+// 4
+even = odds01[0] + odds01[4];
+// 5
+cout << ideas[1] << endl;
+// 6
+char str01[13] = "cheeseburger";
+char str02[] = "chesseburger";
+// 7
+string s1 = "Waldorf Salad";
+// 8
+struct Fish
+{
+	char type[30];  // 品种
+	int ounce;  // 重量
+	double length;  // 长度
+};
+// 9
+Fish fish01;
+fish01 = {"goldfish", 12, 0.4};
+// 10
+enum Response{No, Yes, Maybe};
+// 11
+double ted = 1.0;
+double* p = &ted;
+cout << *p << endl;
+// 12
+float treacle[10] = {1.0, 2.0, ..., 10.0};
+float* ptr = treacle;  // or = &treacle[0]
+cout << "First element: " << *ptr;
+cout << "First element: " << ptr[0];
+cout << "\n Last element: " << *(prt+9);
+cout << "\n Last element: " << ptr[9];
+// 13 ???
+unsigned int size
+cout << "Input a number: ";
+cin >> size;
+int * dyn = new int [size];
+vector<int> dv(size); 
+// 14
+// 有效，打印第一个字符串第一个字符的地址，也就是字符串的首地址
+// 它是一个字符串常量，因此它将判定为字符串开始的地址。cout对象将char地址解释为打印字符串
+// 15
+Fish *fish02 = new Fish;
+fish02->type = "asdf";
+// 16
+cin以空白(空格、换行符、制表符)为结尾，所以只读入1个单词，导致可能无法读取一整行的字符串
+// 17
+#include <string>
+#include <vector>
+#include <array>
+const int Str_num {10};  or = 10
+std::vector<std::string> s1(Str_num);
+std::array<std::string, Str_num> s2;
+```
+## 4.13 编程练习
+- 1.
+```C++
+```
+- 2.
+```C++
+```
+- 3.
+```C++
+```
+- 4.
+```C++
+```
+- 5.
+```C++
+```
+- 6.
+```C++
+```
+- 7.
+```C++
+```
+- 8.
+```C++
+```
+- 9.
+```C++
+```
+- 10.
+```C++
+```
 
 
 
