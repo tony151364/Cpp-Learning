@@ -84,7 +84,242 @@ for (int i = 0; i < 5; i++)
 for (for-init-statement condition; expression)
   statement
 ```
+### 5.1.2 回到for循环
+- 阶乘：
+```C++
+// 5.4 formore.cpp -- more looping with for
+#include <iostream>
+const int AriSize = 16;   // example of external declaration
+int main()
+{
+	long long factorials[AriSize];
+	factorials[1] = factorials[0] = 1LL;  // 注意后面有LL哦
+	for (int i = 2; i < AriSize; i++)
+		factorials[i] = i * factorials[i - 1];
+	for (int i = 0; i < AriSize; i++)
+		std::cout << i << "! = " << factorials[i] << std::endl;
+	return 0;
+}
+```
+- const的好处：当我们需要改变长度时，如把16改为20，只需要修改第3行，其他都随之改变。所以用const值表示数组中的元素是个好办法
 
+### 5.1.3 修改步长
+- 更新表达式可以是任何有效的表达式
+```C++
+// 5.5 bigstep.cpp -- count as directed
+#include <iostream>
+int main()
+{
+	using std::cout;  // a using declaration
+	using std::cin;
+	using std::endl;
+	cout << "Enter an integer: ";
+	int by;
+	cin >> by;
+	cout << "Counting by " << by << "s:\n";
+	for (int i = 0; i < 100; i = i + by)
+		cout << i << endl;
+	return 0;
+}
+```
+- 这个例子用了using声明，而不是using编译指令
+
+### 5.1.4 使用for循环访问字符串
+
+```C++
+// 5.6 forstr1.cpp -- using for with a string
+#include <iostream>
+#include <string>
+int main()
+{
+	using namespace std;
+	cout << "Enter a word: ";
+	string word;
+	cin >> word;
+
+	// display letters in reverse order
+	for (int i = word.size() - 1; i >= 0; i--)
+		cout << word[i];
+	cout << "\nBye.\n";
+	return 0;
+}
+```
+### 5.1.5 递增运算符(++) 和递减运算符(--)
+- 这两个运算符都有两种变体：前缀(prefix) 和 后缀(postfix)
+- 略
+
+### 5.1.6 副作用和顺序点
+- **副作用**(side effect)指的是在计算表达式时对某些东西（如存储在变量中的值）进行了修改；
+- **顺序点**(dequence pointer)是程序执行过程中的一个点，在这里，进入下一步之前将确保对所有的副作用都进行了评估。C++中分号就是一个顺序点，这意味着程序处理下一条语句之前，赋值运算符、递增运算符和递减运算符执行的所有修改都必须完成。任何完整的表达式末尾都有一个顺序点
+```C+++
+while (guests++ < 10)
+	cout << guests << endl;
+// while (guests++ < 10) 是while循环的测试条件，因此该表达式末尾有一个顺序点，所以比较完在对guests加1
+
+
+y = (4 + x++) + (6 + x++); 
+// 4 + x++不是一个完整的表达式，因此C++不保证x的值在计算完4 + x++ 后立刻增加1
+// 整条语句是一个完整的表达式，分号标识了顺序点，因此C++只保证执行到下一条语句之前，x的值被递增两次。
+```
+- C++11不再使用顺序点概念，因为这个概念难以用于讨论多线程执行。而是使用术语“顺序”，它表示有些事件在其他事件前发生。
+
+### 5.1.7 前缀格式和后缀格式
+```C++
+for (n = lim; n > 0; --n)  // 前缀格式
+	...;
+for (n = lim; n > 0; n--)  // 后缀格式
+	...;
+```
+- 在效果上，二者没有差别。但是在**性能上，有区别**。
+- C++运行您针对类定义这些运算符，在这种情况下：
+	- 前缀：将值加1，然后返回结果。
+	- 后缀：先赋值一个副本，将其加1，然后将复制的副本返回。
+	- 因此，对于类而言，前缀版本的效率比后缀高
+
+### 5.1.8 递增/递减运算符和指针 
+- 将递增运算符用于指针时，将把指针的值增加其指向的数据类型占用的字节数
+- 将* 和++结合使用可以修改指针指向的值。但是要考虑优先级问题。
+	- 前缀递增、前缀递减和解除引用运算符的优先级相同，以从右到左的方式结合
+	- 后缀递增、后缀递减的优先级相同，但比前缀运算符优先级高。这两个以从左到右方式进行结合
+```C++
+double x = *++pt;  // *被用于递增后的指针
+double y = ++*pt;  // 先取得pt指向的值，然后将这个值加1；指针指向的位置没变
+(*pt)++;  // 和上面的效果一样
+x = *pt++;  // 后缀运算符++的优先级更高，++用于pt而不是*pt。然后后缀运算符意味着将对原来的地址而不是递增后的新地址接触引用。*pt++的值还是原来的，但是语句执行完毕后，pt指向下一个地址。 
+```
+### 5.1.9 组合运算符
+- -=、+=、\*=、/=、%=
+
+### 5.1.10 复合语句（语句块）
+```C++
+// 5.8 block.cpp -- use a block statement
+#include <iostream>
+
+int main()
+{
+	using namespace std;
+	cout << "The Amazing Accounto will sum and average ";
+	cout << "five numbers for you.\n";
+	cout << "Please enter five values:\n";
+	double number;
+	double sum = 0.0;
+	for (int i = 1; i <= 5; i++)
+	{
+		cout << "Value " << i << ": ";
+		cin >> number;
+		sum += number;
+	}
+	cout << "Five exquisite choices indeed! ";
+	cout << "They sum to " << sum << endl;
+	cout << "and average to " << sum / 5 << ".\n";
+	cout << "The Amazing Accounto bids you adieu!\n";
+	return 0;
+}
+```
+- 如果在一个语句块中声明一个变量，而外部语句块中也有一个这种名称的变量，那么在声明位置到内部语句块结束的范围之内，新变量将隐藏旧变量；然后旧变量再次可见，如下例所示：
+```C++
+#include <iostream>
+int main()
+{
+	using std::cout;
+	using std::endl;
+	int x = 20;  // original x
+	{
+		cout << x << endl;  // 20; use orginal x;
+		int x = 100;
+		cout << x << endl;  // 100; use new x;
+	}
+	cout << x << endl;  // 20; use origianl x;
+	return 0;
+}
+```
+### 5.1.11 其他语法技巧——逗号运算符
+- 逗号运算符允许将两个表达式放到C++语法只允许放一个表达式的地方。
+- [ ] 为什么i = word.size()后出现h消失，不应该一个都不打印么
+```C++
+// 5.9 forstr2.cpp -- reversing an array
+#include <iostream>
+#include <string>
+int main()
+{
+	using namespace std;
+	cout << "Enter a word: ";
+	string word;
+	cin >> word;
+
+	// physically modify string object
+	char temp;
+	int i, j;
+	for (j = 0, i = word.size()-1; j < i; --i, ++j)
+	{
+		temp = word[i];
+		word[i] = word[j];
+		word[j] = temp;
+	}
+		
+	cout << word << "\nDone\n";
+	return 0;
+}
+```
+- 在反转字符串，string类提供了更简洁的方式，在第16章介绍。
+```C++ 
+for(int j = 0, i = word.size() - 1; j < i; --i, ++j);
+```
+- 在↑这种情况下，逗号只是一个**列表分隔符，而不是逗号运算符**，因此该表达式对j和i进行声明和初始化。然而，看上去好像只声明了j；
+
+#### 2. 逗号运算符花絮
+- 逗号运算符的两个特性：
+	- 首先，它确保先计算第一个表达式，然后计算第二个表达式（换句话说，逗号运算符是一个顺序点）
+	- 其次,其次逗号表达式的值是第二部分的值。在所有运算符中，逗号运算符的优先级是最低点
+
+```C++
+i = 20, j = 2 * i;   // i set to 20, then j set to 40;表达式的值为40
+cats = 17, 240;  // 被解释为 (cats = 17), 240;即将cat设置为17
+cats = (17, 240);  // 把cat设置为240——逗号右侧的表达式值
+```
+
+### 5.1.12 关系表达式
+- C++提供6种运算符来对数字比较：<、<=、== 、> 、>= 、!=
+- 由于字符用其ASCII码表示，可以将这些运算符用作字符。不能将它们用于C-风格字符串，但可以用于string对象。
+- 对所有的表达式，结果为真，则值为true，否则为false
+```C++
+// 关系运算符的优先级比算术运算符第。这意味着表达式
+x + 3 > y - 2;
+// 对应于：
+(x + 3) > (y - 2);
+// 而不是
+x + (3 > y) - 2;
+```
+- 由于将bool提升为int后，表达式(3>y)要么为1，要么为0，因此第二个表达式和第三个表达式都是有效的。
+
+### 5.1.13 赋值、比较和可能犯的错误
+- 不要混淆等于运算符(==)和赋值运算符(=)
+- musicians = 4; 表达式的值为4，bool值为true
+
+```C++
+// 5.10 equal.cpp -- equality vs assignment
+#include <iostream>
+int main()
+{
+	using namespace std;
+	int quizscores[10] =
+		{ 20, 20, 20, 20, 20, 19, 20, 18, 20, 20 };
+
+	cout << "Doing it right:\n";
+	int i;
+	for (i = 0; quizscores[i] == 20; i++)
+		cout << "quiz " << i << " is a 20\n";
+
+	// It's wrong! 因为测试表达式的值始终为true，数组也越界了
+	for (i = 0; quizscores[i] = 20; i++)  
+		cout << "quiz " << i << " is a 20\n";
+	return 0;
+}
+```
+- 对于C++类，可以设计一种保护数组类型来防止**数组越界**，第13章提供了一个这样的例子。
+
+### 5.1.14 C-风格字符串的比较
+- 假设要知道字符数组中的字符串是不是
 
 
 
