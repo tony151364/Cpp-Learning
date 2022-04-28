@@ -133,8 +133,7 @@ int main()
 - cin使用空白(空格、制表符和换行符)来确定字符串的结束位置.这意味着cin在获取字符数组时，只读取一个单词。
 
 ### 4.2.4 每次读入一行字符串输入
-- getline()和get() 这两个函数都读取一行输入，直到达到换行符。
-- 然而，随后getline()将丢弃换行符，而get()将换行符保留在输入序列中。
+- getline()和get() 这两个函数都读取一行输入，直到达到换行符。然而，随后getline()将丢弃换行符。
 
 #### 1.面向行的输入：getline()
 ```C++
@@ -142,7 +141,7 @@ int main()
 cin.getline(name, 20);
 ```
 ```C++
-// 4.3 instr2.cpp -- reading more than one word with getline
+// 4.4 instr2.cpp -- reading more than one word with getline
 #include <iostream>
 int main()
 {
@@ -158,12 +157,20 @@ int main()
 	cout << "I have some delicious " << dessert;
 	cout << " for you, " << name << ".\n";
 	return 0;
-	// 换行符替换为空字符
+	// getline()把末尾的换行符替换为空字符
 }
 ```
 
 ##### 2.面向行的输入：get()
+- get()不读取换行符，将换行符保留在输入序列中。假如连续两个调用get()，第二次调用时看到的第一个字符就是换行符，因此get()认为已经达到行尾，没有可读取的内容。**如果不借助帮助，get()不能跨越换行符**。
 ```C++
+cin.get(name, ArSize);
+cin.get(dessert, Atsize);  // aproblem
+```
+
+- 幸运的是，get()还有一种变体，不带任何参数情况下调用cin.get()可读取下一个字符（即使是换行符）因此可以用它来处理换行符，为下一次读入左转被
+```C++
+
 cin.get(name, ArSize);  // read first line
 cin.get();  // read new line
 cin.get(dessert, Arsize);  // read second line
@@ -171,8 +178,45 @@ cin.get(dessert, Arsize);  // read second line
 cin.get(name, ArSize).get();  // concatenate member functions
 ```
 
-#### 3.空行和其他问题
-- [ ] 没太看懂
+- 下面的语句把输入中连续的两行分别读入到数组name1 和name2中，其效果与两次调用cin.getline()相同
+```C++
+cin.getline(name1, ArSize).getline(name2, ArSize);
+```
+
+```C++
+// 4.5 instr3.cpp -- reading more than one word with get() & get()
+#include <iostream>
+int main()
+{
+	using namespace std;
+	const int ArSize = 20;
+	char name[ArSize];
+	char dessert[ArSize];
+
+	cout << "Enter your name:\n";
+	cin.get(name, ArSize).get();  // read string, newline
+	cout << "Enter your favorite dessert:\n";
+	cin.get(dessert, ArSize).get();
+	cout << "I have some delicious " << dessert;
+	cout << " for you, " << name << ".\n";
+	return 0;
+}
+```
+- C++允许函数有多个版本，条件是这些版本的参数列表不同。如果使用的是cin.get(name, ArSize), 则编译器知道是要将一个字符串放入数组中，因而将使用适当的成员函数。如果使用的是cin.get()，则编译器知道要读取一个字符。第8章将探索这种特性——**函数重载**。
+
+##### 3.空行和其他问题
+- 当getline()或get()读取空行时，将发生什么情况？最初的做法是，下一条输入语句将在前一条getlin()或get()结束读取的位置开始读取。当get()（**不是**getline()）读取空行后将设置失效位(failbit)。这意味着接下来的输入将被阻断，但可以用下面的指令来恢复
+```C++
+cin.clear();
+```
+- 若输入行包含的字符数比指定的多，则getline()和get()将把余下的字符留在输入队列中，而getline还会设置失效位，并关闭后面的输入。
+- **对↑解释**：如果cin.get(name1, ArSize);后面跟着cin.getline(name2, ArSize)，就算cin.get()把换行符'\n'留在了输入流当中，getline也不会读取'\n'，他自动从新的一行开始读取，除非第一行的输入流超出ArSize的范围了，getline才会跟着get后面读。就算getline没存满，到换行符也停止，不再读了。如果cin.getline(name2, ArSize)后面跟着cin.get(name1, ArSize)，字符超出最大限制，那么getline()将设置失效位，后面就不读了，也就是说get()什么也没读到。
+
+- **补充**（来自6.1.1节）
+	- cin.get(); 读取一个字符，包括换行符;**用户按完回车后才开始执行**，下同。
+	- cin.get(ch); 把读取的字符存储到ch变量所在的内存中
+	- cin.get(name, ArSize); 读取一行字符，最大为ArSize-1个字符，最后一个位置为'\0'.且不主动读取换行符。也就是说换行符还在输入流中，会被下一个cin.get()读取（如果有这个操作的话）。
+	- cin >> name; 只读取一个单词，遇到空白符就停止了。（name是个字符数组名，上同） 
 
 ### 4.2.5 混合输入字符串和数字
 ```C++
