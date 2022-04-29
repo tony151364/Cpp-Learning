@@ -1292,31 +1292,219 @@ std::array<std::string, Str_num> s2;
 ## 4.13 编程练习
 - 1
 ```C++
+#include <iostream>
+#include <string>
+const unsigned int ArSize{ 20 };
+using namespace std;
+int main()
+{
+	string fName;
+	cout << "What is your first name? ";
+	getline(cin, fName);
+	char lName[ArSize];
+	cout << "What is your last name? ";
+	cin.getline(lName, ArSize);
+	char grade;
+	cout << "What letter grade do you desserve? ";
+	cin.get(grade);
+	int age;
+	cout << "What is your age? ";
+	cin >> age;
+
+	cout << "Name: " << lName << ", " << fName << endl;
+	cout << "Grade: " << ++grade << endl;
+	cout << "Age: " << age << endl;
+	return 0;
+}
 ```
 - 2
 ```C++
+#include <iostream>
+#include <string>
+int main()
+{
+	using namespace std;
+	string name, dessert;
+	
+	cout << "Enter your name:\n";
+	getline(cin, name);
+	cout << "Enter your favorite dessert: \n";
+	getline(cin, dessert);
+	cout << "I have some delicious " << dessert;
+	cout << " for you, " << name << ".\n";
+	return 0;
+	// getline()把末尾的换行符替换为空字符
+}
 ```
 - 3
 ```C++
+#include <iostream>
+#include <string>
+using namespace std;
+const unsigned int ArSize{ 20 };
+int main()
+{
+	
+	string firName;
+	char lasName[ArSize];
+	cout << "Enter your first name: ";
+	getline(cin, firName);
+	cout << "Enter your last name: ";
+	cin.getline(lasName, ArSize);
+	cout << "Here's the information in a single "
+		"string: " << lasName << ", " << firName << endl;
+	return 0;
+}
 ```
 - 4
 ```C++
+// 暂时略过
 ```
 - 5
 ```C++
+#include <iostream>
+struct CandyBar {
+	char brand[30];
+	double weight;  // unsigned 不能和double组合？
+	unsigned int calorie;
+};
+int main()
+{
+	CandyBar snack = {
+		"Mocha Munch",
+		2.3,
+		350
+	};
+	std::cout << "brand: " << snack.brand << std::endl;
+	std::cout << "weight: " << snack.weight << std::endl;
+	std::cout << "calorie: " << snack.calorie << std::endl;
+	return 0;
+}
 ```
 - 6
 ```C++
+#include <iostream>
+struct CandyBar {
+	char brand[30];
+	double weight;  // unsigned 不能和double组合？
+	unsigned int calorie;
+};
+int main()
+{
+	CandyBar snack[3];
+	snack[0] = { "Mocha Munch", 2.3, 350};
+	snack[1] = { "banana Munch", 5.3, 3050 };
+	snack[2] = { "apple Munch", 6.3, 1050 };
+	for (int i = 0; i < 3; i++)
+	{
+		std::cout << "snack[" << i << "] brand: "
+			<< snack[i].brand << std::endl;
+		std::cout << "snack[" << i << "] weight: "
+			<< snack[i].weight << std::endl;
+		std::cout << "snack[" << i << "] calorie: "
+			<< snack[i].calorie << std::endl;
+	}
+	return 0;
+}
 ```
 - 7
 ```C++
+#include <iostream>
+#include <string>
+using namespace std;
+struct Pizza {
+	string company;
+	double diameter;
+	double weight;
+};
+int main()
+{
+	Pizza bigOne;
+	cout << "Enter the company of pizza: ";
+	getline(cin, bigOne.company);
+	cout << "Enter the diameter of the pizza: ";
+	cin >> bigOne.diameter;
+	cout << "Enter the weight of the pizza: ";
+	cin >> bigOne.weight;
+
+	cout << "The information of the pizza\n"
+		<< "company: " << bigOne.company
+		<< ", diameter: " << bigOne.diameter
+		<< ", weight: " << bigOne.weight << endl;
+	return 0;
+}
 ```
 - 8
 ```C++
+#include <iostream>
+#include <string>
+using namespace std;
+struct Pizza {
+	string company;
+	double diameter;
+	double weight;
+};
+int main()
+{
+	Pizza *bigOne = new Pizza;
+	cout << "Enter the diameter of the pizza: ";
+	cin >> bigOne->diameter;
+	cin.get();  // 防止换行符被getline读取？
+	cout << "Enter the company of pizza: ";
+	getline(cin, bigOne->company);
+	cout << "Enter the weight of the pizza: ";
+	cin >> bigOne->weight;
+
+	cout << "The information of the pizza\n"
+		<< "company: " << bigOne->company
+		<< ", diameter: " << bigOne->diameter
+		<< ", weight: " << bigOne->weight << endl;
+	return 0;
+}
 ```
 - 9
 ```C++
+#include <iostream>
+struct CandyBar {
+	char brand[30];
+	double weight;  // unsigned 不能和double组合？
+	unsigned int calorie;
+};
+int main()
+{
+	CandyBar* snack = new CandyBar [3];
+	snack[0] = { "Mocha Munch", 2.3, 350 };
+	snack[1] = { "banana Munch", 5.3, 3050 };
+	snack[2] = { "apple Munch", 6.3, 1050 };
+	for (int i = 0; i < 3; i++)
+	{
+		std::cout << "snack[" << i << "] brand: "
+			<< snack[i].brand << std::endl;
+		std::cout << "snack[" << i << "] weight: "
+			<< snack[i].weight << std::endl;
+		std::cout << "snack[" << i << "] calorie: "
+			<< snack[i].calorie << std::endl;
+	}
+	return 0;
+}
 ```
 - 10
 ```C++
+#include <iostream>
+#include <array>
+using namespace std;
+const unsigned int ArSize{ 3 };
+int main()
+{
+	array<double, 3> grades;
+	double sum = 0;
+	for (int i = 0; i < ArSize; ++i)
+	{
+		cout << "Enter " << i + 1 << "th grade: ";
+		cin >> grades[i];
+		sum += grades[i];
+	}
+	cout << "The average score is " << sum / ArSize << endl;
+	return 0;
+}
 ```
