@@ -286,14 +286,107 @@ age > 30 && age < 45 || weight > 300  // 被解释为：
 	- 变量名：是标识符的实例
 	- 我觉得：最终还是变量名和关键字这俩，那两个的概念解释实在太少，暂时就这么理解吧。
 
+## 6.3 字符函数库cctype
+- C++从C语言继承了一个与字符相关的、非常方便的函数软件包——cctype
+- isalpha(ch); ch是一个字符返回一个非零值，否则返回0
+- ispunct(ch); ch是标点符号函数返回true
+- isspace()来测试字符是否为空白
+```C++
+// cctypes.cpp -- using the ctype.h library
+#include <iostream>
+#include <cctype>  // prototypes for character functions
+int main()
+{
+	using namespace std;
+	cout << "Enter text for analysis, and type @"
+		"to terminate input.\n";
+	char ch;
+	int whitespace = 0;
+	int digits = 0;
+	int chars = 0;
+	int punct = 0;
+	int others = 0;
 
+	cin.get(ch);  // get first character
+	while (ch != '@')
+	{
+		if (isalpha(ch))
+			chars++;
+		else if (isspace(ch))
+			whitespace++;
+		else if (isdigit(ch))
+			digits++;
+		else if (ispunct(ch))
+			punct++;
+		else
+			others++;
+		cin.get(ch);
+	}
+	cout << chars << " letters, "
+		<< whitespace << " whitespace, "
+		<< digits << " digits, "
+		<< punct << " punctuations, "
+		<< others << " others.\n";
+	return 0;
+}
+```
+## 6.4 ?:运算符
+- 三元运算符，常用来替代if else
+```C++
+// 6.9 condit.cpp -- using the conditional operator
+#include <iostream>
+int main()
+{
+	using namespace std;
+	int a, b;
+	cout << "Enter two integers: ";
+	cin >> a >> b;  // 可以啊，一次读两个
+	cout << "The larger of " << a << " and " << b;
+	int c = a > b ? a : b;
+	cout << " is " << c << endl;
+	return 0;
+}
+```
+- 与if else相比，条件运算符生成一个表达式，因此是一个值，可以将其赋给变量或将其放到一个更大的表达式中。
+- 它也可以嵌套，当代码变复杂是，使用if else可能更清晰。
 
-
-
-
-
-
-
+## 6.5 switch语句
+- switch语句能够更容易地从大型列表中进行选择；switch就像指路牌，告诉计算机接下来应该执行哪行代码。
+- 每个标签都必须是整数常量表达式，常见的是int或char常量，也可以是枚举量
+```C++
+// 6.10 switch.cpp -- using the switch statement
+#include <iostream>
+using namespace std;
+void showmenu();  // function prototypes
+void report();
+void comfort();
+int main()
+{
+	showmenu();
+	int choice;
+	cin >> choice;
+	while (choice != 5)
+	{	
+		switch (choice)
+		{
+			case 1: cout << "\a\n";
+				break;
+			case 2: report();
+				break;
+			case 3: cout << "The boss was in all day.\n";
+				break;
+			case 4: comfort();
+				break;
+			default: cout << "That's not a choice.\n";
+		}
+		showmenu();
+		cin >> choice;
+	}
+	cout << "Bye!\n";
+	return 0;
+}
+```
+- showmenu()函数显示一组选项
 
 
 
