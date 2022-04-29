@@ -319,7 +319,113 @@ int main()
 - 对于C++类，可以设计一种保护数组类型来防止**数组越界**，第13章提供了一个这样的例子。
 
 ### 5.1.14 C-风格字符串的比较
-- 假设要知道字符数组中的字符串是不是
+```C++
+// 如果word是数组名，要知道字符数组中的字符串是不是mate，进行了这样的操作：
+word == "mate";
+// 因为数组名是地址，引号括起来的字符串常量也是地址，所以↑其实是比较它们是否存储在相同的地址上
+// 而不是判断两个字符串相同。显然它们的地址也不相同
+```
+- C-风格字符串比较一般都用strcmp()
+- C-风格字符串是通过结尾的空值字符定义的；即便数组定义的长度不同，但存储的字符相同那么它们就是相同的，
+```C
+char big[80] = "Daffy";  // 5 letters plus \0
+char little[6] = "Daffy";  // 5 letters plus \0
+```
+```C++
+// 5.11 compstr1.cpp -- comparing strings using arrays
+#include <iostream>
+#include <cstring>
+int main()
+{
+	using namespace std;
+	char word[5] = "?ate";
+	for (char ch = 'a'; strcmp(word, "mate"); ch++)
+	{
+		cout << word << endl;
+		word[0] = ch;
+	}
+	cout << "After loop ends, word is " << word << endl;
+
+	// addition
+	for (char ch = 'a'; ch <= 'z'; ++ch)
+		cout << ch;
+	return 0;
+}
+```
+
+### 5.1.15 比较string类字符串
+- 对于string字符串，可以使用比较运算符比较，因为类函数重载（重定义）了这些运算符
+```C++
+// 5.12 compstr2.cpp -- comparing strings using arrays
+#include <iostream>
+#include <string>
+int main()
+{
+	using namespace std;
+	string word = "?ate";
+	for (char ch = 'a'; word != "mate"; ch++)
+	{
+		cout << word << endl;
+		word[0] = ch;
+	}
+	cout << "After loop ends, word is " << word << endl;
+	return 0;
+}
+```
+- **注意1**：用关系运算符比较时：至少有一个操作数为string对象，另一个操作数可以是string对象，也可是是C-风格字符串
+- **注意2**：此循环不是计数循环，根据情况(word为"mate")来确定是否停止。对于这种情况，通常使用while循环
+
+## 5.2 while循环
+```C++
+// 5.13 -- introducing the while loop
+#include <iostream>
+const int ArSize = 20;
+int main()
+{
+	using namespace std;
+	char name[ArSize];
+	cout << "Your first name, please: ";
+	cin >> name;
+	cout << "Here is your name, verticalized and ASCIIized:\n";
+	int i = 0;
+	while (name[i] != '\0')
+	{
+		cout << name[i] << ": " << int(name[i]) << endl;
+		i++;
+	}
+	return 0;
+}
+```
+- 不同于C-风格字符串，string对象不使用空字符来标记字符串末尾；但是要将程序5.13转换为使用string类的版本，只需要用string对象替换char数组即可。第16章讨论可用于标识string对象中最后一个字符的技术
+
+### 5.2.1 for 与 while
+- 本质上，for 和 while是相同的
+	- 程序员使用for循环为循环计数
+	- 当无法预先知道循环将执行的次数时，程序员常使用while循环 
+- for与while的三个差别：
+	- for省略了测试条件时，将认为条件为true
+	- 在for循环中，可使用初始化语句声明一个局部变量，但while循环不能这样做
+	- 如果循环体包含continue语句，情况将稍有不同。 
+- 设计循环的规则
+	- 指定循环终止条件
+	- 在首次测试之前初始化条件
+	- 在条件被再次测试之前更新条件
+- for循环的一个优点是，结构提供了一个可实现上述3条指导原则的地方 
+
+### 5.2.2 等待一段时间：编写延时循环
+```C++
+// 早期用这种方法
+long wait = 0;
+while (wait < 10000)
+	wait++;
+```
+- ANSI C和C++库有个clock()函数，可以完成这样的工作。clock()返回的函数不是秒，其次返回类型有的系统是long，另一些系统是unsigned long
+- ctime提供了解决方案。它定义一个符号常量——CLOCKS_PER_SEC,该常量等于每秒包含的系统时间单位数。系统时间除以这个数可以得到秒数。其次，ctiem将clock_t作为clock()返回类型的别名（参见本章后面的注释“类型别名”）,这意味着可以将变量声明为clock_t类型，编译器把它转换为long、unsigned int或适合系统的其他类型。
+```C++
+
+```
+
+
 
 
 
