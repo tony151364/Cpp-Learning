@@ -422,7 +422,23 @@ while (wait < 10000)
 - ANSI C和C++库有个clock()函数，可以完成这样的工作。clock()返回的函数不是秒，其次返回类型有的系统是long，另一些系统是unsigned long
 - ctime提供了解决方案。它定义一个符号常量——CLOCKS_PER_SEC,该常量等于每秒包含的系统时间单位数。系统时间除以这个数可以得到秒数。其次，ctiem将clock_t作为clock()返回类型的别名（参见本章后面的注释“类型别名”）,这意味着可以将变量声明为clock_t类型，编译器把它转换为long、unsigned int或适合系统的其他类型。
 ```C++
-
+// 5.14 waiting.cpp -- using clock() in a time-delay loop
+#include <iostream>
+#include <ctime>  // describes clock() function, clock_t type
+int main()
+{
+	using namespace std;
+	cout << "Enter the delay time, in seconds: ";
+	float secs;
+	cin >> secs;
+	clock_t delay = secs * CLOCKS_PER_SEC;  // convert to clock ticks
+	cout << "starting\a\n";
+	clock_t start = clock();
+	while (clock() - start < delay)  // wait until time elapses
+		;  // note the semicolon
+	cout << "done\a\n";
+	return 0;
+}
 ```
 
 
