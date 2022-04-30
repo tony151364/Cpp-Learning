@@ -440,13 +440,72 @@ int main()
 	return 0;
 }
 ```
+- 该程序以系统时间单位为单位（而不是以秒为单位）计算延迟时间，避免了在每轮循环中将系统时间转换为秒
+#### 类型别名
+- C++为类型创建别名的方式有两种：
+	- 1.使用预处理器：``` define BYTE char ```
+	- 2.用关键字typedef来创建：``` typedef char byte ``` （**常用**）
 
+```C++
+typedef char * byte_pointer;  // 让byte_pointer成为char指针的别名
 
+#define FLOAT_POINTER float *  // 也可以用#define，不过沉迷一些列变量时，这种方法不使用
+FLOAT_POINTER pa, pb;
+float * pa, pb;  // 预处理器将其替换为这样，只有pa是指针，pb只是一个float型变量，typedef就不会有这样的问题
+```
 
+## 5.3 do while 循环
+- do while 循环是出口条件(exit condition)循环，意味着它先执行循环体，再判定测试表达式。至少执行一次。
+- 通常入口条件循环比出口条件循环好，因为入口条件循环在循环开始前就对条件进行检查
+- 有时do while更合理。例如，请求用户输入时，程序必须先获得输入，然后对它进行测试
+```C++
+// 5.15 dowhile.cpp -- exit-condition loop
+#include <iostream>
+int main()
+{
+	using namespace std;
+	int n;
 
+	cout << "Enter numbers in the range 1-10 to find ";
+	cout << "my favorite number\n";
+	do
+	{
+		cin >> n;
+	} while (n != 7);
+	cout << "Yes, 7 is my favorite.\n";
+	return 0;
+}
+```
+## 5.4 基于范围的for循环 (C++11)
+- C++新增的基于范围(range-based)的for循环简化了循环任务：对数组（或容器类，如vector和array）的每个元素执行相同的操作
+```C++
+#include <iostream>
+int main()
+{
+	using namespace std;
+	double prices[5] = { 4.99, 10.99, 6.87, 7.99, 8.49 };
 
+	// x最初表示数组的第一个元素，然后依次表示数组的其他元素
+	for (double x : prices)
+		cout << x  << endl;
 
+	// &表明x是一个引用变量，这种声明能让代码修改x的内容
+	for (double& x : prices)
+		x *= 0.8;  // 修改数组的元素
 
+	// 可以和初始化列表结合使用
+	for (int x : {3, 4, 5, 3, 2, 1})
+		cout << x << " ";
+	cout << '\n';
+	return 0;
+}
+```
+- 像Java中的for-each
 
+## 5.5 循环和文本输入
+- cin对象支持3种不同模式的单字符输入，其用户接口各不相同
+
+### 5.5.1 使用原始的cin进行输入
+- 选择某个字符——有时称为哨兵字符(sentinel character)作为停止标记
 
 
