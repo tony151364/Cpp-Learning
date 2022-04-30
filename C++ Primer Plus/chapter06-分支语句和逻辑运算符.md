@@ -366,18 +366,18 @@ int main()
 	int choice;
 	cin >> choice;
 	while (choice != 5)
-	{	
+	{
 		switch (choice)
 		{
-			case 1: cout << "\a\n";
-				break;
-			case 2: report();
-				break;
-			case 3: cout << "The boss was in all day.\n";
-				break;
-			case 4: comfort();
-				break;
-			default: cout << "That's not a choice.\n";
+		case 1: cout << "\a\n";
+			break;
+		case 2: report();
+			break;
+		case 3: cout << "The boss was in all day.\n";
+			break;
+		case 4: comfort();
+			break;
+		default: cout << "That's not a choice.\n";
 		}
 		showmenu();
 		cin >> choice;
@@ -385,21 +385,139 @@ int main()
 	cout << "Bye!\n";
 	return 0;
 }
+
+void showmenu()
+{
+	cout << "Please enter 1, 2, 3, 4, or 5:\n"
+		"1) alarm			2) report\n"
+		"3) ablibi			4) comfort\n"
+		"5) quit\n";
+}
+
+void report()
+{
+	cout << "It's been an excellent week for business. \n"
+		"Sales are up 120%. Expenses are down 35%.\n";
+}
+
+void comfort()
+{
+	cout << "Your employees think you are the finest CEO\n" 
+		"in the industry. The board of directors think\n" 
+		"you are the finest CEO in the industry.\n";
+}
 ```
-- showmenu()函数显示一组选项
+### 6.5.1 将枚举量用作标签
+```C++
+// 6.11 enum.cpp -- using enum
+#include <iostream>
+enum {red, orange, yellow, green, blue, violet, indigo};
+int main()
+{
+	using namespace std;
+	cout << "Enter color code (0-6): ";
+	int code;
+	cin >> code;
+	while (code >= red && code <= indigo)
+	{
+		switch (code)
+		{
+			case red: cout << "Her lips were red.\n"; break;
+			case orange: cout << "Her hair were orange.\n"; break;
+			case yellow: cout << "Her shoes were yellow.\n"; break;
+			case green: cout << "Her nails were green.\n"; break;
+			case blue: cout << "Her sweatsuit were blue.\n"; break;
+			case violet: cout << "Her eyes were violet.\n"; break;
+			case indigo: cout << "Her mood were indigo.\n"; break;
+		}
+		cout << "Enter color code (0-6): ";
+		cin >> code;
+	}
+	cout << "Bye\n";
+	return 0;
+}
+```
+- 通常，cin无法识别枚举类型（它不知道程序员是如何定义它们的），因此该程序要求用户选择选项时输入一个整数。当switch语句将int值和枚举量标签进行比较时，将枚举量提升为int。
+- while循环测试条件中，也会将枚举量提升为int类型
 
+### 6.5.2 switch 和 if else
+- switch并不是为处理取值范围而设计的。switch语句中的每一个case标签都必须是一个单独的值。另外，这个值必须是整数（包括char）。另外case标签值还必须是常量。相比之下，if else 更通用。
+- **提示**：如果既可以用 if else if语句，也可用switch语句，则当选项不少于3个时，应使用switch语句。
 
+### 6.6 break 和 continue语句
+```C++
+// 6.12 jump.cpp -- using continue and break
+#include <iostream>
+const int ArSize = 80;
+int main()
+{
+	using namespace std;
+	char line[ArSize];
 
+	int spaces = 0;
 
+	cout << "Enter a line of text:\n";
+	cin.get(line, ArSize);
+	cout << "Complete line:\n" << line << endl;
+	cout << "Line through first period:\n";
+	for (int i = 0; line[i] != '\0'; i++)
+	{
+		cout << line[i];
+		if (line[i] == '.')
+			break;
+		if (line[i] != ' ')
+			continue;
+		spaces++;
+	}
+	cout << "\n" << spaces << " spaces\n";
+	cout << "Done.\n";
+	return 0;
+}
+```
+- 在for循环中，continue语句使程序直接跳到更新表达式处，然后跳到测试表达式处。
+- 对于while来说，continue将使程序直接跳到测试表达式处
+## 6.7 读取数字的循环
+```C++
+int n;
+cin >> n;
+```
+- 如果用户输入一个单词，而不是数字，将发生4种情况：
+	- n的值保持不变；
+	- 不匹配的输入将被留在输入队列中
+	- cin对象将设置一个错误标记
+	- cin方法返回false（如果被转换为bool类型） 
+- 方法返回false意味着可以用非数字输入来结束读取数字的循环
 
-
-
-
-
-
-
-
-
+```C++
+// 6.13 cinfish.cpp -- non-numeric input terminates loop
+#include <iostream>
+const int Max = 5;
+int main()
+{
+	using namespace std;
+	double fish[Max];
+	cout << "You may enter up to " << Max
+		<< " fish <q to terminate>.\n";
+	cout << "fish #1: ";
+	int i = 0;
+	while (i < Max && cin >> fish[i])  // 需要注意
+	{
+		if (++i < Max)  // 需要注意
+			cout << "fish #" << i + 1 << ": ";
+	}
+	double total = 0.0;
+	for (int j = 0; j < i; j++)
+		total += fish[j];
+	if (i == 0)
+		cout << "No fish\n";
+	else
+		cout << total / i << " = average weight of "
+		<< i << " fish\n";
+	cout << "Done.\n";
+	return 0;
+}
+```
+- i < Max放到&&左边是有讲究的，运用&&的“短路”现象以防止数组越界
 
 
 
