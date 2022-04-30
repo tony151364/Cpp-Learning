@@ -507,5 +507,118 @@ int main()
 
 ### 5.5.1 使用原始的cin进行输入
 - 选择某个字符——有时称为哨兵字符(sentinel character)作为停止标记
+```C++
+// 5.16 textin1.cpp
+#include <iostream>
+int main()
+{
+	using namespace std;
+	char ch;
+	int count = 0;  // use basic input
+	cout << "Enter characters; enter # to quit:\n";
+	cin >> ch;
+	while (ch != '#')
+	{
+		cout << ch;
+		++count;
+		cin >> ch;  // 没有这一步，循环将反复处理第一个输入字符
+	}
+	cout << endl << count << " characters read\n";
+	return 0;
+}
+```
+- 为什么输入的空格被省略了？
+	- 因为cin读char时，与其他类型一致，cin将忽略空格和换行符。
+	- 因此输入的空格没有被回显，也没有被包括在计数内
+- 更复杂的是，发送给cin的输入流被缓冲。当用户按下回车时，才被发送给程序。这就是可以在#后输入字符的原因。（讲的真好，真细）
+
+### 5.5.2 使用cin.get(char)进行补救
+- 成员函数cin.get(ch)读取输入中的下一个字符（即使它是空格），并将其赋给ch。使用这个函数调用替换cin>>ch，可以修补程序5.16的问题
+```C++
+// 5.17 textlin2.cpp -- using cin.get(char)
+#include <iostream>
+int main()
+{
+	using namespace std;
+	char ch;
+	int count = 0;  // use basic input
+
+	cout << "Enter characters; enter # to quit:\n";
+	cin.get(ch);
+
+	while (ch != '#')
+	{
+		cout << ch;
+		++count;
+		cin .get(ch);  // use it again
+	}
+	cout << endl << count << " characters read\n";
+	return 0;
+}
+```
+- 这样就全部字符计算在内了，包括空格。输入扔被缓冲，因此输入的字符个数扔可能比最终到达程序的要多
+- 头文件iostream将cin.get(ch)的参数声明为引用类型，因此该函数可以修改其参数的值
+
+### 5.5.3 使用哪一个cin.get()
+- cin.get()的一个版本接受两个参数：数组名（字符串（char* 类型）的地址）和ArSize（int类型的整数）
+- 函数重载将在第8章介绍
+
+### 5.5.4 文件尾条件
+- 如果编程环境能够检测EOF，可以在类似与程序清单5.17的程序中使用重定向的文件，也可以使用键盘输入，并在键盘仔模拟EOF（Windows下用Ctrl+z来模拟）
+```C++
+// 5.18 textin3.cpp -- reading chars to end of file
+#include <iostream>
+int main()
+{
+	using namespace std;
+	char ch;
+	int count = 0;
+	cin.get(ch);  // attempt to read a char
+	while (!cin.fail())  // test for EOF
+	{
+		cout << ch;
+		++count;
+		cin.get(ch);
+	}
+	cout << endl << count << " characters read\n";
+	return 0;
+}
+```
+- 检测到EOF后，cin将两位（eofbit和failbit）都设置为1.
+	- 可以通过eof()来查看eofbit是否被设置；如果检测到EOF，cin.eof()将返回true，否则返回false
+	- 同样，如果eofbit或falibit被设置为1， fail()函数返回true，否则返回false
+	- 注意，eof()和fail()方法报告最近读取的结果，因此应将cin.eof()或cin.fail测试放在读取后
+- [ ] 还不是太理解这个到底怎么搞的
+
+#### 1.EOF结束输入
+- 对于文件输入，这也是有道理的，因为程序不应读取超出文件尾的内容。
+- 对于键盘输入，可以模拟EOF来结束循环。cin.clear()方法可能清除EOF标记，使输入继续进行。第17章介绍
+#### 2.常见的字符输入做法
+- cin.get(char)的返回值是一个cin对象。然而，istream类提供了一个可以将istream对象（如cin）转换为bool值的函数。当cin出现在需要bool值的地方（如在while循环的测试条件中）时，该转换函数将被调用。
+- 另外，如果最后一次读取成功了，则转换得到bool值为true；否则为false。
+```C++
+// 这意味着，可以将while测试改写成这样
+while (cin)  // while input is successful
+// 这比!cin.fail()或!cin.eof()更通用，因为它可以检测到其他失败原因，如磁盘故障。
+// 最后，由于cin.get(char)的返回值为cin，因此可以将循环精简成这种格式：
+while (cin.get(ch))
+{
+	...
+}
+// 这样cin.get(char)调用一次就行了。程序会对返回值cin进行bool转换的。
+// 程序5.18直接改成这就行了，nice！
+int count = 0;
+while (cin.get(ch))
+{
+	cout << ch;
+	++count;
+}
+```
+- 三条指导原则（确定结束条件、对调节进行初始化以及更新条件）**全部被放在循环测试条件中！！！**（牛逼）
+### 5.5.5 另一个cin.get()版本
+
+
+
+
 
 
