@@ -616,6 +616,244 @@ while (cin.get(ch))
 ```
 - 三条指导原则（确定结束条件、对调节进行初始化以及更新条件）**全部被放在循环测试条件中！！！**（牛逼）
 ### 5.5.5 另一个cin.get()版本
+```C++
+// 不接受任何参数的cin.get()成员函数返回输入中的下一个字符
+ch = cin.get();
+cout.put(ch);  // （参见第3章）来显示字符
+// 使用显式强制类型转换的原型（如cin.put(char(ch))）可以使用int参数
+
+char ch;
+cin.get(ch);
+while (cin.fail() == false)  // test for EOF
+{
+	cout << ch;
+	++count;
+	cin.get(ch);
+}
+
+// 可以使用int ch, 并用cin.get()代替cin.get(char)，用cout.put()代替cout，用EOF测试代替cin.fail()测试：
+int ch;
+ch = cin.get();
+while (ch != EOF)
+{
+	cout.put(ch);  // cout.put(char(ch)) for some implementations
+	++count;
+	ch = cin.get();
+}  // 需要知道的是，EOF不表示输入中的字符，而是指出没有字符
+```
+- 关于cin.get()还有一个微妙而重要的问题：EOF表示的不是有效字符编码，因此可能不与char类型兼容。
+```C+++
+// 5.19 -- textlin4.cpp -- reading chars with cin.get()
+#include <iostream>
+int main(void)
+{
+	using namespace std;
+	int ch;  // should be int, not char
+	int count = 0;
+
+	while ((ch = cin.get()) != EOF)  // test for end-of-file
+	{
+		cout.put(char(ch));
+		++count;
+	}
+	cout << endl << count << " characters read\n";
+	return 0;
+}  // 包含了换行符
+```
+- cin.get(ch) 与 ch=cin.get()，见表
+- 到底用哪个？
+
+## 5.6 嵌套循环和二维数组
+```C++
+// 该声明意味着maxtemps是一个包含4个元素的数组，其中每个元素都是一个由5个整数组成的数组
+int maxtemps[4] [5];  
+
+// 打印二维数组
+for (int row = 0; row < 4; row++)
+{
+	for (int col = 0; col < 5; ++col)
+		cout << maxtemps[row]pcol] << "\t";
+	cout << endl;
+}
+```
+### 5.6.1 初始化二维数组
+```C++
+int maxtemps[4][5] = 
+{
+	{98, 100, 100, 134, 112},  // values for maxtemps[0]
+	{98, 100, 100, 134, 112},  // values for maxtemps[1]
+	{98, 100, 100, 134, 112},  // values for maxtemps[2]
+	{98, 100, 100, 134, 112}   // values for maxtemps[3]
+};
+```
+
+### 5.6.2 使用二维数组
+```C++
+// 5.20 nested.cpp -- nested loops and 2-D array
+#include <iostream>
+const int Cities = 5;
+const int Years = 4;
+int main()
+{
+	using namespace std;
+	const char* cities[Cities] =  // array of pointers
+	{  // to 5 strings
+		"Gribble city",
+		"Gribbletown",
+		"New Gribble",
+		"San Gribble",
+		"Gribble vista"
+	};
+
+	int maxtemps[Years][Cities] =
+	{
+		{96, 100, 87, 101,105},
+		{96, 98, 91, 107,104},
+		{97, 101, 93, 108, 107},
+		{98, 103, 95, 109, 108}
+	};
+
+	cout << "Maximum temperatures for 2008 - 2011\n\n";
+	for (int city = 0; city < Cities; ++city)
+	{
+		cout << cities[city] << ":\t";
+		for (int year = 0; year < Years; ++year)
+			cout << maxtemps[year][city] << "\t";
+		cout << endl;
+	}
+	return 0;
+}
+```
+- 指针数组 和 数组指针有区别吗？
+	- 指针数组：是一个数组，每个元素都是一个指针。 ``` int* a[4]; ```
+	- 数组指针：指向数组的指针 ``` int (*a)[4]; ```
+```C++
+#include <iostream>
+
+using namespace std;
+
+int main()
+{
+	int c[4] = { 1,2,3,4 };
+	int* a[4]; //指针数组
+	int(*b)[4];  //数组指针
+	
+	b = &c;
+	for (int i = 0; i < 4; i++)  //将数组c中元素赋给数组a
+	{
+		a[i] = &c[i];
+	}
+	cout << *a[1] << endl;  //输出2就对
+	cout << (*b)[2] << endl;  //输出3就对
+	return 0;
+}
+```
+- 1.将一个指针数组初始化为一组字符串常量。
+```C++
+const char* cities[Cities] =  
+{  // to 5 strings
+	"Gribble city",
+	"Gribbletown",
+	"New Gribble",
+	"San Gribble",
+	"Gribble vista"
+};
+```
+- 2.使用char数组的数组，而不是字符串指针数组
+- 从存储空间角度说，使用指针数组更为经济；如果要修改其中的任何一个字符串，二维数组是更好的选择。
+```C++
+char cities[Cities][25] =  
+{  // to 5 strings
+	"Gribble city",
+	"Gribbletown",
+	"New Gribble",
+	"San Gribble",
+	"Gribble vista"
+}; 
+```
+- 3.使用string类
+- 如果希望字符串是可修改的值，则应省略限定符const。
+- 使用string对象数组是，初始化列表和显示字符串的for循环与前两种相同
+- 在希望字符串是可以修改的情况下，string类是比二维数组更好的选择
+```C++
+const string cities[Cities] = 
+{  // to 5 strings
+	"Gribble city",
+	"Gribbletown",
+	"New Gribble",
+	"San Gribble",
+	"Gribble vista"
+};
+```
+## 5.7 总结
+- 循环部分还行，cin这部分，字符串读取相关的函数和返回值看的有点懵。下次看视频可以再回顾回顾。
+## 5.8 复习题
+- [ ] 第8题
+- [ ] 第9题
+
+```C++
+// 1.入口条件：只要满足入口设置的条件，才能进入循环；先判断条件，后执行语句。如：for循环、while循环；出口条件：先执行，后判断条件。
+// 2.打印：0\n 1\n 2\n 3\n 4\n
+// 3.打印：0369 \n 11 \n
+// 4. 68
+// 5. k = 8, k = 9, k= 10 ...死循环
+// 6. 
+for (int i = 1; i <= 64; i *= 2)
+	cout << i << endl;
+// 7.加一个{}
+// 8.取最后以个值为表达式的值，024是八进制，转换为十进制是20，所以x = 20.逗号表达式优先级最低，所以y = 1;
+// 9.cin>>ch。把一个字符赋值给ch，包含回车。cin.get(ch)把下一个字符赋给ch，返回一个对象。ch=cin.get()返回一个对应字符ASCII编码的整数
+```
+## 5.9 编程练习
+- 1
+```C++
+
+```
+- 2
+```C++
+
+```
+- 3
+```C++
+
+```
+- 4
+```C++
+
+```
+- 5
+```C++
+
+```
+- 6
+```C++
+
+```
+- 7
+```C++
+
+```
+- 8
+```C++
+
+```
+- 9
+```C++
+
+```
+- 10
+```C++
+
+```
+
+
+
+
+
+
+
+
+
 
 
 
