@@ -292,7 +292,7 @@ age > 30 && age < 45 || weight > 300  // 被解释为：
 - ispunct(ch); ch是标点符号函数返回true
 - isspace()来测试字符是否为空白
 ```C++
-// cctypes.cpp -- using the ctype.h library
+// 6.8 cctypes.cpp -- using the ctype.h library
 #include <iostream>
 #include <cctype>  // prototypes for character functions
 int main()
@@ -631,14 +631,188 @@ int main()
 - 如果文件已经存在，open()将首先截断该文件，即将其长度截短到零——丢其原有的内容，然后将新的输入加入到该文件中。（第17章介绍如何修改这种行为）
 
 ### 6.8.3 读取文本文件
+- 控制台输入：
+	- 必须包含头文件iostream
+	- 头文件iostream定义了一个用处理输入的istream类
+	- 头文件iostream声明了一个名为cin的ostream变量（对象）
+	- 必须指明名称空间std；例如，为引用元素cin，必须使用编译指令using或前缀std::。
+	- 可以结合使用cin和运算符>>来显示各种类型的数据
+	- 可以使用cin和eof()、fail()方法来判断输入是否成功
+	- 对象cin本身被用作测试条件时，如果最后一个读取操作成功，它将被转换为布尔值true，否则转换为false
+- 文件输入与其极其相似：
+	- 必须包含头文件fstream
+	- 头文件fstream定一个了一个用于处理输入的ifstram类
+	- 需要声明一个或多个ifstream变量（对象），并以自己喜欢的方式对其进行命名，条件是遵守常用的命名规则。
+	- 必须指明名称空间std;例如，为引用元素ifstream，必须使用编译指令using或前缀std::。
+	- 需要将ifstream对象与文件关联起来。为此，方法之一就是使用open()方法
+	- 使用完文件后，应使用方法close()将其关闭
+	- 可结合使用ifstream对象和运算符>>来读取各种类型的数据
+	- 可以使用ifstream对象和get()方法来读取一个字符，使用ifstream对象和getline()来读取一行字符。
+	- 可以结合使用ifstream和eof()、fail()等方法来判断输入是否成功
+	- ifstream对象本身用作测试条件时，如果最后一个读取操作成功，它将转换为布尔值true，否则转换为false。
 
+```C++
+// 6.16 sumafile.cpp -- functions with an array argument
+#include <iostream>
+#include <fstream>
+#include <cstdlib>  // support for exit()
+const int SIZE = 60;
+int main()
+{
+	using namespace std;
+	char filename[SIZE];
+	ifstream inFile;  // object for handling file input
+	cout << "Enter name of data file: ";
+	cin.getline(filename, SIZE);
+	inFile.open(filename);  // associate inFile with a file
+	if (!inFile.is_open())  // failed to open file
+	{
+		cout << "Could not open the file " << filename << endl;
+		cout << "Program terminating.\n";
+		exit(EXIT_FAILURE);  // EXIT_FAILURE:用于同操作系统通信的参数值
+	}
+	double value;
+	double sum = 0.0;
+	int count = 0;  // number of items read
 
+	inFile >> value;  // get first value?
+	// 效果类似与inFile.is_open()，是比较老的方法，没is_open()那么广泛
+	while (inFile.good())
+	{
+		cout << "Values: " << value << endl;
+		++count;	// one more item read
+		sum += value;  // calculate running total
+		inFile >> value;  // get next value
+	}
+	if (inFile.eof())  // enf of file
+		cout << "End of file reached.\n";
+	else if (inFile.fail())
+		cout << "Input terminated by data mismatch.\n";  // 数据不匹配
+	else
+		cout << "Input terminated for unknown reason.\n";
+	if (count == 0)
+		cout << "No data processed.\n";
+	else
+	{
+		cout << "Items read: " << count << endl;
+		cout << "Sum: " << sum << endl;
+		cout << "Average: " << sum / count << endl;
+	}
+	inFile.close();
+	return 0;
+}
+```
+- 声明一个ifstream对象并将其同文件关联起来后，便可以像使用cin那样使用它。所有可用于cin的操作和方法都可用于ifstream对象（前面的inFile和fin也是）
+- 注意：有些文本编译器（MS的记事本）不会自动在最后一行末尾加上换行符。需要在文本最后按下回车键，再保存文件，才能保证最后一行数据被读入。
+- 读取文件时：有几点需要检查：
+	- 首先，程序读取文件时不应超过EOF。如果最后一次读取数据时遇到EOF，方法eof()将返回true
+	- 其次，程序可能遇到类型不匹配的情况。这时方法fail()将返回true
+	- 最后，如果发生了文件受损或硬件故障这样的问题，方法bad()将返回true。
+	- 不需要分别检查这些情况，方法goo()在没有任何错误发生时返回true()
+```C++
+// 方式1：循环终止
+while (inFile.good())
+{
+	...
+}
 
+// 方式2：循环终止
+if (inFile.eof())  // enf of file
+	cout << "End of file reached.\n";
+else if (inFile.fail())
+	cout << "Input terminated by data mismatch.\n";  // 数据不匹配
+else
+	cout << "Input terminated for unknown reason.\n";
 
+// 方式3。最后一次读取输入的操作是否成功很重要，所以...
+inFile >> value;  // get first value
+while (inFile.good())  // while input good and not at EOF
+{
+	// loop body goes here
+	inFile >> value;  // get next value
+}
+// 方式4：表达式inFile >> value的结果为inFile，而在需要一个bool值的情况下，inFile的结果为inFIle.good()，即true或false。遵循了在测试之前进行读取的规则
+// omit pre-loop input
+while (inFile >> value)  // read and test for success
+{
+	// loop body goes here
+	// omit end-of-loop input
+}
+```
+## 6.9 总结
+- cctype字符函数库提供了一组方便的、功能强大的工具，可用于分析字符输入。
+## 6.10 复习题
+- [ ] 第8题
+```C++
+// 1.减少运算量，因为' '和'\n'不可能同时出现
+// 2.ch的值将会由字符型转换为int型，输出结果也为int，需要char(ch+1)才行
+// 3.输出：ct1 = 3, ct2 = 0
+// 4. 
+//	a: weight >= 115 && weight < 125 
+//	b: ch == 'q' || ch == 'Q'
+//	c: x != 26 && x % 2 == 0
+//  d: x % 26 != 0 && x % 2 == 0
+//  e: guest == 1 || (donation >= 1000  && donation << 2000)
+//  f: (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
+// 5.是相同的
+// 6.
+x >= 0 ? x : -x;
+// 7.
+switch (ch)
+{
+	case 'A': a_grade++; break;
+	case 'B': b_grade++; break;
+	case 'C': c_grade++; break;
+	case 'D': d_grade++; break;
+	default: f_grade++;
+}
+// 8.原来的程序：输入非数字cin会缓存这个字符，程序陷入死循环。但是如果是字符，输错也不会陷入死循环，因为数字可以被当做对应的字符？？？
+// 9.
+int line = 0;
+char ch;
+while ((ch = cin.get()) != 'Q')
+{
+	if ( ch == '\n')
+		line++;
+}
+```
+## 6.11 编程练习
+- 1
+```C++
 
+```
+- 2
+```C++
 
+```
+- 3
+```C++
 
+```
+- 4
+```C++
 
+```
+- 5
+```C++
+
+```
+- 6
+```C++
+
+```
+- 7
+```C++
+
+```
+- 8
+```C++
+
+```
+- 9
+```C++
+
+```
 
 
 
