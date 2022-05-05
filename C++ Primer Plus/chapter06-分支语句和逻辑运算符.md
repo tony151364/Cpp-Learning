@@ -518,6 +518,129 @@ int main()
 }
 ```
 - i < Max放到&&左边是有讲究的，运用&&的“短路”现象以防止数组越界
+- 6.13中,的表达式cin >> fish[i] 实际上是一个cin方法调用，该函数返回cin。如果cin位于测试条件中，则将被转换为bool类型。如果输入成功，则转换后的值为true，否则为false。
+```C++
+// 6.14 cingolf.cpp -- non-numeric input skipped
+#include <iostream>
+const int Max = 5;
+int main()
+{
+	using namespace std;
+	// get data
+	int golf[Max];
+	cout << "Please enter your golf scores.\n";
+	cout << "You must enter " << Max << " rounds.\n";
+	int i;
+	for (i = 0; i < Max; i++)
+	{
+		cout << "round #" << i + 1 << ": ";
+		while (!(cin >> golf[i])) {  // 若输入的不满足golf[i]的要求，返回false
+			cin.clear();  // 1.重置cin以接受新的输入
+			while (cin.get() != '\n')  // 2.删除错误输入
+				continue; // get rid of bad input
+			cout << "Please enter a number: "; // 3.提示用户再输入
+		}
+	}
+	// calculate average
+	double total = 0.0; 
+	for (i = 0; i < Max; i++)
+		total += golf[i];
+	// report results
+	cout << total / Max << " = average score "
+		<< Max << " rounds\n";
+	return 0;
+}
+```
+- 注意：程序必须先重置cin，才能删除错误输入
+
+## 6.8 简单文件输入/输出
+- 控制台输入/输出；文件输入/输出
+
+### 6.8.1 文本I/O和文本文件
+-[ ] 阅读cin的原理
+- 本章讨论的文件I/O相当于控制台I/O，因此仅适用于文本文件(txt等)
+### 6.8.2 写入到文本文件
+- cout用于控制台的一些内容：
+	- 必须包含头文件iostream
+	- 头文件iostream定义了一个用于处理输出的ostream类
+	- 头文件iostream声明了一个名为cout的ostream变量（对象）
+	- 必须指明名称空间std；例如，为引用元素cout和endl，必须使用编译指令using或前缀std::。
+	- 可以结合使用cout和运算符<<来显示各种类型的数据
+- 文件输出与其极其相似：
+	- 必须包含头文件fstream
+	- 头文件fstream定一个了一个用于处理输出的ofstram类
+	- 需要声明一个或多个ofstream变量（对象），并以自己喜欢的方式对其进行命名，条件是遵守常用的命名规则。
+	- 必须指明名称空间std;例如，为引用元素ofstream，必须使用编译指令using或前缀std::。
+	- 需要将ofstream对象与文件关联起来。为此，方法之一就是使用open()方法
+	- 使用完文件后，应使用方法close()将其关闭
+	- 可结合使用ofstream对象和运算符来输出各种类型的数据
+
+- 注意：虽然头文件iostream提供了一个预先定义好的名为cout的ostream对象，但您必须声明自己的ofstream对象，为其命名，并将其同文件关联起来。
+- 总之，文件输出的主要步骤如下。
+	- 1.包含头文件fstream
+	- 2.创建一个ofstream对象
+	- 3.将该ofstream对象同一个文件关联起来
+	- 4.就像使用cout那样使用该ofstream对象
+```C++
+// 6.15 -- outline.cpp
+#include <iostream>
+#include <fstream>
+int main()
+{
+	using namespace std;
+
+	char automobile[50];
+	int year;
+	double a_price;
+	double d_price;
+
+	ofstream outFile;  // create object for output
+	outFile.open("carinfo.txt");  // associate with file
+
+	cout << "Enter the make and model of automobile: ";
+	cin.getline(automobile, 50);
+	cout << "Enter the model year: ";
+	cin >> year;
+	cout << "Enter the original asking price: ";
+	cin >> a_price;
+	d_price = 0.913 * a_price;
+
+	// display information on screen with cout
+	cout << fixed;  // 用一般的方式输出浮点数，而不是科学计数法
+	cout.precision(2);  // 设置精确度为2，并返回上一次的设置
+	cout.setf(ios_base::showpoint);  // 显示浮点数小数点后的0
+	cout << "Make and model: " << automobile << endl;
+	cout << "Year: " << year << endl;
+	cout << "Was asking $" << a_price << endl;
+	cout << "Now asking $" << d_price << endl;
+
+	// now do exact same things using outFile instead of cout
+	outFile << fixed;
+	outFile.precision(2);
+	outFile.setf(ios_base::showpoint);
+	outFile << "Make and model: " << automobile << endl;
+	outFile << "Year: " << year << endl;
+	outFile << "Was asking $" << a_price << endl;
+	outFile << "Now asking $" << d_price << endl;
+
+	outFile.close();   // done with file
+	return 0;
+}
+```
+- close(): 如果你忘记关文件，程序正常终止时将自动关闭它
+- 如果文件已经存在，open()将首先截断该文件，即将其长度截短到零——丢其原有的内容，然后将新的输入加入到该文件中。（第17章介绍如何修改这种行为）
+
+### 6.8.3 读取文本文件
+
+
+
+
+
+
+
+
+
+
 
 
 
