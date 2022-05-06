@@ -7,11 +7,19 @@
   - 调用函数； 
 
 ### 7.1.1 定义函数
-- 可以将函数分为两类：没有返回值的函数和有返回值的函数
+- 可以将函数分为两类：
 ```C++
-void funtionName(parameterList)
+// 1.没有返回值的函数(void)
+void funtionName(parameterList)  // parameter指定了传递给函数的参数类型和数量
 {
     statement(s);
-    return;
+    return;  // 可选的,返回语句标记了函数的结尾
+}
+// 2.有返回值的函数
+typeName funtionName(parameterList)
+{
+    statement(s);
+    return value;  // 必须有返回语句
 }
 ```
+
