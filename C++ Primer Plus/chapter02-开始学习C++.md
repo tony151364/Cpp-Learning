@@ -241,3 +241,23 @@ void simon(int n)  //   define the simon() function
 - 返回语句：将一个值从被调用的函数那里返回到调用函数中。
 - ostream 类定义的插入运算符(<<)，istream定义的抽取运算符(>>)
 
+### 2.6 复习题
+- [ ] 第2题
+- [ ] 第3题
+- [ ] 第11题
+```C++
+// 1. 函数
+// 2. 包含iostream头文件，将头文件中的内容添加到源代码中
+// 3. using是预编译指令，它能使得程序可以使用std名称空间中的定义。命名空间（）有多种。
+// 4. cout << "Hello,world" << endl;
+// 5. int cheeses;
+// 6. chesses = 32;
+// 7. cin >> cheeses;
+// 8. cout << "We have " << cheeses << " varieties of cheese," << endl;
+// 9. 
+//	返回值为int，接收一个参数, 参数为double类型...
+// 10. 函数没有返回值时，即返回值类型为void
+// 11. std::cout; using namespace std::cout; using namespace std;
+```
+### 2.7 编程题
+-
