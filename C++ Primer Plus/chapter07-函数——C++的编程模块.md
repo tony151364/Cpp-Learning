@@ -88,13 +88,84 @@ double cube(double x)
 - 仅当有意义时，原型化才会导致类型转换。例如，原型不会将整数转换为结构或指针。
 - 在编译阶段进行的原型化被称为静态类型检查(static type checking)。可以看出，静态类型检查可捕获许多在运行阶段非常难以捕获的错误。
 
-## 7.2 
+## 7.2 函数参数和按值传递
+- C++通常按值传递参数，这意味着将数值参数传递给函数，而后者将其赋值给一个新的变量。
+- 用于接收传递值的变量称为形参。传递给函数的值被称为实参。
+- 处于标准化的目的，C++标准使用参数(argument)来表示实参，使用参量(parameter)来表示形参，因此参数传递，将parameter赋给argument。
+### 7.2.1 多个参数
+```C++
+// 7.3 twoarg.cpp -- a function with 2 arguments
+#include <iostream>
+using namespace std;
+void n_chars(char, int);
 
+int main()
+{
+	int times = 0;
+	char ch;
 
+	cout << "Enter a character: ";
+	cin >> ch;
+	while (ch != 'q')  // q to quit
+	{
+		cout << "Enter an integer: ";
+		cin >> times;
+		n_chars(ch, times);  // function with two arguments
+		cout << "\nEnter another character or press the"
+			" q-key to quit: ";
+		cin >> ch;
+	}
+	cout << "The value of times is " << times << ".\n";
+	cout << "Bye\n";
+	return 0;
+}
 
+void n_chars(char c, int n)
+{
+	while (n-- > 0)  // continue untill n reaches 0
+		cout << c;
+}
+```
+### 7.2.2 另外一个接受两个参数的函数
+- 该函数将演示局部变量的用法，而不是形参的用法。
+- 当数字非常大时，这种交替进行乘除的运算的策略可以防止中间结果超出最大的浮点数。
 
+``C++
+// 7.4 lotto.cpp -- probability of winning
+#include <iostream>
+long double probability(unsigned numbers, unsigned picks);
 
+int main()
+{
+	using namespace std;
+	double total, choices;
+	cout << "Enter the total number of number of choices on the game card and\n"
+		"the number of picks allowed:\n";
+	while ((cin >> total >> choices) && choices <= total)
+	{
+		cout<< fixed;
+		cout << "You have one chance in ";
+		cout << probability(total, choices);  // compute the odds
+		cout << " of winning.\n";
+		cout << "Next two numbers (q to quit): ";
+	}
+	cout << "Bye\n";
+	return 0;
+}
 
+long double probability(unsigned numbers, unsigned picks)
+{
+	long double result = 1.0;
+	long double n;
+	unsigned p; // = unsigned int
+
+	for (n = numbers, p = picks; p > 0; n--, p--)
+		result = result * n / p;
+	
+	return result;
+}
+```
+- 形参与其他局部变量的主要区别是：形参从调用probability()的函数那里获得自己的值，而其他变量是从函数中获得自己的值
 
 
 
