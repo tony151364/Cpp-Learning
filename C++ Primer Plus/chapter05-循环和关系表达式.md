@@ -807,40 +807,167 @@ for (int i = 1; i <= 64; i *= 2)
 ## 5.9 编程练习
 - 1
 ```C++
-
+#include <iostream>
+using namespace std;
+int main()
+{
+	int min, max, sum;
+	
+	cout << "Enter two numbers: ";
+	cin >> min >> max;
+	
+	for (sum = 0; min <= max; ++min)
+		sum += min;
+	cout << "The sum is " << sum << endl;
+	return 0;
+}
 ```
 - 2
 ```C++
+// 5.4 formore.cpp -- more looping with for
+#include <iostream>
+#include <array>
+using namespace std;
+const int AriSize = 16;   // example of external declaration
+int main()
+{
+	array<long double, AriSize> factorials;
+	factorials[0] = factorials[1] = 1;
 
+	for (int i = 2; i < AriSize; ++i)
+		factorials[i] = i * factorials[i - 1];
+	for (int i = 0; i < AriSize; ++i)
+	{
+		cout << fixed;
+		cout.precision(0);
+		cout << i << "! = " << factorials[i] << endl;
+	}
+		
+	return 0;
+}
 ```
 - 3
 ```C++
-
+#include <iostream>
+int main()
+{
+	using namespace std;
+	long long num;
+	long long sum = 0LL;
+	
+	cin >> num;
+	while (num != 0)
+	{
+		sum += num;
+		cout << "sum = " << sum  << endl;
+		cin >> num;
+	}
+	return 0;
+}
 ```
+
 - 4
 ```C++
+#include <iostream>
+using namespace std;
+int main()
+{
+	double D_money, C_money;
+	int year;
 
+	D_money = C_money = 100.0;
+	for (year = 0; C_money <= D_money; ++year)
+	{
+		D_money += 0.1 * 100;
+		C_money += 0.05 * C_money;
+		cout << "C_money: " << C_money << endl;
+	}
+	cout << "Need years: " << year << endl;  // 27
+	cout << "Daphne has $" << D_money
+		<< "\tCleo has $" << C_money << endl;
+	return 0;
+}
 ```
+
 - 5
 ```C++
+#include <iostream>
+#include <string>
+using namespace std;
+const int Size = 12;
+int main()
+{
+	string months[Size] =
+		{
+			"January", "February", "March", "April",
+			"May", "June", "July", "August",
+			"September", "October", "November", "December"
+		};
+	int sales_volume[Size];
+	int sum = 0;
 
+	for (int i = 0; i < Size; ++i)
+	{
+		cout << "Enter volumes of " << months[i] << ": ";
+		cin >> sales_volume[i];
+		sum += sales_volume[i];
+	}
+	cout << "This year's sales are " << sum << endl;
+}
 ```
+
 - 6
 ```C++
+#include <iostream>
+#include <string>
+using namespace std;
+const int Size = 12;
+int main()
+{
+	string months[Size] =
+		{
+			"January", "February", "March", "April",
+			"May", "June", "July", "August",
+			"September", "October", "November", "December"
+		};
+	int sales_volume[3][Size];
+	int y_sum, sum;
+	y_sum = 0;
 
+	for (int i = 0; i < 3; ++i)
+	{
+		sum = 0;
+		cout << i+1 << "th year:\n";
+		for (int j = 0; j < Size; ++j)
+		{
+			cout << "Enter volumes of " << months[j] << ": ";
+			cin >> sales_volume[i][j];
+			sum += sales_volume[i][j];
+		}
+		cout << "This year's sales are " << sum << endl;
+		y_sum += sum;
+	}
+
+	cout << "y_sum is " << y_sum;
+	
+}
 ```
+
 - 7
 ```C++
 
 ```
+
 - 8
 ```C++
 
 ```
+
 - 9
 ```C++
 
 ```
+
 - 10
 ```C++
 
