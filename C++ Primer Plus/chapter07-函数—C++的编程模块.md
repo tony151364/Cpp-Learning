@@ -130,7 +130,7 @@ void n_chars(char c, int n)
 - 该函数将演示局部变量的用法，而不是形参的用法。
 - 当数字非常大时，这种交替进行乘除的运算的策略可以防止中间结果超出最大的浮点数。
 
-``C++
+```C++
 // 7.4 lotto.cpp -- probability of winning
 #include <iostream>
 long double probability(unsigned numbers, unsigned picks);
@@ -167,15 +167,50 @@ long double probability(unsigned numbers, unsigned picks)
 ```
 - 形参与其他局部变量的主要区别是：形参从调用probability()的函数那里获得自己的值，而其他变量是从函数中获得自己的值
 
+## 7.3 函数和数组
+```C++
+// 7.5 arrfun1.cpp -- functions with an array argument
+#include <iostream>
+const int ArSize = 8;
+int sum_arr(int arr[], int n);
 
+int main()
+{
+	using namespace std;
+	int cookies[ArSize] = { 1, 2, 4, 8, 16, 32, 64, 128 };
 
+	int sum = sum_arr(cookies, ArSize);
+	cout << "Total cookies eaten: " << sum << "\n";
+	return 0;
+}
 
+int sum_arr(int arr[], int n)  // int sum_arr(int* arr, int n)
+{
+	int total = 0;
+	
+	for (int i = 0; i < n; i++)
+		total += arr[i];
+	return total;
+}
+```
+- 方括号指出arr是一个数组，而方括号为空表明，可以将任何长度的数组传递给该函数。**arr实际上是一个指针！**
+- 下面讨论为何该程序管用
 
+### 7.3.1 函数如何使用指针来处理数组
+- 大多数情况下，C++和C语言一样，将数组名视为指针。第4章说过，C++将数组名解释为第一个元素的地址，是个常量。
+- 该规则的一些例外：
+	- 数组声明使用数组名标记存储位置
+	- 对数组名只有sizeof将得到整个数组的长度（以字节为单位）
+	- 如第4章指出，将地址运算符&用于数组名时，将返回整个数组的地址，例如&cookies将返回一个32字节内存块的地址（如果int长4字节
+- 在C++中，当且仅当用于函数头和函数原型中，int* arr 和int arr[ ]的含义才是相同的。数组表示法(int arr[])提示用户，arr不仅指向int，还指向int数组的第一个int。
+- 当指针指向数组的第一个元素时，本书使用数组表示法；当指针指向一个独立的值时，使用指针表示法
+- 在其他上下文中,int* arr 和int arr[ ]的含义并不相同。例如，不能在函数体中使用int tip[ ] 来声明指针
+```C++
+arr[i] = *(ar + i);
+&arr[i] = ar + i;
+```
 
-
-
-
-
+### 7.3.1 将数组作为参数意味着什么
 
 
 
