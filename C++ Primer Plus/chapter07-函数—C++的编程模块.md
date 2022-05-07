@@ -91,7 +91,7 @@ double cube(double x)
 ## 7.2 函数参数和按值传递
 - C++通常按值传递参数，这意味着将数值参数传递给函数，而后者将其赋值给一个新的变量。
 - 用于接收传递值的变量称为形参。传递给函数的值被称为实参。
-- 处于标准化的目的，C++标准使用参数(argument)来表示实参，使用参量(parameter)来表示形参，因此参数传递，将parameter赋给argument。
+- [ ] 处于标准化的目的，C++标准使用argument来表示实参(actural argument)，使用parameter来表示形参(formal argument)，因此参数传递，将argument传给parameter。（书上这里是不是错了？）
 ### 7.2.1 多个参数
 ```C++
 // 7.3 twoarg.cpp -- a function with 2 arguments
@@ -210,7 +210,210 @@ arr[i] = *(ar + i);
 &arr[i] = ar + i;
 ```
 
-### 7.3.1 将数组作为参数意味着什么
+### 7.3.2 将数组作为参数意味着什么
+- 如果数组很大，拷贝数组的开销非常大，还需要更多的计算机内存，所以传递地址是个好事。
+```C++
+// 7.6 arrfun2.cpp -- functions with an array argument
+#include <iostream>
+const int ArSize = 8;
+int sum_arr(int arr[], int n);
+// use std:: instead of using derective
+int main()
+{
+	int cookies[ArSize] = { 1, 2, 4, 8, 16, 32, 64, 128 };
+
+	std::cout << cookies << " = array address, "; 
+	std::cout << sizeof cookies << " = sizeof cookies\n";  // cookies是int类型指针常量
+
+	int sum = sum_arr(cookies, ArSize);
+	std::cout << "Total cookies eaten: " << sum << std::endl;
+	sum = sum_arr(cookies, 3);
+	std::cout << "First three eaters ate " << sum << std::endl;
+	sum = sum_arr(cookies+4, 4); // same as sum_arr(&a[4], 4);
+	std::cout << "Last four eaters ate " << sum << std::endl;
+	return 0;
+}
+
+int sum_arr(int arr[], int n)  // int sum_arr(int* arr, int n)
+{
+	int total = 0;
+
+	std::cout << arr << " = arr, ";  // arr是一个int类的指针变量
+	std::cout << sizeof arr << " = sizeof arr\n";
+	
+	for (int i = 0; i < n; i++)
+		total += arr[i];
+	return total;
+}
+```
+- cookies与arr的sizeof值不同也解释了，为什么必须显式传递数组长度，而不能在sum_arr()中使用sizeof arr的原因：指针本身没有指出数组长度。
+- [ ] 使用原始数据增加了破坏数据的风险？&引用？
+
+### 7.3.3 更多数组函数示例
+- 确保显式数组的函数不修改数组，可在形参声明时使用关键字const。这意味着指针ar指向的是常量数据，意味着不能修改该数据
+
+```C++
+// 7.7 arrfun3.cpp -- array functions and const
+#include <iostream>
+const int Max = 5;
+int fill_array(double ar[], int limit);
+void show_array(const double ar[], int n);
+void revalue(double r, double ar[], int n);
+using namespace std;
+
+int main()
+{
+	double properties[Max];
+	int size = fill_array(properties, Max);
+	show_array(properties, size);
+
+	if (size > 0)
+	{
+		cout << "Enter revaluation factor: ";
+		double factor;
+		while (!(cin >> factor))  // bad input
+		{
+			cin.clear();
+			while (cin.get() != '\n')
+				continue;
+			cout << "Bad input; Please enter a number: ";
+		}
+		revalue(factor, properties, size);
+		show_array(properties, size);
+	}
+	cout << "Done.\n";
+	return 0;
+}
+
+int fill_array(double ar[], int limit)
+{
+	double temp;
+	int i;
+	for (i = 0; i < limit; i++)
+	{
+		cout << "Enter value #" << i + 1 << ": ";
+		cin >> temp;
+		if (!cin)
+		{
+			cin.clear();
+			while (cin.get() != '\n')
+				continue;
+			cout << "Bad input; input process terminated.\n";
+			break;
+		}
+		else if (temp < 0)  // signal to terminate
+			break;
+		ar[i] = temp;
+	}
+	return i;
+}
+
+void show_array(const double ar[], int n)
+{
+	for (int i = 0; i < n; ++i)
+	{
+		cout << "Property #" << i + 1 << ": $";
+		cout << ar[i] << endl;
+	}
+}
+
+// multiplies each element of ar[] by r
+void revalue(double r, double ar[], int n)
+{
+	for (int i = 0; i < n; i++)
+		ar[i] *= r;
+}
+```
+
+### 7.3.4 使用数组区间的函数
+- 另一种给函数提供所需信息的方法，即指定元素区间(range)，这可以通过传递两个指针来完成：一个指针标识数组开头，另一个指针标识数组的尾部。
+- STL方法使用“超尾”概念来指定区间（STL将在第16章介绍）
+
+```C++
+// 7.8 arrfun4.cpp -- functions with an array range
+#include <iostream>
+const int ArSize = 8;
+int sum_arr(const int* begin, const int* end);
+
+int main()
+{
+	int cookies[ArSize] = { 1, 2, 4, 8, 16, 32, 64, 128 };
+
+	// cookies + ArSize指向区间中最后一个元素后面的一个位置
+	int sum = sum_arr(cookies, cookies + ArSize);
+	std::cout << "Total cookies eaten: " << sum << std::endl;
+	sum = sum_arr(cookies, cookies + 3);
+	std::cout << "First three eaters ate " << sum << std::endl;
+	sum = sum_arr(cookies + 4, cookies + 8);
+	std::cout << "Last four eaters ate " << sum << std::endl;
+	return 0;
+}
+
+int sum_arr(const int* begin, const int* end)  // int sum_arr(int* arr, int n)
+{
+	const int* pt;
+	int total = 0;
+
+	for (pt = begin; pt != end; pt++)
+		total += *pt;
+	return total;
+}
+```
+- 根据指针减法规则，在sum_arr()中，表达式end-begin是一个整数值，等于数组的元素数目
+
+### 7.3.5 指针和const
+- 可以用两种不同的方式将const关键字用于指针
+	- 1.让指针指向一个常量对象，可防止用指针修改指向的值
+	- 2.将指针本身声明为常量，以防止改变指针指向的位置
+
+```C++
+int age = 39;  
+const int * pt = &age;  // 
+// pt的声明并不意味着它指向的值实际上就是一个常量，而只是意味着对pt而言，这个值是常量。
+// pt指向age，而age不是const。可以直接通过age变量来修改age的值，但不能使用pt指针来修改它
+```
+
+- 还有两种可能：
+	- 1.将const变量的地址赋给指向const的指针（可行）
+	- 2.const的地址赋给常规指针（不可行） 
+```C++
+const float g_earth = 9.80;
+const float * pe = &g_earth;  // VALID
+
+const float g_moon = 1.63;
+float * pm = &g_moon;  // INVALID
+```
+- C++禁止第二种情况的原因很简单——如果将g——moon的地址赋给pm，则可以使用pm来修改g_moon的值，这使得g_moon的const状态很荒谬，因此C++禁止将const的地址赋给非const指针。
+- 如果读者非要这样做，可以使用强制类型转换来突破这种限制，第15章讨论对运算符const_cast
+
+#### 多重指针
+- 如果将指针指向指针，情况更复杂。假如涉及的是一级间接关系，则将非const指针赋给const指针是可以的
+```C++
+int age = 39;  // age++ is a valid operation
+int * pd = &age;  // *pd = 41 is a valid operation
+const int* pt = pd;  // *pt = 42 is an invalid operation
+```
+- 然而，进入两级间接关系时，与一级间接关系一样将const和非const混合的指针赋值方式将不再安全。如果允许这样做，则可以编写这样的代码：
+```C++
+const int **pp2;
+int *p1;
+const int n = 13;
+pp2 = &p1;  // not allowed, but suppose it were
+*pp2 = &n;  // valid, both const, but sets p1 to point at n
+*p1 = 10;  // valid, but chages const n
+```
+- [ ] 上述代码将非const地址（&p1）赋给了const指针（pp2）,因此可以使用p1来修改const数据。仅当只有一层间接关系（如指针指向基本数据类型）时，才可以将非const地址或指针赋给const指针。
+- [ ] 这一部分略，没看懂，看视频讲吧
+
+
+
+
+
+
+
+
+
+
 
 
 
