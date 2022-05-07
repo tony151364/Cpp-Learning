@@ -955,22 +955,112 @@ int main()
 
 - 7
 ```C++
+#include <iostream>
+#include <string>
+using namespace std;
+struct car {
+	string producer;  // 生产商
+	int year;  // 生产年份
+};
+int main()
+{
+	int Size = 0;
+	cout << "How many cars do you wish to catalog? ";
+	cin >> Size;
+	car* cars = new car [Size];
+	cin.get();  // eat '\n'
+	for (int i = 0; i < Size; ++i)
+	{
+		cout << "Car #" << i + 1 << endl;
+		cout << "Please enter the make: ";
+		getline(cin, cars[i].producer);
+		//cin >> cars[i].producer;
 
+		cout << "Please enter the year made: ";
+		cin >> cars[i].year;
+		cin.get();  // eat '\n' 
+	}
+
+	cout << "Here is your collection:\n";
+	for (int i = 0; i < Size; ++i)
+		cout << cars[i].year << " " << cars[i].producer << endl;
+	
+	delete[] cars;
+	return 0;
+}
 ```
 
 - 8
 ```C++
+#include <iostream>
+#include <cstring>
+const int ArSize = 20;
 
+int main()
+{
+	using namespace std;
+	char word[ArSize];
+	int n = 0;
+	
+	cout << "Enter words (to stop, type the word done):" << endl;
+	cin >> word;
+	while (strcmp(word, "done") != 0)
+	{
+		++n;
+		cin >> word;
+	}
+
+	cout << "You entered a total of "<< n << " words" << endl;
+	return 0;
+}
 ```
 
 - 9
 ```C++
+#include <iostream>
+#include <string>
 
+int main()
+{
+	using namespace std;
+	string word;
+	int n = 0;
+	
+	cout << "Enter words (to stop, type the word done):" << endl;
+	cin >> word;
+	while (word != "done")
+	{
+		++n;
+		cin >> word;
+	}
+
+	cout << "You entered a total of "<< n << " words" << endl;
+	return 0;
+}
 ```
 
 - 10
 ```C++
+#include <iostream>
 
+
+int main()
+{
+	using namespace std;
+	int i, j, n;
+	cout << "Enter number of rows:";
+	cin >> n;
+	
+	for (i = 1; i <= n; ++i)
+	{
+		for (j = n - i; j > 0; --j)
+			cout << ".";
+		for (j = i; j > 0; --j)
+			cout << "*";
+		cout << endl;
+	}
+	return 0;
+}
 ```
 
 
