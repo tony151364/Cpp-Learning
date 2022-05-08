@@ -19,14 +19,63 @@
 	- long long至少64位，且至少与long一样长
 - **sizeof是一个运算符**，因为你可以这样使用： 
 ```C++
-int n_int = 0;
+int n_int = 0;  // n_int(0);  n_int{0};  n_int = {0};
 cout << sizeof(int) << endl;  // 类型必须加括号
 cout << sizeof n_int << endl;  // 变量加不加都无所谓
 ```
 ### 3.1.4 无符号类型
 - 可以使用头文件climits来确定限制情况
 
+### 3.1.5 选择数据类型
+- 通常，int被设置为对目标计算机而言最“自然”的长度。自然长度(natural size)指的是计算机处理起来效率最高的长度。
+
+### 3.1.6 整型字面量
+```C++
+// 3.3 hexoct1.cpp -- shows hex and octal literals
+#include <iostream>
+using namespace std;
+int main()
+{
+	int chest = 42;
+	int waist = 0x42;
+	int inseam = 042;
+
+	cout << "chest = " << chest << " (42 in decimal)" << endl;
+	cout << "waist = " << waist << " (0x42 in hexadecimal)" << endl;
+	cout << "inseam = " << inseam << " (042 in octal)" << endl;
+	return 0;
+}
+```
+
+```C++
+// 3.4 hexoct2.cpp -- display values in hex and octal
+#include <iostream>
+using namespace std;
+int main()
+{
+	int chest = 42;
+	int waist = 42;
+	int inseam = 42;
+
+	cout << "chest = " << chest << " (decimal for 42)" << endl;
+	// 修改cout显示帧数的方式。hex位于名称空间std中，使用了using namespace std;后不能当做变量。不使用名称空间时可以用作变量。
+	cout << hex;  
+	cout << "waist = " << waist << " (hexadecimal for 42)" << endl;
+	cout << oct;
+	cout << "inseam = " << inseam << " (octal for 42)" << endl;
+	return 0;
+}
+```
+### 3.1.7 C++如何确定常量的类型
+- 除非有理由存储为其他类型（如使用了特殊的后缀来表示特定的类型，或者值太大，不能存储为int），一般都存储为int类型。20000存储为int，40000存储为long类型
+
+```
+unsigned long 后缀：LU, UL
+unsigned long long 后缀：ull, uLL, Ull, ULL
+```
+
 ### 3.1.8 char类型：字符和小整数
+- char也是一种整型，专门为存储字符而设计，任何一个字符都会对应一个整数。在内存中，也是用整数存储的，只是读取(cin)和打印(cout)的时候会做转换.
 ```C++
 // 3.6 morechar.cpp -- the char type and int type contrasted
 #include <iostream>
