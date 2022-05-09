@@ -779,7 +779,29 @@ while ((ch = cin.get()) != 'Q')
 ## 6.11 编程练习
 - 1
 ```C++
+#include <iostream>
+#include <cctype>
 
+int main()
+{	
+	using namespace std;
+	char ch;
+
+	while ((ch = cin.get()) != '@')
+	{
+		if (islower(ch))  // islower
+			cout << char(toupper(ch));
+		else if (isupper(ch))  // isUpper
+			cout << char(tolower(ch));
+		else if (ch == '\n')
+			cout << endl;
+		else
+			continue;
+	}
+
+	cout << "Program terminated!" << endl;;
+	return 0;
+}
 ```
 - 2
 ```C++
@@ -787,6 +809,37 @@ while ((ch = cin.get()) != 'Q')
 ```
 - 3
 ```C++
+#include <iostream>
+#include <cctype>
+#include <array>
+using namespace std;
+const int ArSize = 10;
+
+int main()
+{	
+	array<double, ArSize> nums;
+	double donation, sum = 0;
+	int i = 0;
+	cout << "Enter a maximum of 10 numbers: ";
+	while (cin >> donation)
+	{
+		cout << "donation: " << donation << endl;
+		nums[i++] = donation;
+		sum += donation;
+	}
+
+	double average = 0;
+	int count = 0;
+	if (i > 0)
+	{
+		average = sum / i;
+		for (int j = 0; j < i; ++j)
+			if (nums[i] > average)
+				++count;
+	}
+	cout << "Average: " << average << ", nums: " << i << endl;
+	return 0;
+}
 
 ```
 - 4
