@@ -19,9 +19,47 @@
 	- long long至少64位，且至少与long一样长
 - **sizeof是一个运算符**，因为你可以这样使用： 
 ```C++
-int n_int = 0;  // n_int(0);  n_int{0};  n_int = {0};
-cout << sizeof(int) << endl;  // 类型必须加括号
-cout << sizeof n_int << endl;  // 变量加不加都无所谓
+// 3.1 
+#include <iostream>
+#include <climits>
+
+int main()
+{
+	using namespace std;
+
+	int n = 0;  // n_int(0);  n_int{0};  n_int = {0};
+	int n_int = INT_MAX;
+	unsigned u_int = UINT32_MAX;
+	short n_short = SHRT_MAX;
+	long n_long = LONG_MAX;
+	long long n_llong = LLONG_MAX;
+
+	cout << "n = " << n << endl;
+
+	cout << "int is " << sizeof(int) << " bytes" << endl;  // 类型必须加括号
+	cout << "int is " << sizeof n_int << " bytes" << endl;  // 变量加不加都无所谓
+	cout << "short is " << sizeof(short) << " bytes" << endl;
+	cout << "long is " << sizeof(long) << " bytes" << endl;
+	cout << "long is " << sizeof(long long) << " bytes" << endl;
+	
+	cout << "short max: " << n_short << endl;
+	cout << "int max: " << n_int << endl;
+	cout << "unsigned int max: " << u_int << endl;
+	cout << "long max: " << n_long << endl;
+	cout << "long long max: " << n_llong << endl;
+	return 0;
+}
+/*
+int is 4 bytes
+short is 2 bytes
+long is 4 bytes
+long is 8 bytes
+short max: 32767
+int max: 2147483647
+unsigned int max: 4294967295
+long max: 2147483647
+long long max: 9223372036854775807
+*/
 ```
 ### 3.1.4 无符号类型
 - 可以使用头文件climits来确定限制情况
@@ -300,11 +338,40 @@ auto z = 0;  // opps, z is int because 0 is int
 - 整型之间通过存储值时使用的内存量及有无符号来区分。
 
 ## 3.6 复习题
-- 2.c 存储值为3000000000的整数？
-- 3.C++提供什么措施来防止超过整型的范围？
-- 5.下面两条C++语句是否等价？
-- 8. 3 / 4 * 6 结果是多少？
-- 10.d
+```C++
+// 1.相应的数据类型配合相应的数据运算
+/* 2. 
+int is 4 bytes
+short is 2 bytes
+long is 4 bytes
+long long is 8 bytes
+short max: 32767
+int max: 2147483647
+unsigned int max: 4294967295
+long max: 2147483647 （有点系统4字节，有的系统8字节）
+long long max: 9223372036854775807
+c：先明确int 、long、long long的最大值是多少； unsigned int c = 3000000000; unsigned long c = 3000000000;
+*/
+// 3.C++没有提供自动防止超出整数类型范围的功能，需要程序员自己预估数据大小并选择合适的数据类型
+// 4.C++在不超出int类型的范围情况下，默认优先使用int类型
+	33：int类型
+	33L：以long类型来存储整数常量
+// 5.在ASCII下，两者等价。但是 char grade = 65; 先将65存储为int类型，然后再将int转换为char。char grade = 'A'则不需要这样的转换
+// 6. 
+	char ch = 88; 
+	cout << ch << endl;
+	cout << (char)88 << endl;  // cout << char(88) << endl;
+// 7. 如果long是4字节，则存放入double不会出现舍入误差
+      long long 若为8字节，存入double会出现舍入误差
+// 8. 
+	6 * 3 / 4 = 4
+	3 / 4 * 6  = 0
+	6.0 * 3 / 4 = 4.5
+// 9. 
+int sum = (int)x1 + (int)x2;  // int sum2 = int(x1) + int(x2);
+int sum = int(x1 + x2);
+// 10. fract -> double
+```
 ##   3.7 编程练习
 - 3
 ```C++
@@ -319,12 +386,8 @@ int main()
 
 	cout << "First, enter the degrees: " ;
 	cin >> degree;
-
-
 	cout << "Next, enter the minuetes of arc: ";
 	cin >> minute;
-	
-
 	cout << "Finally, enter the seconds of arc: ";
 	cin >> second;
 	
@@ -345,14 +408,29 @@ const int MINUTE_SECONDS = 60;
 
 int main()
 {
+	unsigned long long seconds;
+	unsigned int days, hours, minutes, new_seconds;
 	cout << "Enter the number of seconds:";
-	long seconds;
 	cin >> seconds;
-	cout << seconds << " seconds = " 
-		<< seconds / (DAY_HOURS * HOUR_MINUTES * MINUTE_SECONDS)<< " days, " 
-		<< (seconds / (HOUR_MINUTES * MINUTE_SECONDS)) % 24 << " hours, " 
-		<< (seconds / MINUTE_SECONDS) % HOUR_MINUTES <<" minutes, " 
-		<< seconds % MINUTE_SECONDS << " seconds" << endl;
+
+	days = seconds / (DAY_HOURS * HOUR_MINUTES * MINUTE_SECONDS);
+	hours = (seconds / (HOUR_MINUTES * MINUTE_SECONDS)) % DAY_HOURS;
+	minutes = (seconds / MINUTE_SECONDS) % HOUR_MINUTES;
+	new_seconds = seconds % MINUTE_SECONDS;
+	/*另一种思路，类似循环，seconds的值会改变。
+	days = seconds / (DAY_HOURS * HOUR_MINUTES * MINUTE_SECONDS);
+	seconds = seconds % (DAY_HOURS * HOUR_MINUTES * MINUTE_SECONDS);
+
+	hours = seconds / (HOUR_MINUTES * MINUTE_SECONDS);
+	seconds = seconds % (HOUR_MINUTES * MINUTE_SECONDS);
+
+	minutes = seconds / MINUTE_SECONDS
+	seconds = seconds % MINUTE_SECONDS;
+	*/
+
+	cout << seconds << " seconds = " << days<< " days, "
+		<< hours << " hours, "<< minutes << " minutes, "
+		<< new_seconds << " seconds" << endl;
 	return 0;
 }
 ```
