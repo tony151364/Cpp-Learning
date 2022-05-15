@@ -446,6 +446,154 @@ ar2 + r  // 第r行的首地址
 - 前面介绍的大部分有关设计数组函数的知识也适用于字符串函数。如，将字符串作为参数时，意味着传递的是地址，但可以使用const类禁止对字符串参数进行修改。
 
 ### 7.5.1 将C-风格字符串作为参数的函数
+- 将字符串作为参数传递给函数，表示字符串的方式有三种：
+	- char 数组
+	- 用引号括起的字符串常量（也称字符串字面值）
+	- 被设置为字符串的地址的char指针
+- 上述3种类型都是char指针(char * )，因此可以将其作为字符串处理函数的参数。
+
+```C++
+// 7.9 strfun.cpp -- function with a string argument
+#include <iostream>
+unsigned int c_in_str(const char* str, char ch);
+
+int main()
+{
+	using namespace std;
+	char mmm[15] = "minmum";
+	const char* wail = "ululate"; 
+	
+	unsigned int ms = c_in_str(mmm, 'm');
+	unsigned int us = c_in_str(wail, 'u');
+	cout << ms << " m characters in " << mmm << endl;
+	cout << us << " u characters in " << wail << endl;
+	return 0;
+}
+
+unsigned int c_in_str(const char* str, char ch)
+{
+	unsigned int count = 0;
+
+	while (*str)
+	{
+		if (*str == ch)
+			count++;
+		str++;
+	}
+	return count;
+}
+```
+### 7.5.2 返回C-风格字符串的函数
+```C++
+// 7.10 strgback.cpp -- a function that returns a pointer to char
+#include <iostream>
+char* buildstr(char c, int n);
+
+int main()
+{
+	using namespace std;
+	int times;
+	char ch;
+
+	cout << "Enter a character: ";
+	cin >> ch;
+	cout << "Enter a interger: ";
+	cin >> times;
+
+	char* ps = buildstr(ch, times);
+	cout << ps << endl;
+	delete[] ps;
+
+	ps = buildstr('+', 20);
+	cout << ps << "-DONE-" << ps << endl;
+	delete[] ps;
+	return 0;
+}
+
+char* buildstr(char c, int n)
+{
+	char* pstr = new char[n + 1];
+	pstr[n] = '\0';
+	while (n-- > 0)
+		pstr[n] = c;
+	return pstr;
+}
+```
+- buildstr中是为了额外的变量
+```C++
+// 从前向后填充
+int i = 0;
+while (i < n)
+	pstr[i++] = c;
+```
+- 这种设计（让函数返回一个指针，该指针指向new分配的内存）的**缺点**是，程序员必须记住使用delete。
+
+## 7.6 函数和结构
+- 在涉及到函数时，结构变量的行为更接近于基本的单值变量。也就是说，与数组不同，结构将其数据组合成单个实体或数据对象，该实体被视为一个整体。
+- 前面讲过，可以将一个结构赋给另外一个结构。同样，也可以按值传递结构，就像普通变量那样。
+- 另外，函数也可以返回结构。与数组名就是数组第一个元素的地址不同的是，结构名只是结构的名称，要获得结构的地址，必须使用地址运算符&。C++还使用该运算符表示引用，这将在第8章讨论。
+- 按值传递结构有个**缺点**：如果结构非常大，则复制结构将增加内存要求，降低系统运行的速度。
+	- C语言倾向传递结构的地址。
+	- C++提供第三种方式——按引用传递（第8章介绍）
+	- 下面介绍前两种
+
+
+### 7.6.1 传递和返回结构
+-当结构比较小时，按值传递最合理。
+```C++
+// 7.11 travel.cpp -- using structures with functions
+#include <iostream>
+struct travel_time
+{
+	int hours;
+	int minutes;
+};
+const int Mins_per_hr = 60;
+
+travel_time sum(travel_time t1, travel_time t2);
+void show_time(travel_time t);
+
+int main()
+{
+	using namespace std;
+	travel_time day1 = { 5, 45 };
+	travel_time day2 = { 4, 55 };
+
+	travel_time trip = sum(day1, day2);
+	cout << "Two-day total: ";
+	show_time(trip);
+
+	travel_time day3 = { 4, 22 };
+	cout << "Three-day total: ";
+	show_time(sum(trip, day3));
+
+	return 0;
+}
+
+travel_time sum(travel_time t1, travel_time t2)
+{
+	travel_time total;
+	
+	total.minutes = (t1.minutes + t2.minutes) % Mins_per_hr;
+	total.hours = t1.hours + t2.hours +
+				 (t1.minutes + t2.minutes) / Mins_per_hr;
+	return total;
+}
+
+void show_time(travel_time t)
+{
+	using namespace std;
+	cout << t.hours << " hours, "
+		<< t.minutes << " minutes\n";
+}
+```
+- 这行很妙：``` show_time(sum(trip, day3)); ```
+
+### 7.6.2 另一个处理结构函数的实例
+```C++
+
+```
+
 
 
 
