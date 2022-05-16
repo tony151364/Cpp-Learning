@@ -591,23 +591,253 @@ void show_time(travel_time t)
 
 ### 7.6.2 另一个处理结构函数的实例
 ```C++
+// 7.12 strctfun.cpp -- function with a structure argument
+#include <iostream>
+#include <cmath>
+using namespace std;
+struct polar
+{
+	double distance;
+	double angle;
+};
+struct rect
+{
+	double x;
+	double y;
+};
 
+polar rect_to_polar(rect xypos);
+void show_polar(polar dapos);
+
+int main()
+{
+	rect rplace;
+	polar pplace;
+
+	cout << "Enter the x and y values: ";
+	while (cin >> rplace.x >> rplace.y)
+	{
+		show_polar(rect_to_polar(rplace));
+		cout << "Next two numbers (q to qiut): ";
+	}
+	cout << "Done.\n";
+	return 0;
+}
+
+// convert rectangular to polar coordinates
+polar rect_to_polar(rect xypos)
+{
+	polar answer;
+
+	answer.distance =
+		sqrt(xypos.x * xypos.x + xypos.y * xypos.y);
+
+	answer.angle = atan2(xypos.y, xypos.x);  // 根据x,y的值计算角度
+	return answer;
+}
+
+void show_polar(polar dapos)
+{
+	const double Rad_to_deg = 57.29577951;  // 180/π,用于弧度转角度
+
+	cout << "distance = " << dapos.distance;
+	cout << ", angle = " << dapos.angle * Rad_to_deg;
+	cout << " degrees\n";
+}
+```
+- 如果程序在输入循环后还需要进行输入，则必须使用cin.clear()重置输入，然后还需要读取不合法的输入来丢弃它们。程序7.7演示了这种技术。
+```C++
+for (i = 0; i < limit; i++)
+{
+	cout << "Enter value #" << i + 1 << ": ";
+	cin >> temp;
+	if (!cin)  // cin is false
+	{
+		cin.clear();
+		while (cin.get() != '\n')
+			continue;
+		cout << "Bad input; input process terminated.\n";
+		break;
+	}
+	else if (temp < 0)  // signal to terminate
+		break;
+}
 ```
 
+### 7.6.3 传递结构的地址
+- 将前面函数进行修改
+	- 将形参声明为指向poplar的指针，即polar* 型。
+	- 由于函数不应该修改结构，因此使用const修饰符。
+	- 使用间接成员运算符(->)
 
+```C++
+// 7.13 trctptrcpp -- function with pointer to structure arguments
+#include <iostream>
+#include <cmath>
+using namespace std;
+struct polar
+{
+	double distance;
+	double angle;
+};
+struct rect
+{
+	double x;
+	double y;
+};
 
+void rect_to_polar(const rect* pxy, polar* pda);
+void show_polar(const polar* dapos);
 
+int main()
+{
+	rect rplace;
+	polar pplace;
 
+	cout << "Enter the x and y values: ";
+	while (cin >> rplace.x >> rplace.y)
+	{
+		rect_to_polar(&rplace, &pplace);
+		show_polar(&pplace);
+		cout << "Next two numbers (q to qiut): ";
+	}
+	cout << "Done.\n";
+	return 0;
+}
 
+// convert rectangular to polar coordinates
+void rect_to_polar(const rect* pxy, polar* pda)
+{
+	pda->distance =
+		sqrt(pxy->x * pxy->x + pxy->y * pxy->y);
 
+	pda->angle = atan2(pxy->y, pxy->x);  // 根据x,y的值计算角度
+}
 
+void show_polar(const polar* dapos)
+{
+	const double Rad_to_deg = 57.29577951;  // 180/π,用于弧度转角度
 
+	cout << "distance = " << dapos->distance;
+	cout << ", angle = " << dapos->angle * Rad_to_deg;
+	cout << " degrees\n";
+}
+```
 
+## 7.7 函数和string对象
+- 与char数组相比，string对象与结构更相似。如，可以将一个结构赋给另一个结构，也可以将一个对象赋给另一个对象。可以将结构作为完整的实体传递给函数，也可以将对象作为完整的实体进行传递。
+- 如果需要多个字符串，可以声明一个string对象数组，而不是二维char数组。
+```C++
+// 7.14 topfive.cpp -- handing an array of string objects
+#include <iostream>
+#include <string>
+using namespace std;
+const int SIZE = 5;
+void display(const string sa[], int n);
+int main()
+{
+	string list[SIZE];
+	
+	cout << "Enter your " << SIZE << " favorite astronimical sights:\n";
+	for (int i = 0; i < SIZE; ++i)
+	{
+		cout << i + 1 << ": ";
+		getline(cin, list[i]);
+	}
 
+	cout << "Your list:\n";
+	display(list, SIZE);
 
+	return 0;
+}
 
+void display(const string sa[], int n)
+{
+	for (int i = 0; i < n; ++i)
+		cout << i + 1 << ": " << sa[i] << endl;
+}
+```
+- 除了getline()外，该程序像对待内置类型（如int）一样对待string，如声明、赋值、打印。
 
+## 7.8 函数与array对象
+- 在C++中，类对象是基于结构的，因此结构编程方面的有些考虑因素也适用于类。例如，可按值将对象传递给函数，这时函数处理的是院士对象的副本。另外，也可传递指向对象的指针，这让函数能直接操作原始对象。
+- 使用array需要包含头文件array，而名词array位于名称空间std中。
+- 注意：模板array并非只能存储基本数据类型，它还可存储类对象。
 
+```C++
+// 7.15 arrobj.cpp -- functions with array objects (C++11)
+#include <iostream>
+#include <array>
+#include <string>
+// constant data
+const int Seasons = 4;
+// const arrya对象，包含四个string对象
+const std::array<std::string, Seasons> Snames =
+{ "Spring", "Summer", "Fall", "Winter" };
+
+void fill(std::array<double, Seasons>* pa);
+void show(std::array<double, Seasons> da);
+
+int main()
+{
+	std::array<double, Seasons> expenses;
+	fill(&expenses);
+	show(expenses);
+	return 0;
+}
+
+void fill(std::array<double, Seasons>* pa)
+{
+	using namespace std;
+	for (int i = 0; i < Seasons; ++i)
+	{
+		cout << "Enter " << Snames[i] << " expenses: ";
+		cin >> (*pa)[i];  // pa[i]不对，cin传递给变量而不是地址
+	}
+}
+
+void show(std::array<double, Seasons> da)
+{
+	using namespace std;
+	double total = 0.0;
+	cout << "\nEXPENSES\n";
+	for (int i = 0; i < Seasons; i++)
+	{
+		cout << Snames[i] << ": $" << da[i] << endl;
+		total += da[i];
+	}
+	cout << "Total Expenses: $" << total << endl;
+}
+```
+- 对于``` cin >> (*pa)[i];  ```，pa是一个指向array<double, 4>对象的指针，因此\*pa为该对象，而(\*pa)[i]是该对象的第i+1个元素。由于优先级的影响，括号必不可少。这种方式逻辑简单，但增加了犯错的机会。
+
+## 7.9 递归
+- 与C语言不同，C++不允许main()调用自己
+
+### 7.9.1 包含一个递归调用的递归
+```C++
+// 7.16 recur.cpp
+#include <iostream>
+void countdown(int n);
+using namespace std;
+
+int main()
+{
+	countdown(4);
+	return 0;
+}
+
+void countdown(int n)
+{
+	cout << "Counting down ..." << n << " (n at " << &n << ")" << endl;
+	if (n > 0)
+		countdown(n - 1);  // function calls itself
+	cout << n << ": Kaboom!" << "\t  " << " (n at " << &n << ")" << endl;
+}
+```
+- ↑太妙了！几行代码把递归说的清清楚楚！
+- 注意：每个n都是一个独立的变量，它们有不同的地址
+### 7.9.2 包含多个递归调用的递归
 
 
 
