@@ -1006,11 +1006,92 @@ const double *(*(*pd)[3])(const double *, int ) = &pa;  // ???
 	- 差别1：pa+1为数组中下一个元素，而&pa + 1为pa后面一个12字节内存块的地址（假定3个元素，每个4字节）
 	- 差别2：要得到一个元素的值，对pa解除引用1次，而&pa需要2次。``` **&pa == *pa == pa[0] ```
 ```C++
+// 7.19 arfupt.cpp -- an array of function pointers
+#include <iostream>
+using namespace std;
+const double* f1(const double ar[], int n);
+const double* f2(const double[], int);
+const double* f3(const double*, int);
+
+int main()
+{
+	double av[3] = { 1112.3, 1542.6, 2227.9 };
+
+	// 1.函数指针及其使用
+	const double* (*p1)(const double*, int) = f1;
+	auto p2 = f2;  // C++11 automatic type deduction
+	// pre-C++11 can use the following code instead
+	// const double *(*p2)(const double *, int) = f2;
+	cout << "Using pointers to functions:\n";
+	cout << "Address Value\n";
+	cout << (*p1)(av, 3) << ": " << *(*p1)(av, 3) << endl;
+	cout << p2(av, 3) << ": " << *p2(av, 3) << endl;
+
+	// 2.函数指针数组及其使用
+	const double* (*pa[3])(const double*, int) = { f1, f2, f3 };
+	auto pb = pa;
+	// pre-C++11 can use the following code instead
+	// const double *(**pb)(const double *, int) = pa;
+	cout << "\nUsing an array of pointers to functions:\n";
+	cout << " Address Value\n";
+	for (int i = 0; i < 3; i++)
+		cout << pa[i](av, 3) << ": " << *pa[i](av, 3) << endl;
+
+	// 3.指向函数指针的指针
+	cout << "\nUsing a pointer to a pointer to a function:\n";
+	cout << " Address Value\n";
+	for (int i = 0; i < 3; i++)
+		cout << pb[i](av, 3) << ": " << *pb[i](av, 3) << endl;
+	
+	// 4.指向函数指针数组的指针
+	cout << "\nUsing a pointer to an array to a function pointers:\n";
+	cout << " Address Value\n";
+	auto pc = &pa;
+	// pre-C++11 can use the following code instead
+	// const double *(*(*pc)[3])(const double *, int) = &pa;
+	cout << (*pc)[0](av, 3) << ": " << *(*pc)[0](av, 3) << endl;
+	const double* (*(*pd)[3])(const double*, int) = &pa;
+	// store return value in pdb
+	const double* pdb = (*pd)[1](av, 3);
+	cout << pdb << ": " << *pdb << endl;
+	// alternative notation
+	cout << (*(*pd)[2])(av, 3) << ": " << *(*(*pd)[2])(av, 3) << endl;
+
+
+	return 0;
+}
+
+const double* f1(const double * ar, int n)
+{
+	return ar;
+}
+
+const double* f2(const double ar[], int n)
+{
+	return ar + 1;
+}
+
+const double* f3(const double ar[], int n)
+{
+	return ar + 2;
+}
 
 ```
+- 指向函数的指针并不少见。实际上，类的虚方法实现通常都采用了这种技术（参见第13章）。所幸的是，这些细节由编译器处理。
+- auto有一个潜在缺点。自动类型推断确保变量的类型与赋给它的初值的类型一致，但您提供的初值的类型可能不对：``` auto pc = *pa;  // oops! used *pa instead of &pa``` ...也没懂???
+- [ ] 真TM头疼，难理解
 
+### 7.10.4 使用typedef进行简化
+- typedef能够让你创建类型的别名。减少输入量，让您编写代码时不容易犯错，让程序更容易理解。
+```C++
+typedef double real;  // make real another name for double
 
-
+// 用p_fun声明为程序7.19使用的函数指针类型起别名
+typedef const double *(*p_fun)(const double *, int);  // p_fun now a type name
+p_fun p1 = f1;  // p1 points to the f1() function
+// 然后使用这个别名来简化代码
+p_fun pa[3] = {f1, f2, f3};  // 包含3个元素的函数指针数组
+p_fun (*pd)[3] = &pa;  /// 指向上面这个函数指针数组
 
 
 
