@@ -838,6 +838,184 @@ void countdown(int n)
 - ↑太妙了！几行代码把递归说的清清楚楚！
 - 注意：每个n都是一个独立的变量，它们有不同的地址
 ### 7.9.2 包含多个递归调用的递归
+```C++
+// 7.17 ruler.cpp -- using recusion to subdivide a ruler
+#include <iostream>
+using namespace std;
+const int Len = 66;
+const int Divs = 6;
+void subdivide(char ar[], int low, int high, int level);
+
+int main()
+{
+	char ruler[Len];
+	int i;
+	for (i = 1; i < Len - 2; ++i)
+		ruler[i] = ' ';
+	ruler[Len - 1] = '\0';
+
+	int max = Len - 2;
+	int min = 0;
+	ruler[min] = ruler[max] = '|';
+	cout << ruler << endl;
+	for (i = 1; i <= Divs; i++)
+	{
+		subdivide(ruler, min, max, i);
+		cout << ruler << endl;
+		for (int j = 1; j < Len - 2; j++)
+			ruler[j] = ' ';  // reset to blank ruler
+	}
+	return 0;
+}
+
+void subdivide(char ar[], int low, int high, int level)
+{
+	if (level == 0)
+		return;
+	
+	int mid = (high + low) / 2;
+	ar[mid] = '|';
+	subdivide(ar, low, mid, level - 1);
+	subdivide(ar, mid, high, level - 1);
+}
+```
+
+## 7.10 函数指针
+- 函数也有地址。可以编写将另一个函数的地址作为参数的函数。这样第一个函数能够找到第二个函数，并运行它。
+
+### 7.10.1 函数指针的基础知识
+#### 1.获取函数的地址
+- 函数名就是地址。也就是说，如果think()是一个函数，则think就是该函数的地址
+#### 2.声明函数指针
+- 声明指向某种数据类型的指针时，必须指定指针指向的类型。同样，声明指向函数的指针是，也必须指定指针指向的函数类型。
+```C++
+double pam(int)  // prototype
+
+double (*pf)(int);  // pf points to a function that takes
+		    // ont int argument and that returns type double
+pf = pam;   // pf now points to the pam() function
+```
+- 可以看出与pam声明类似，只是将pam替换为(* pf)。由于pam是函数，因此(* pf)也是函数。如果(* pf)是函数，则pf就是函数指针
+- 注意：声明的时候，可以先编写这种函数的原型，然后用(* pf)替换函数名。
+- 参数类型和返回值类型必须相同
+#### 3.使用指针来调用函数
+- (* pf)扮演的角色与函数名相同，因此使用(* pf)时，只需将它看做函数名即可。
+```C++
+double pam(int);
+double (*pf)(int);
+pf = pam;
+double x = pam(4);  // call pam() using the function name
+double y = (*pf)(5);  // call pam() using the function name
+double y = pf(5);  // C++也允许使用想使用函数名那样使用pf
+```
+- 虽然第一种格式不太好看，但是它给出了强有力的提示——代码正在使用函数指针
+#### 历史与逻辑
+- 两种观点：
+	- 一种学派认为，由于pf是函数指针，而* pf是函数，因此应将(* pf)用作函数调用
+	- 另一种认为，由于函数名是指向该函数的指针，指向函数的指针的行为应于函数名相似，因此应将pf()用作函数调用使用
+	- 容忍逻辑上无法自圆其说的观点正是人类思维活动的特点
+
+### 7.10.2 函数指针示例
+```C++
+// 7.18 fun_ptr.cpp -- pointers to functions
+#include <iostream>
+using namespace std;
+
+double betsy(int);
+double pam(int);
+void estimate(int lines, double(*pf)(int));
+
+
+int main()
+{
+	int code;
+	cout << "How many lines of code do you need? ";
+	cin >> code;
+	cout << "Here's Betsy's estimate:\n";
+	estimate(code, betsy);
+	cout << "Here's Pam's estimate:\n";
+	estimate(code, pam);
+	return 0;
+}
+
+double betsy(int lns)
+{
+	return 0.05 * lns;
+}
+
+double pam(int lns)
+{
+	return 0.03 * lns + 0.0004 * lns * lns;
+}
+
+void estimate(int lines, double(*pf)(int))
+{
+	cout << lines << " lines will take ";
+	cout << (*pf)(lines) << " hour(s)\n";
+}
+```
+### 7.10.3 深入探讨函数指针
+```C++
+// 三种函数原型实际上是相同的。
+const double * f1(const double ar[], int n);
+const double * f2(const double [], int);
+const double * f3(const double *, int);
+
+// 声明一个指针，指向三函数之一。假设该指针名为pa，则只需将目标函数原型中的函数名替换为(*pa)
+const double * (*p1)(const double *, int);
+ // 声明的同时进行初始化
+const double * (*p1)(const double *, int) = f1; 
+// 使用C++11的自动类型推断功能时，代码要简单得多
+auto p2 = f2;  // C++11 automitic type deduction
+// 看看下面语句
+cout << (*p1)(av,3) << ": " << *(*p1)(av, 3) << endl;
+cout << p2(av, 3) << ": " << *p2(av, 3) << endl;
+// ↑不带*是地址，带了*是具体的值（函数返回值）
+```
+
+#### 函数指针数组
+```C++
+// 声明包含3个函数指针的数组
+const double * (*pa[3])(const double *, int) = {f1, f2, f3};
+
+// 不能用auto，因为auto只能用于单值初始化，而不能用于列表初始化。
+// 但声明数组pa后，声明通用类型的数组就简单了
+auto pb = pa;
+
+// 调用
+const double * px = pa[0](av, 3);
+const double * py = (*pb)(av, 3);
+// 要获得指向的double值，可以使用运算符*
+double x = *pa[0](av, 3);
+double y = *(*pb[1])（av, 3）;
+
+// 指向指针的指针，也可用单值对其进行初始化。
+auto pc = &pa;  // C++11 automatic type dedution
+
+const double *(*(*pd)[3])(const double *, int ) = &pa;  // ???
+*pd[3]  // an array of 3 pointers（包含3个指针的数组）
+(*pd)[3]  // a pointer to an array of 3 elements（一个指向数组的指针，这数组有3个元素）
+// 要调用函数，需要认识这样一点：既然pd指向数组，那么 *pd 就是数组，而 (*pd)[i] 是数组中的元素，即函数指针。因此，较简单的函数调用是 (*pd)[i](av, 3) 是返回的指针指向的值。也可以使用第二章使用指针调用的语法：使用(*(*pd)[i](av, 3)来调用函数，而*(*(*pd)[i](av, 3)是指向的double值
+```
+- [ ] 这一部分也没听太懂，越来越懵了。
+
+#### 注意pa与&pa的差别
+- pa是数组名，表示地址。大多数情况下pa是数组第一个元素的地址，即&pa[0]。因此，它是单个元素的地址
+- &pa是真个数组（3个元素）的地址。
+- 从数字上说，pa与&pa值相同。但他们类型不同
+	- 差别1：pa+1为数组中下一个元素，而&pa + 1为pa后面一个12字节内存块的地址（假定3个元素，每个4字节）
+	- 差别2：要得到一个元素的值，对pa解除引用1次，而&pa需要2次。``` **&pa == *pa == pa[0] ```
+```C++
+
+```
+
+
+
+
+
+
+
+
 
 
 
