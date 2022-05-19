@@ -1062,7 +1062,7 @@ int main()
 
 	name = getname();  // reuse freed memory
 	cout << name << " at " << (int*)name << "\n";
-	delete[] name;
+	delete [] name;
 	return 0;
 }
 char* getname()
@@ -1210,10 +1210,10 @@ a2.at(1) = 2.3;  // assign 2.3 to a2[1]
 - 略
 
 ## 4.12 复习题
-- [ ] 第13题
-- [ ] 第14题
-- [ ] 第16题
-- [ ] 第17题
+- [X] 第13题
+- [X] 第14题
+- [X] 第16题
+- [X] 第17题
 ```C++
 // 1
 char actor2[30];
@@ -1267,7 +1267,7 @@ cout << "First element: " << *ptr;
 cout << "First element: " << ptr[0];
 cout << "\n Last element: " << *(prt+9);
 cout << "\n Last element: " << ptr[9];
-// 13 ???
+// 13 ??? √
 unsigned int size
 cout << "Input a number: ";
 cin >> size;
@@ -1280,7 +1280,7 @@ vector<int> dv(size);
 Fish *fish02 = new Fish;
 fish02->type = "asdf";
 // 16
-cin以空白(空格、换行符、制表符)为结尾，所以只读入1个单词，导致可能无法读取一整行的字符串
+cin以空白(空格、换行符、制表符)为结尾，所以只读入1个单词，导致可能无法读取一整行的字符串。单词前面的空格也会略过。
 // 17
 #include <string>
 #include <vector>
@@ -1290,6 +1290,7 @@ std::vector<std::string> s1(Str_num);
 std::array<std::string, Str_num> s2;
 ```
 ## 4.13 编程练习
+- [ ] new和delete要成对出现
 - 1
 ```C++
 #include <iostream>
@@ -1312,7 +1313,8 @@ int main()
 	cin >> age;
 
 	cout << "Name: " << lName << ", " << fName << endl;
-	cout << "Grade: " << ++grade << endl;
+	cout << "Grade: " << grade+1 << endl;  // int
+	cout << "Grade: " << ++grade << endl;  // char
 	cout << "Age: " << age << endl;
 	return 0;
 }
@@ -1325,7 +1327,10 @@ int main()
 {
 	using namespace std;
 	string name, dessert;
-	
+
+	// 1. 字符数组char：cin.getline(arr, Size);
+	// 2. string类：getline(cin, str);
+	// 3. getline()把末尾的换行符替换为空字符
 	cout << "Enter your name:\n";
 	getline(cin, name);
 	cout << "Enter your favorite dessert: \n";
@@ -1333,41 +1338,61 @@ int main()
 	cout << "I have some delicious " << dessert;
 	cout << " for you, " << name << ".\n";
 	return 0;
-	// getline()把末尾的换行符替换为空字符
+	
 }
 ```
 - 3
 ```C++
 #include <iostream>
-#include <string>
+#include <cstring>
 using namespace std;
 const unsigned int ArSize{ 20 };
 int main()
 {
-	
-	string firName;
-	char lasName[ArSize];
+	char firName[ArSize],lasName[ArSize], fullName[2 * ArSize];
 	cout << "Enter your first name: ";
-	getline(cin, firName);
+	cin.getline(firName, ArSize);
 	cout << "Enter your last name: ";
 	cin.getline(lasName, ArSize);
+	
+	strcpy_s(fullName, lasName);
+	strcat_s(fullName, ", ");
+	strcat_s(fullName, firName);
+
 	cout << "Here's the information in a single "
-		"string: " << lasName << ", " << firName << endl;
+		"string: " << fullName << endl;
 	return 0;
 }
 ```
 - 4
 ```C++
-// 暂时略过
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main()
+{
+	string firName,lasName, fullName;
+	cout << "Enter your first name: ";
+	getline(cin, firName);
+	cout << "Enter your last name: ";
+	getline(cin, lasName);
+	
+	fullName = lasName + ", " + firName;
+	cout << "Here's the information in a single "
+		"string: " << fullName << endl;
+	return 0;
+}
 ```
 - 5
 ```C++
 #include <iostream>
 struct CandyBar {
 	char brand[30];
-	double weight;  // unsigned 不能和double组合？
+	double weight;
 	unsigned int calorie;
 };
+
 int main()
 {
 	CandyBar snack = {
@@ -1386,7 +1411,7 @@ int main()
 #include <iostream>
 struct CandyBar {
 	char brand[30];
-	double weight;  // unsigned 不能和double组合？
+	double weight; 
 	unsigned int calorie;
 };
 int main()
@@ -1446,10 +1471,10 @@ struct Pizza {
 };
 int main()
 {
-	Pizza *bigOne = new Pizza;
+	Pizza* bigOne = new Pizza;
 	cout << "Enter the diameter of the pizza: ";
 	cin >> bigOne->diameter;
-	cin.get();  // 防止换行符被getline读取？
+	cin.get();  // 防止换行符被getline读取;先读company再读diameter就需要了
 	cout << "Enter the company of pizza: ";
 	getline(cin, bigOne->company);
 	cout << "Enter the weight of the pizza: ";
@@ -1459,6 +1484,8 @@ int main()
 		<< "company: " << bigOne->company
 		<< ", diameter: " << bigOne->diameter
 		<< ", weight: " << bigOne->weight << endl;
+
+	delete bigOne;
 	return 0;
 }
 ```
@@ -1467,24 +1494,32 @@ int main()
 #include <iostream>
 struct CandyBar {
 	char brand[30];
-	double weight;  // unsigned 不能和double组合？
+	double weight;
 	unsigned int calorie;
 };
 int main()
 {
-	CandyBar* snack = new CandyBar [3];
+	CandyBar* snack = new CandyBar[3];
 	snack[0] = { "Mocha Munch", 2.3, 350 };
 	snack[1] = { "banana Munch", 5.3, 3050 };
 	snack[2] = { "apple Munch", 6.3, 1050 };
+	// snack[0] = snack[2]; 可以直接赋值
+
 	for (int i = 0; i < 3; i++)
-	{
+	{	// 1. 结构体方式，数组表示法
 		std::cout << "snack[" << i << "] brand: "
 			<< snack[i].brand << std::endl;
 		std::cout << "snack[" << i << "] weight: "
 			<< snack[i].weight << std::endl;
 		std::cout << "snack[" << i << "] calorie: "
 			<< snack[i].calorie << std::endl;
+
+		// 2.指针方式
+		std::cout << "snack[" << i << "] calorie: "
+			<< (snack + i)->calorie << std::endl;
 	}
+
+	delete [] snack;
 	return 0;
 }
 ```
