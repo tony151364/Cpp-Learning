@@ -1094,11 +1094,174 @@ p_fun pa[3] = {f1, f2, f3};  // 包含3个元素的函数指针数组
 p_fun (*pd)[3] = &pa;  /// 指向上面这个函数指针数组
 ```
 
+## 7.11 总结
+- 定义、原型、调用
+	- 函数原型描述了函数的接口：传递给函数的数目以及函数返回值类型
+	- 函数调用使得程序将参数传递给函数，并执行函数的代码
+- C++函数通过使用拷贝，保护了原始数据的完整性
 
+## 7.12 复习题
 
+```C++
+// 1.声明原型、进行编写、最后调用
+// 2.	
+a. void igor(void);
+b. float tofu(int);
+c. double mpg(double, double);
+d. long summation(long[], int);
+e. double doctor(const char*);
+f. void ofcourse(boss);
+g. char* plot(map*);
+// 3.	
+void func1(int arr[], int ArSize, int n)
+{
+	for (int i = 0; i < ArSize; i++)
+		arr[i] = n;
+}
+// 4.
+void func2(int* first, int* end, int n)
+{
+	while (first < end)
+		*first = *end = n;
+}
+// 5.
+double func3(const double arr[], int ArSize)
+{
+	double max = arr[0];
+	for (int i = 1; i < ArSize; i++)
+		if (arr[i] > max)
+			max = arr[i];
+	return max;
+}
+// 6. 因为对于基本类型，函数会复制一份进行使用，函数调用结束后就会将复制的这一份删除，不会影响原始的数值
+// 7. 1)string 2)char数组 3)字符串常量
+// 8.
+int replace(char* str, char c1, char c2)
+{
+	int count = 0;
+	
+	while (*str != '\0')
+	{
+		if (*str == c1)
+		{
+			*str = c2;
+			count++;
+		}
+		str++;
+	}
 
+	return count;
+}
+// 9. "pizza"是个字符串常量，含义是其首地址，*"pizza"就是首个字符的值，即'p'
+// 10. 
+struct GLITZ
+{
+	int n;
+};
+void fun4(GLITZ glitz);  // 按值传递
+void fun5(GLITZ*);  // 按地址传递
+// 按值传递：函数会复制一份，不会对原始数据产生影响，但若结构较大，会占用较多内存。
+// 按地址传递：可以直接对原始数据进行操作，节省内存，但容易破坏原始数据。
+// 11.
+int judge(const char* );
+// 12.
+struct applicant {
+	char name[30];
+	int credit_ratings[3];
+};
+void show(applicant app)  // 按值传递
+{
+	std::cout << app.name << std::endl;
+	std::cout << app.credit_ratings << std::endl;
+}
 
+void show2(applicant *app)  // 按地址传递
+{
+	std::cout << app->name << std::endl;
+	std::cout << app->credit_ratings << std::endl;
+}
+// 13.
+typedef void (*p1_fun)(applicant);
+p1_fun p1 = f1;
+typedef const char* (*p2_fun)(const applicant, const applicant);
+p2_fun p2 = f2;
+void (*ap[5])(applicant);
+const char* (*(*p2)[10])(const applicant, const applicant);
+```
 
+## 7.13 编程练习
+- 1.
+```C++
+#include <iostream>
+double harmonic_average(double x, double y);
+
+int main()
+{
+	using namespace std;
+	double x, y;
+	while (true)
+	{
+		cout << "Please input two numbers:";
+		cin >> x >> y;
+		if (x == 0 || y == 0)
+			break;
+		else
+			cout << "answer: " << harmonic_average(x, y) << endl;
+	}
+	cout << "Done." << endl;
+	return 0;
+}
+
+double harmonic_average(double x, double y)
+{
+	return 2.0 * x * y / (x + y);
+}
+```
+
+- 2.
+```C++
+
+```
+
+- 3.
+```C++
+
+```
+
+- 4.
+```C++
+
+```
+
+- 5.
+```C++
+
+```
+
+- 6.
+```C++
+
+```
+
+- 7.
+```C++
+
+```
+
+- 8.
+```C++
+
+```
+
+- 9.
+```C++
+
+```
+
+- 10.
+```C++
+
+```
 
 
 
