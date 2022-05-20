@@ -805,9 +805,40 @@ int main()
 ```
 - 2
 ```C++
+#include <iostream>
+#include <array>
+using namespace std;
 
+int main()
+{
+	array<double, 10> donations;
+	int i = 0;
+	double sum = 0;
+
+	cout << "Please Enter donation less than 10:\n";
+	while (cin >> donations[i])
+	{
+		sum += donations[i];
+		if (++i > 9)
+			break;
+	}
+
+	if (i == 0)
+		return;
+
+	double average = sum / i;
+	int count = 0;
+	for (int j = 0; j < i; j++)
+	{
+		if (donations[j] > average)
+			count++;
+	}
+	cout << "Average: " << average << endl;
+	cout << count << " numbers that are greater than the average" << endl;
+	return 0;
+		
+}// 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 ```
-- 3
 ```C++
 #include <iostream>
 #include <cctype>
@@ -840,28 +871,72 @@ int main()
 	cout << "Average: " << average << ", nums: " << i << endl;
 	return 0;
 }
-
 ```
+
+- 3
+```C++
+#include <iostream>
+using namespace std;
+
+int main()
+{
+	char ch;
+	cout << "Please enter one of the following choices:" << endl;
+	cout << "a) apple \t\t c) carnivore\n";
+	cout << "p) pianist \t\t t) tree\n";
+	cout << "g) game\n";
+	while (true)
+	{
+		cin >> ch;
+		if (ch != 'a' && ch != 'c' && ch != 'p' && ch != 't' && ch != 'g')
+		{
+			cin.clear();
+			while (cin.get() != '\n')
+				continue;
+			cout << "Please enter a a, c, p, t, or g: ";
+		}
+		else
+			break;
+	}
+
+	switch (ch)
+	{
+	case 'a': cout << "give your a apple." << endl; break;
+	case 'c': cout << "You describe yourself as a born-again carnivore." << endl; break;
+	case 'p': cout << "You are a talented pianist." << endl; break;
+	case 't': cout << "a maple is a tree." << endl; break;
+	default: cout << "玩局《暖雪》吧！" << endl;
+	}
+
+	return 0;
+}
+```
+
 - 4
 ```C++
 
 ```
+
 - 5
 ```C++
 
 ```
+
 - 6
 ```C++
 
 ```
+
 - 7
 ```C++
 
 ```
+
 - 8
 ```C++
 
 ```
+
 - 9
 ```C++
 
