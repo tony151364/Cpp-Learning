@@ -1220,7 +1220,60 @@ double harmonic_average(double x, double y)
 
 - 2.
 ```C++
+#include <iostream>
+using namespace std;
+const int ArSize = 10;
+int input(double*);
+void show(const double*, int);
+double average(const double*, int);
 
+int main()
+{
+	double grades[ArSize];
+	int size = input(grades);
+	show(grades, size);
+	cout << "Average: " << average(grades, size) << endl;
+	
+	return 0;
+}
+
+int input(double* arr)
+{
+	int i = 0;
+
+	cout << "input scores and press 'q' to quit: ";
+	while (i < ArSize)
+	{
+		if (!(cin >> arr[i++]))
+		{
+			i--;
+			break;
+		}
+			
+	}
+
+	return i;
+}
+
+void show(const double* arr, int size)
+{
+	cout << "All scores: ";
+	
+	for (int i = 0; i < size; i++)
+		cout << arr[i] << " ";
+	
+	cout << endl;
+}
+
+double average(const double* arr, int size)
+{
+	double sum = 0.0;
+
+	for (int i = 0; i < size; i++)
+		sum += arr[i];
+
+	return sum / size;
+}
 ```
 
 - 3.
