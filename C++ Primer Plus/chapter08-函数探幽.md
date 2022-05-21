@@ -222,15 +222,108 @@ int main()
 - 对于引用来说，传递表达式是不行的``` double z = refcube(x + 3.0);  // should not compile```，**因为表达式不是变量**，就像``` x + 3.0 = 5.0 // nonsensical ```一样不合理。
 - 早期的C++允许将表达式传递给引用变量。有些情况下，仍然是这样做的。这样做的结果如下：由于x + 3.0不是double类型的变量，因此程序将创建一个临时的无名变量，并将其初始化为表达式x+3.0的值。然后，ra将成为该临时变量的引用。（有点像i++与++i的区别）下面详细讨论。
 #### 临时变量、引用参数和const
+- 什么时候创建临时变量？如果引用参数是const，则编译器将在下面两种情况下生成临时变量：
+	- 实参的类型正确，但不是左值；
+	- 实参的类型不正确，但可以转换为正确的类型。
+
+- 什么是左值？
+	- 左值参数是可被引用的数据对象，例如：变量、数组元素、结构成员、引用和接触引用的指针都是左值。
+	- 非左值：字面量（用引号括起的字符串除外，它们由其地址表示）和包含多项的表达式。
+	- 以前：在C语言中，左值最初指的是可出现在赋值语句左边的实体，但这是引入关键字const之前的情况。
+	- 现在：常规变量和const变量都可视为左值，因为可通过地址访问它们。但常规变量属于可修改的左值，而const属于不可修改的左值。
+```C++
+double refcube(const double& ra)
+{
+	return ra * ra * ra;
+}
+
+double side = 3.0;
+double* pd = &side;
+double& rd = side;
+long edge = 5L;
+double lens[4] = { 2.0, 5.0, 10.0, 12.0 };
+double c1 = refcube(side);  // ra is side
+double c2 = refcube(lens[2]);  // ra is lens[2]
+double c3 = refcube(rd);  // ra is rd is side
+double c4 = refcube(*pd);  // ra is *pd is side
+double c5 = refcube(edge);  // ra is temporary variable
+double c6 = refcube(7.0);  // ra is temporary variable
+double c7 = refcube(side + 10.0); // ra is temporary variable
+```
+- 参数side、lens[2]、rd和\*pd都是有名称的、double类型的数据对象，因此可以为其创建引用，而不需要临时变量。但是，edge虽然是变量，类型却不正确，double引用不能指向long。另一方面，参数7.0和side+10.0的类型都正确，但是没有名称，在这些情况下，编译器都将生成一个临时匿名变量，并让ra指向它。这些临时变量只在函数调用期间存在，此后编译器便可以随意将其删除。
+
+- 为什么对于常量引用，这种行为是可行的，但是其他情况下却不行呢？对于程序8.4中的函数swapr()
+```C++
+void swapr(int & a, int & b)  // use references
+{
+	int temp;
+	
+	temp = a;
+	a = b;
+	b = temp;
+}
+
+long a = 3, b = 5;
+swapr(a, b);
+```
+- ↑ 这里类型不匹配，编译器创建两个临时int类型变量，将它们交换。（太傻b了）而a, b保持不变。
+- 意思就是，你不能直接修改原始变量。你修改的只是临时变量。等于没引用，跟按值传递差不多。
+#### 应尽可能使用const
+- 将引用参数声明为常量数据的引用的理由有三个：
+	- 使用const可以避免无意中修改数据的编程错误
+	- 使用const使函数能够处理const和非const实参，否则将只能接受非const数据
+	- 使用const引用函数能够正确生成并使用临时变量
+
+- C++新增了**右值引用**(rvalue reference)。这种引用可指向右值，是使用&&声明的：
+```C++
+double && rref = std::sqrt(36.0);  // not allowed for double &
+double j = 15.0;
+double && jref = 2.0 * j + 18.5;  // not allowed for double &
+std::cout << rref << '\n';  // display 6.0
+std::cout << jref << '\n';  // display 48.5
+```
+- 第18章讨论使用右值引用来实现移动语义（move semantics）
+
+### 8.2.4 将引用用于结构
+- 引用非常适合用于结构和类（C++用户定义类型），引用主要也用于这些类型。
+
+```C++
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct free_throws
+{
+	string name;
+	int made;
+	int attempts;
+	float percent;
+};
+void display(const free_throws& ft);
+void set_pc(free_throws& ft);
+free_throws& accumulate(free_throws& target, const free_throws& source);
+
+int main()
+{
+
+	return 0;
+}
+
+void display(const free_throws& ft);
+void set_pc(free_throws& ft);
+free_throws& accumulate(free_throws& target, const free_throws& source);
+```
 
 
-## 8.3 默认参数
 
 
-## 8.4 函数重载
 
 
-## 8.5 函数模板
+
+
+
+
+
 
 
 
