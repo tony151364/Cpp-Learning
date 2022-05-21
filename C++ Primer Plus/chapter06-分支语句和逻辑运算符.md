@@ -912,9 +912,34 @@ int main()
 }
 ```
 
-- 4
+- 4.这道题有点花里胡哨，到时候看视频跟着敲得了。
 ```C++
+#include<iostream>
+const int strsize = 30;
+struct bop {
+	char fullname[strsize];  // real name
+	char title[strsize];  // job title
+	char bopname[strsize];  // secret BOP name
+	int preference;  // 0 = fullname, 1 = title, 2 = bopname
+};
 
+int main()
+{
+	using namespace std;
+
+	bop* members = new bop[3];
+	cout << "Benevolent Order of Programmer Report" << endl;
+
+	while (true)
+	{
+		cout << "a. display by name \t\t b. display the title\n";
+		cout << "c. display by bopname \t\t d.display by preference\n";
+		cout << "q.quit\n";
+		cout << "Enter your choice: "
+	}
+	
+	return 0;
+}
 ```
 
 - 5
