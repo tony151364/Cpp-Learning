@@ -38,6 +38,7 @@
 1.using namespace std;什么意思？  
 2.cin.get()、cin.getline()、cin.get(ch)、cin >> ch等区别
 3.为什么unsigned 不能和double组合？
+4.const的好处（chapter08 line271）
 
 
 
