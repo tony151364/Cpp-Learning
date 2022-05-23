@@ -288,6 +288,7 @@ std::cout << jref << '\n';  // display 48.5
 - 引用非常适合用于结构和类（C++用户定义类型），引用主要也用于这些类型。
 
 ```C++
+// 8.6
 #include <iostream>
 #include <string>
 using namespace std;
@@ -362,7 +363,279 @@ free_throws& accumulate(free_throws& target, const free_throws& source)
 	return target;
 }
 ```
+
 #### 1.程序说明
+- 由于display()显示结构的内容，而不修改它，因此这个函数使用了一个const引用参数。就这个函数而言，也可以按值传递结构，但与复制原始结构的拷贝相比，使用引用可以节省时间和内存。
+- [ ] 使用常量指针指向常量数据应该也可以
+```C++
+// 因为函数的返回值是一个引用（这里是变量名），所以这是可行的。
+accumulate(dup, five) = four;  // 修改后的dup被four所覆盖
+ // 等价于下面两条语句
+accumulate(dup, five);
+dup = four;
+```
+
+#### 2.为何要返回引用
+```C++
+dup = accumulate(team, five);
+```
+- 如果accumulate()返回一个结构，而不是指向结构的引用，将把整个结构复制到一个临时位置，再将这个拷贝复制给dup。但在返回值为引用是，直接把team复制到dup，其效率更高。
+- [ ] 注意：**返回引用的函数实际上是被引用的变量的别名**（函数是变量的别名）
+
+#### 3.返回指针时需要注意的问题
+- 返回引用是最重要的一点是，应避免返回函数终止时不再存在的内存单元，避免使用这样的代码
+```C++
+const free_throws & clone2(free_throws & ft)
+{
+	free_throws newguy;  // first step to big error
+	newguy = ft;  // copy info
+	return newguy;  // return reference to copy
+}
+```
+- 一种方法是：返回作为参数传递给函数的引用，accumulate()正是这样做的
+- 另一种方法：用new来分配新的存储空间。
+
+```C++
+const free_throws & clone(free_throws & ft)
+{
+	free_throws *pt;
+	*pt = ft;  // copy info
+	return *pt;  // return reference to copy
+}  // 函数声明表明了，该函数实际上将返回这个结构的引用
+// 因此，可以这样使用该函数
+free_throws & jolly = clone(three);  // 这使jolly成为新结构的引用
+```
+- 该方法存在的问题，调用clone()隐藏了对new的调用，这使得以后很容易忘记使用delete来释放内存。第16章会讨论自动释放的问题。
+
+#### 4.为何将const用于引用返回类型
+```C++
+accumulate(dup, five) = four;
+```
+- 为何这条语句能够通过编译？在赋值语句中，左值必须是可修改的左值。也就是说，**在赋值表达式中，左边的子表达式必须标识一个可修改的内存块**。在这里，函数返回指向dup的引用，它确实标识的是一个这样的内存块，因此这条语句是合法的。
+- 另一方面，常规（非引用）返回类型是右值——不能通过地址访问的值。这种表达式可出现在赋值语句的右边，但不能出现在左边。显然，获取字面值（如 10.0）的地址没有意义，但为何常规函数返回值是右值呢？因为这种返回值位于类是内存单元中，运行到下一条语句时，它们可能不再存在。
+
+
+- 不想被修改，可以在函数返回值前加const
+
+### 8.2.5 将引用用于类对象
+- 将类对象传递给函数时，C++通常的做法是使用引用。可以通过引用，让函数将类string、ostream、istream、ofstream和ifstream等类的对象作为参数。
+```C++
+// 8.7 
+#include <iostream>
+#include <string>
+using namespace std;
+string version1(const string& s1, const string& s2);
+const string& version2(string& s1, const string& s2);  // has side effect
+const string& version3(string& s1, const string& s2);  // bad design
+
+int main()
+{
+	string input;
+	string copy;
+	string result;
+
+	cout << "Enter a string: ";
+	getline(cin, input);
+	copy = input;
+	cout << "Your string as entered: " << input << endl;
+	result = version1(input, "***");
+	cout << "Your string enhenced: " << result << endl;
+	cout << "Your orginal string: " << input << endl;
+
+	result = version2(input, "###");
+	cout << "Your string enhenced: " << result << endl;
+	cout << "Your orginal string: " << input << endl;
+
+	cout << "Resetting orginal string.\n";
+	input = copy;
+	result = version3(input, "@@@");
+	cout << "Your string enhenced: " << result << endl;
+	cout << "Your orginal string: " << input << endl;
+
+	return 0;
+}
+
+string version1(const string& s1, const string& s2)
+{
+	string temp;
+
+	temp = s2 + s1 + s2;
+	return temp;
+}
+
+const string& version2(string& s1, const string& s2)
+{
+	s1 = s2 + s1 + s2;
+	return s1;
+}
+
+const string& version3(string& s1, const string& s2)  // bad design
+{
+	string temp;
+
+	temp = s2 + s1 + s2;
+	return temp;
+}
+```
+- 对于version1：为何程序能将char* 指针赋给string引用呢？
+	- 首先，string类定义了一种char* 到string的转换功能，这使得可以使用C-风格字符串来初始化string对象。
+	- 其次，前面讨论过的一个const引用形参的一个属性——const会自动做类型转换（把数据合理化） 
+	- 因此，如果形参类型为const string &，在函数调用时，使用的实参可以是string对象或C-风格字符串，如用引号括起的字符串常量、以空字符结尾的char数组或指向char的指针变量
+
+
+- version3指出了什么不能做。它存在一个致命缺陷：返回一个指向version3()中声明的变量的引用。这个函数能通过编译（编译器可能会发出警告），当程序执行时可能崩溃。具体地说，问题由下面的赋值语句引发：
+```C++
+result = version3(input, "@@@");
+```
+
+### 8.2.6 对象、继承和引用
+- 派生类继承基类，派生类可以使用基类的某些特性
+- 继承的另一个特征：基类引用可以指向派生类对象，而无需进行强制类型转换。这种特征的一个实际结果是，可以定义一个接受基类引用作为参数的函数，调用该函数时，可以将基类对象作为参数，也可以将派生类对象作为参数。
+```C++
+// 8.8
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+using namespace std;
+
+void file_it(ostream& os, double fo, const double fe[], int n);
+const int LIMIT = 5;
+int main()
+{
+	ofstream fout;
+	const char* fn = "D:/Desktop/ep-data.txt";
+	
+	fout.open(fn);
+	if (!fout.is_open())
+	{
+		cout << "Cant't open " << fn << ".Bye\n";
+
+		// 参数不填写行不行？不行。里面写的是退出状态。函数在cstdlib文件里。
+		// C使用整型，0正常退出，1异常退出。C++使用常量。
+		exit(EXIT_FAILURE);  // EXIT_FALLURE == 1; EXIT_SUCCESS = 0
+	}
+
+	double objective;
+	cout << "Enter the foacl length of your "
+		"telescope objective in mm: ";
+	cin >> objective;
+
+	double eps[LIMIT];
+	cout << "Enter the focal lengths, in mm, of" << LIMIT
+		<< " eyepieces:\n";
+	for (int i = 0; i < LIMIT; i++)
+	{
+		cout << "Eyepiece #" << i + 1 << ": ";
+		cin >> eps[i];
+	}
+
+	file_it(fout, objective, eps, LIMIT);  // 将目镜数据写入到文件
+	file_it(cout, objective, eps, LIMIT);  // 将目镜数据显示到屏幕
+	cout << "Done\n";
+	return 0;
+}
+
+void file_it(ostream& os, double fo, const double fe[], int n)
+{
+	ios_base::fmtflags initial;
+	initial = os.setf(ios_base::fixed);  // save initial formatting state
+	os.precision(0);
+	os << "Focal length of objective: " << fo << " mm\n";
+	os.setf(ios::showpoint);
+	os.precision(1);
+	os.width(12);
+	os << "f.l eyepiece";
+	os.width(15);
+	os << "magnification" << endl;
+	for (int i = 0; i < n; i++)
+	{
+		os.width(12);
+		os << fe[i];
+		os.width(15);
+		os << int(fo / fe[i] + 0.5) << endl;
+	}
+	os.setf(initial);  // restore initial formatting state
+}
+```
+- ``` os.setf(ios_base::fixed) ```将对象置于**使用定点表示法**的模式；``` os.setf(ios_base::showpoint) ```将对象置于**显示小数点**的模式；``` persion() ```指示显示多少位小数（假定对象处于定点模式下）。所有这些设置都将一直保持不变，直到再次调用相应的方法重置它们。
+- 方法``` width() ``` 设置下一次输出操作使用的字段宽度，这种设置只在显示下一个值时有效，然后将恢复默认状态（字段宽度为0）
+
+```C++
+ios_base:: fmtflags initial;
+initial = os.setf(ios_base::fixed);   // save initial formatting state
+...
+os.setf(initial);  / restore initial formatting state
+```
+- 方法setf()返回调用它之前的有效的格式化设置。 ↑是个恢复的过程
+
+### 8.2.7 何时使用参数
+- 引用参数实际上是基于指针的代码的另一个接口
+- 使用参数的主要原因：
+	- 程序员能够修改调用函数中的对象
+	- 通过传递引用而不是整个数据对象，可以提高程序的运行速度。
+- **只传递值，而不修改**的函数 ：
+	-  数据对象很小，则按值传递
+	-  数据对象是数组，只能用指针，需要将指针声明为const
+	-  数据很大，使用const引用或const指针，将提高效率
+	-  数据是类对象，使用const引用
+-  **修改数值**的函数：
+	- 内置数据类型使用指针（有时也用引用，如cin >> n; 不是 cin >> &n;）
+	- 数组，用指针
+	- 结构，引用或指针
+	- 类对象，引用  
+
+## 8.3 默认参数
+- 由于编译器通过查看原型类了解函数所使用的参数数目，因此函数原型也必须将可能的默认参数告知程序。
+- 对于带参数列表的函数，必须从右向左添加默认值。也就是说，要为某个参数设置为默认值，则必须为它右边的所有参数提供默认值：
+```C++
+int harpo(int n, int m = 4, int j = 5);  // VALID
+int chico(int n, int m = 6, in j);  // INVALID
+int groucho(int k = 1; int m = 2; int n = 3);  // VALID
+
+// 实参从左到右，不能跳过任何参数。下面是不允许的：
+beeps = harpo(3, , 8);  // invalid, doesn't set m to 4
+```
+- 默认参数是一种便捷操作。在设计类时，通过默认参数，可以减少要定义的折构函数、方法以及方法重载的数量。
+```C++
+// 8.9
+#include <iostream>
+const int ArSize = 80;
+char* left(const char* str, int n = 1);
+int main()
+{
+	using namespace std;
+	char sample[ArSize];
+	cout << "Enter a string:\n";
+	cin.get(sample, ArSize);
+	char* ps = left(sample, 4);
+	cout << ps << endl;
+	delete[] ps;
+
+	ps = left(sample);
+	cout << ps << endl;
+	delete[] ps;
+	return 0;
+}
+
+char* left(const char* str, int n)
+{
+	if (n < 0)
+		n = 0;
+	char* p = new char[n + 1];
+	int i;
+	for (i = 0; i < n && str[i]; i++)
+		p[i] = str[i];  // copy characters
+	while (i <= n)
+		p[i++] = '\0';
+	return p;
+}
+```
+
+#### 程序说明
+
+
+
+
 
 
 
