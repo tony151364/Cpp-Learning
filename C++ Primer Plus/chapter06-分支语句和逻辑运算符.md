@@ -708,7 +708,7 @@ int main()
 	- 首先，程序读取文件时不应超过EOF。如果最后一次读取数据时遇到EOF，方法eof()将返回true
 	- 其次，程序可能遇到类型不匹配的情况。这时方法fail()将返回true
 	- 最后，如果发生了文件受损或硬件故障这样的问题，方法bad()将返回true。
-	- 不需要分别检查这些情况，方法goo()在没有任何错误发生时返回true()
+	- 不需要分别检查这些情况，方法good()在没有任何错误发生时返回true()
 ```C++
 // 方式1：循环终止
 while (inFile.good())
@@ -944,27 +944,209 @@ int main()
 
 - 5
 ```C++
+#include <iostream>
+double tax(double);
 
+int main()
+{
+	using namespace std;
+	double money;
+	while (true)
+	{
+		cout << "Enter your money: ";
+		if (!(cin >> money) || money < 0)
+			break;
+		else
+			cout << "Tax: " << tax(money) << endl;
+	};
+
+	cout << "Done.\n";
+}
+
+double tax(double n)
+{
+	if (n <= 5000)
+		return 0;
+	else if (n >= 5001 && n <= 15000)
+		return (n - 5000) * 0.1;
+	else if (n >= 15001 && n <= 35000)
+		return 10000 * 0.1 + (n - 15000) * 0.15;
+	else
+		return 10000 * 0.1 + 20000 * 0.15 + (n - 35000) * 0.2;
+}
 ```
 
 - 6
 ```C++
+#include <iostream>
+#include <string>
+using namespace std;
+struct Patron {
+	string name;
+	double money = 0.0;
+};
 
+int main()
+{
+	int size;
+	cout << "Enter the number of patrons: ";
+	cin >> size;
+	Patron* patrons = new Patron[size];
+	for (int i = 0; i < size; ++i)
+	{
+		cout << "Enter " << i + 1 << "th name:";
+		cin.get();
+		getline(cin, patrons[i].name); // ?为啥不是->
+		cout << "Enter " << i + 1 << "th money:";
+		cin >> patrons[i].money;
+	}
+
+	cout.setf(ios_base::fixed);
+	cout.precision(0);
+	cout << "Grand Patrons:\n";
+	for (int i = 0; i < size; ++i)
+		if (patrons[i].money > 10000)
+			cout << "\t" << patrons[i].name
+				 << "\t" << patrons[i].money << endl;
+	cout << "Patrons:\n";
+	for (int i = 0; i < size; ++i)
+		if (patrons[i].money <= 10000)
+			cout << "\t" << patrons[i].name
+			<< "\t" << patrons[i].money << endl;
+
+	delete[] patrons;
+	return 0;
+}
 ```
 
 - 7
 ```C++
-
+// 跟着敲
 ```
 
 - 8
+- [ ] 每行末尾都会多读一个字符，是不是换行没忽略？
 ```C++
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+using namespace std;
+const int SIZE = 60;
 
+int main()
+{
+	// 1.打开文件
+	char filename[SIZE];
+	ifstream inFile;  // object for handling file input
+	cout << "Enter name of data file: ";
+	cin.getline(filename, SIZE);
+	inFile.open(filename);  // associate inFile with a file
+	if (!inFile.is_open())
+	{
+		cout << "Could not open the file" << filename << endl;
+		cout << "Program terminating.\n";
+		exit(EXIT_FAILURE);
+	}
+
+	// 2.处理文件+显示结果
+	char value;
+	int count = 0;
+	
+	while (inFile.good())
+	{
+		inFile >> value;
+		if (value == '\n' || inFile.eof())
+			continue;  // 跳过换行符和EOF
+		else
+		{
+			++count;
+			cout << "count: " << count
+				<<"Values: " << value << endl;
+		}
+		
+	}
+	if (inFile.eof())
+		cout << "End of file reached.\n" << count << " characters";
+	else if (inFile.fail())
+		cout << "Input terminated by data mismatch.\n";
+	else
+		cout << "Input terminated for unknown reason.\n";
+
+	// 3.关闭文件
+	inFile.close();
+	return 0;
+}
 ```
 
 - 9
 ```C++
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace std;
+const int SIZE = 60;
 
+struct Patron {
+	string name;
+	double money = 0.0;
+};
+int main()
+{
+	// 1.打开文件
+	char filename[SIZE];
+	ifstream inFile;  // object for handling file input
+	cout << "Enter name of data file: ";
+	cin.getline(filename, SIZE);
+	inFile.open(filename);  // associate inFile with a file
+	if (!inFile.is_open())
+	{
+		cout << "Could not open the file" << filename << endl;
+		cout << "Program terminating.\n";
+		exit(EXIT_FAILURE);
+	}
+
+	// 2.处理文件+显示结果
+	int size, i = 0;
+	inFile >> size;  // 捐款人数
+	Patron* patrons = new Patron[size];
+	cout << "inFile.isopen(): " << inFile.is_open() << endl;
+	cout << "size: " << size << endl;
+	while (inFile.good() && i < size)
+	{
+		inFile.get();  // 吃掉文件末尾换行符
+		getline(inFile, patrons[i].name);
+		cout << "Read name: " << patrons[i].name << endl;
+
+		inFile >> patrons[i].money;
+		cout << "Read money: " << patrons[i].money << endl;
+		i++;
+	}
+	if (inFile.eof())
+		cout << "End of file reached.\n";
+	else if (inFile.fail())
+		cout << "Input terminated by data mismatch.\n";
+	else
+		cout << "Input terminated for unknown reason.\n";
+	
+	
+	// 3.显示结果 + 关闭文件
+	cout.setf(ios_base::fixed);
+	cout.precision(0);
+	cout << "Grand Patrons:\n";
+	for (int i = 0; i < size; ++i)
+		if (patrons[i].money > 10000)
+			cout << "\t" << patrons[i].name
+			<< "\t" << patrons[i].money << endl;
+	cout << "Patrons:\n";
+	for (int i = 0; i < size; ++i)
+		if (patrons[i].money <= 10000)
+			cout << "\t" << patrons[i].name
+			<< "\t" << patrons[i].money << endl;
+	
+	inFile.close();
+	delete[] patrons;
+	return 0;
+}   // D:/Desktop/ep-data.txt
 ```
 
 
