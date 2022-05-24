@@ -1190,7 +1190,7 @@ const char* (*(*p2)[10])(const applicant, const applicant);
 ```
 
 ## 7.13 编程练习
-- 1.
+- 1
 ```C++
 #include <iostream>
 double harmonic_average(double x, double y);
@@ -1218,7 +1218,7 @@ double harmonic_average(double x, double y)
 }
 ```
 
-- 2.
+- 2
 ```C++
 #include <iostream>
 using namespace std;
@@ -1276,42 +1276,42 @@ double average(const double* arr, int size)
 }
 ```
 
-- 3.
+- 3
 ```C++
 
 ```
 
-- 4.
+- 4
 ```C++
 
 ```
 
-- 5.
+- 5
 ```C++
 
 ```
 
-- 6.
+- 6
 ```C++
 
 ```
 
-- 7.
+- 7
 ```C++
 
 ```
 
-- 8.
+- 8
 ```C++
 
 ```
 
-- 9.
+- 9
 ```C++
 
 ```
 
-- 10.
+- 10
 ```C++
 
 ```
