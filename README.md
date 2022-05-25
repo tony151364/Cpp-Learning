@@ -4,8 +4,9 @@
 - [C语言程序设计](C-Learning)
 - [C++ Prime Plus](C++%20Primer%20Plus)
 
-##  习题
-- [练习](newcoder)
+##  练习
+- [习题](newcoder)
+- [建议](suggestion)
 
 ## 视频
 - [C++教程：C++ Primer Plus(第六版)教程](https://www.bilibili.com/video/BV1Yv411t7qe?spm_id_from=333.999.0.0)
