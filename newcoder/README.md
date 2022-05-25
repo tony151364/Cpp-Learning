@@ -1,7 +1,7 @@
 
 ### 未解决
 - [指针数组](https://www.nowcoder.com/test/question/done?tid=56767737&qid=3733#referAnchor)
-- [数组指针]((https://www.nowcoder.com/test/question/done?tid=56768251&qid=4971#summary)
+- [数组指针](https://www.nowcoder.com/test/question/done?tid=56768251&qid=4971#summary)
 - [const 与指针](https://www.nowcoder.com/test/question/done?tid=56768251&qid=3181#summary)
 - [三目运算符](https://www.nowcoder.com/test/question/done?tid=56768251&qid=111823#summary)
 - [三目运算符2](https://www.nowcoder.com/test/question/done?tid=56768251&qid=78438#summary)
