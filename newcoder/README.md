@@ -1,9 +1,16 @@
-## 未解决
-- [文件相关问题](https://www.nowcoder.com/test/question/done?tid=55835812&qid=157342#summary)
-- [函数指针问题](https://www.nowcoder.com/test/question/done?tid=55835812&qid=304674#summary)
-- [原码等1](https://www.nowcoder.com/test/question/done?tid=55846227&qid=247568#summary)
-- [原码等2](https://www.nowcoder.com/test/question/done?tid=55846227&qid=111131#summary)
-## 参考内容
+
+### 未解决
+- [指针数组](https://www.nowcoder.com/test/question/done?tid=56767737&qid=3733#referAnchor)
+- [数组指针]((https://www.nowcoder.com/test/question/done?tid=56768251&qid=4971#summary)
+- [const 与指针](https://www.nowcoder.com/test/question/done?tid=56768251&qid=3181#summary)
+- [三目运算符](https://www.nowcoder.com/test/question/done?tid=56768251&qid=111823#summary)
+- [三目运算符2](https://www.nowcoder.com/test/question/done?tid=56768251&qid=78438#summary)
+- [C语言文件](https://www.nowcoder.com/test/question/done?tid=56767737&qid=326200#summary)
+- [C++中结构体](https://www.nowcoder.com/test/question/done?tid=56768251&qid=78438#summary)
+- [移位操作](https://www.nowcoder.com/test/question/done?tid=56768251&qid=36433#summary)
+
+### 参考内容
+- [牛客网]([url](https://www.nowcoder.com/exam/intelligent))
 - [经典C++笔试面试题目与参考答案100例](https://www.jb51.net/it/692577.html)
 - [C++ 面试题目(整理自牛客网)](https://www.jb51.net/it/713160.html)
 
