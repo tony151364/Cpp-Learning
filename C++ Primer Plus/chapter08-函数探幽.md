@@ -632,6 +632,235 @@ char* left(const char* str, int n)
 ```
 
 #### 程序说明
+- ``` i < n && str[i] ``` 防止用户输入的数字超过字符串的字符数
+```C++
+// 另一种设置新字符串长度的方法是，将n设置为传递的值和字符串长度中较小的一个：
+int len = strlen(str);
+n = (n < len) ? n : len;  // the lesser of n and len
+char * p = new char[n+1];
+// 这样确保new分配的空间不会多于存储字符串所需的空间
+```
+
+## 8.4 函数重载
+- 函数多态（函数重载）让您能够使用多个同名的函数，他们实现不同的但相似的功能。
+- “多态”和“函数重载”两个术语指的是同一回事。有点像一词多意。
+- 函数重载的关键是函数的参数列表——也称为函数特征标（function signture）
+```C++
+void print (const char * str, int width);  // #1
+void print (double d, int width);  // #2
+void print (long l, int width);  // #3
+void print(int i, int width);  // #4
+void print (const char *str);// #5
+
+unsigned int year = 3210;
+print(year, 6);  // 不与任何类型匹配
+// 因为有3种转换方式，C++将拒绝这种函数调用
+```
+- 对于重载，返回值**可以不同**，但是参数列表**必须不同**
+
+#### 重载引用参数
+- [ ] 这个左值和右值的例子还不太理解
+
+### 8.4.1 重载示例
+```C++
+// 8.10 leftover.cpp -- overloading the left() function
+#include <iostream>
+unsigned long left(unsigned long num, unsigned ct);
+char* left(const char* str, int n = 1);
+
+int main()
+{
+	using namespace std;
+	const char* trip = "Hawwii!!";  // test value
+	unsigned long n = 12345678;  // test value
+	int i;
+	char* temp;
+
+	for (i = 1; i < 10; i++)
+	{
+		cout << left(n, i) << endl;
+		
+		temp = left(trip, i);  // left()函数里面用new了
+		cout << temp << endl;
+		delete temp;  // point to temorary storage
+	}
+	return 0;
+}
+
+// This function returns the first ct digits of the number num.
+unsigned long left(unsigned long num, unsigned ct)
+{
+	unsigned digits = 1;
+	unsigned long n = num;
+
+	if (ct == 0 || num == 0)
+		return 0;			// return 0 if no digits
+
+	while (n /= 10)
+		digits++;
+
+	if (digits > ct)
+	{
+		ct = digits - ct;
+		while (ct--)
+			num /= 10;
+		return num;			// return left ct digits
+	}
+	else					// if ct >= of digits
+		return num;			// return the whole number
+}
+
+// This function returns a pointer to a new string
+// consisting of the first n characters in the str string
+char* left(const char* str, int n)
+{
+	if (n < 0)
+		n = 0;
+
+	char* p = new char[n + 1];
+	int i;
+
+	for (i = 0; i < n && str[i]; i++)
+		p[i] = str[i];  // copy characters
+	while (i <= n)
+		p[i++] = '\0';  // set rest of string to '\0'
+	return p;
+}
+```
+
+### 8.4.2 何时使用重载函数
+- 仅当函数基本上执行相同任务，但使用不同形式的数据时，才应采用函数重载。
+
+#### 默认参数与函数重载
+- 使用一个带默认参数的函数要简单些。只需编写一个函数（而不是两个函数），程序也只需为一个函数（而不是两个）请求内存；需要修改函数时，只修改一个。然而，如果需要使用不同类型的参数，则默认参数便不管用了，这种情况下，应该使用函数重载
+
+#### 名称修饰
+- 名称修饰(name decoration)或名称矫正(name mangling)，它根据函数原型中指定的参数类型对每个函数名进行加密，以便于C++追踪每个函数
+
+## 8.5 函数模板
+- 函数模板是通用的函数描述，也就是说，它们使用泛型来定义函数，其中的泛型可用具体的类型（如int 或 double）替换。通过将类型作为参数传递给模板，可使编译器生成该类型模板。
+- 由于模板允许以泛型（而不是具体类型）的方式编写程序，因此有时也被称为通用编程。由于类型是用参数表示的，因此模板特性有时也称为参数化类型(parameterized types)
+```C++
+// 8.11 funtemp.cpp -- using a function template
+#include <iostream>
+template <typename T>
+void Swap(T& a, T& b);
+
+int main()
+{
+	using namespace std;
+	int i = 10;
+	int j = 20;
+	cout << "i, j = " << i << ", " << j << endl;
+	cout << "Using compiler-generated int swapper:\n";
+	Swap(i, j);
+	cout << "Now i, j = " << i << ", " << j << ".\n";
+
+	double x = 24.5;
+	double y = 81.7;
+	cout << "x, y = " << x << ", " << y << ".\n";
+	cout << "Using compiler-generated double swapper:\n";
+	Swap(x, y);
+	cout << "Now x, y = " << x << ", " << y << ".\n";
+	return 0;
+}
+
+template <typename T>
+void Swap(T& a, T& b)
+{
+	T temp;
+	temp = a;
+	a = b;
+	b = temp;
+}
+```
+- template 和 typename是必须的除非用关键字class代替typename。因为在C++98添加关键字typename之前，C++使用关键字class来创建模板。
+- 模板不创建任何函数，而只是告诉编译器如何定义函数。
+- **提示**：如果需要多个将同一种算法用于不同类型的函数，请使用模板。如果不考虑向后兼容的问题，并愿意键入较长的单词，则声明类型参数时，应使用关键字typename而不使用class
+- **注意：** 函数模板不能缩短可执行程序。对于该程序而言，最终仍由两个独立的函数定义，就像以手工方式定义了这些函数一样。最终的代码不包含任何模板，而只包含了为程序生成的实际函数。使用模板的好处是，它使生成多个函数定义更简单、更可靠。
+
+### 8.5.1 重载的模板
+- 需要多个对不同类型使用同一种算法时，可以使用模板。然而，并非所有的类型都使用相同的算法，这时候就需要重载模板。
+```C++
+// 8.12 twotemps.cpp -- using overloaded template functions
+#include <iostream>
+template <typename T>
+void Swap(T& a, T& b);
+
+template <typename T>
+void Swap(T* a, T* b, int n);
+
+void Show(int a[]);
+const int Lim = 8;
+
+int main()
+{
+	using namespace std;
+	int i = 10;
+	int j = 20;
+	cout << "i, j = " << i << ", " << j << endl;
+	cout << "Using compiler-generated int swapper:\n";
+	Swap(i, j);
+	cout << "Now i, j = " << i << ", " << j << ".\n";
+
+	int d1[Lim] = { 0, 7, 0, 4, 1, 7, 7, 6 };
+	int d2[Lim] = { 0, 7, 2, 0, 1, 9, 6, 9 };
+	cout << "Original arrays:\n";
+	Show(d1);
+	Show(d2);
+	Swap(d1, d2, Lim);
+	cout << "Swapped arrays:\n";
+	Show(d1);
+	Show(d2);
+	return 0;
+}
+
+template <typename T>
+void Swap(T& a, T& b)
+{
+	T temp;
+	temp = a;
+	a = b;
+	b = temp;
+}
+
+template <typename T>
+void Swap(T* a, T* b, int n)
+{
+	T temp;
+	for (int i = 0; i < n; i++)
+	{
+		temp = a[i];
+		a[i] = b[i];
+		b[i] = temp;
+	}
+}
+
+void Show(int a[])
+{
+	using namespace std;
+	cout << a[0] << a[1] << "/";
+	cout << a[2] << a[3] << "/";
+	for (int i = 4; i < Lim; i++)
+		cout << a[i];
+	cout << endl;
+}
+```
+
+### 8.5.2 模板的局限性
+- 如果模板函数中使用了赋值( = )，T是数组将不成立。如果使用了<运算符，T为结构也不成立。
+- 总之，模板无法处理某些函数。
+	- 一种解决办法是，C++允许您重载运算符+，以便能够将其用于特定的结构或类（第11章）
+	- 另一种是，为特定类型提供具体化的模板定义，下面介绍这种方案。 
+
+### 8.5.3 显式具体化(explicit specialization)
+- 当编译器找到与函数调用匹配的具体化定义时，将使用该定义，而不再寻找模板。
+#### 1.第三代具体化(ISO/ANSI C++模板)
+- 实验其他具体化方法后，C++98标准选择了下面方法
+	- 对于给定的函数名，可以有非模板函数、模板函数和显式具体化模板函数以及它们的重载版本。
+	- 显式具体化的原型和定义以template<>开头，并通过名称来指出类型。
+	- 具体化优先于常规模板，而非
+
 
 
 
