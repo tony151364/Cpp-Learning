@@ -855,16 +855,123 @@ void Show(int a[])
 
 ### 8.5.3 显式具体化(explicit specialization)
 - 当编译器找到与函数调用匹配的具体化定义时，将使用该定义，而不再寻找模板。
+
 #### 1.第三代具体化(ISO/ANSI C++模板)
-- 实验其他具体化方法后，C++98标准选择了下面方法
+- 试验其他具体化方法后，C++98标准选择了下面方法
 	- 对于给定的函数名，可以有非模板函数、模板函数和显式具体化模板函数以及它们的重载版本。
 	- 显式具体化的原型和定义以template<>开头，并通过名称来指出类型。
 	- 具体化优先于常规模板，而非
+```C++
+// 下面是用于交换job结构的非模板函数、模板函数和具体化的原型
 
+// non template function prototype
+void Swap(job &, job &);
 
+// template prototype
+template <typename T>
+void Swap(T &, T &);
 
+// explicit specialization for the job type
+template <> void Swap<job>(job &, job &);
+```
+- 前面指出，如果有多个原型，则编译器在选择原型时，非模板版本优先于显示具体化和模板版本，显示具体化优先于使用模板生成的版本。
+- 例如，在下面的代码中，第一次调用Swap()时使用通用版本，而第二次调用使用基于job类型的显式具体化版本。
+```C++
+template <class T>  // template
+void Swap(T &, T &);
 
+// explicit specialization for the job type
+template <> void Swap<job> (job &, job &);
+int main()
+{
+	double u, v;
+	...
+	Swap(u, v);  // use template
+	job a, b;
+	...
+	Swap(a, b);  // use void Swap<job>(job &, job &)
+}
+```
+- Swap<job>中的<job>是可选的，因为函数的参数类型表明，这是job的一个具体化。因此，该院向也可以这样编写：``` template <> void Swap(job &, job &);   // simpler form ```
+	
+#### 2.显式具体化示例
+```C++
+// 8.13 twoswap.cpp -- specialization overrides a template
+#include <iostream>
+template <typename T>
+void Swap(T& a, T& b);
 
+struct job
+{
+	char name[40];
+	double salary;
+	int floor;
+};
+
+// explicit specialization
+template <> void Swap<job>(job& j1, job& j2);
+void Show(job& j);
+
+int main()
+{
+	using namespace std;
+	cout.precision(2);
+	cout.setf(ios::fixed, ios::floatfield);
+	int i = 10, j = 20;
+	cout << "i, j = " << i << ", " << j << ".\n";
+	cout << "Using compoler-generated int swapper:\n";
+	Swap(i, j);  // genetates void Swap(int &, int &)
+	cout << "Now, i, j = " << ", " << j << ".\n";
+
+	job sue = { "Susan Yaffee", 73000.60, 7 };
+	job sidney = { "Sidney Taffee", 78060.72, 9 };
+	Show(sue);
+	Show(sidney);
+	Swap(sue, sidney);  // use void Swap(job &, job &)
+	cout << "After job swapping:\n";
+	Show(sue);
+	Show(sidney);
+	return 0;
+}
+
+template <typename T>
+void Swap(T& a, T& b)  // generalversion
+{
+	T temp;
+	temp = a;
+	a = b;
+	b = temp;
+}
+
+// swaps just the salary and floor fields of a job structure
+
+template <> void Swap<job>(job& j1, job& j2)  // specialization
+{
+	double t1;
+	int t2;
+	t1 = j1.salary;
+	j1.salary = j2.salary;
+	j2.salary = t1;
+	t2 = j1.floor;
+	j1.floor = j2.floor;
+	j2.floor = t2;
+}
+
+void Show(job& j)
+{
+	using namespace std;
+	cout << j.name << ": $" << j.salary
+		<< " on floor " << j.floor << endl;
+}
+	
+```
+	
+### 8.5.4 实例化和具体化
+- 为进一步了解模板，必须理解术语实例化的具体化。	
+
+### 8.5.5 编译器选择使用哪个函数版本
+	
+### 8.5.6 模板函数的发展
 
 
 
