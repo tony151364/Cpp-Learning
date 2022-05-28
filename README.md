@@ -13,8 +13,7 @@
 - [建议](suggestion)
 
 ##  练习
-- [问答题](newcoder)
-- 程序题
+- [面试题](newcoder)
 
 ## 游戏
 - [虚幻引擎](Unreal%20Engine)
