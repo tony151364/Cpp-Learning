@@ -743,7 +743,7 @@ char* left(const char* str, int n)
 ```C++
 // 8.11 funtemp.cpp -- using a function template
 #include <iostream>
-template <typename T>
+template <typename T>  // 第一行指出，要建立一个模板，将类型命名为AnyType。
 void Swap(T& a, T& b);
 
 int main()
@@ -857,11 +857,13 @@ void Show(int a[])
 ### 8.5.3 显式具体化(explicit specialization)
 - 当编译器找到与函数调用匹配的具体化定义时，将使用该定义，而不再寻找模板。
 - 当参数不变，只想更改函数的内容时，可以用显示具体化。
+
 #### 1.第三代具体化(ISO/ANSI C++模板)
 - 试验其他具体化方法后，C++98标准选择了下面方法
 	- 对于给定的函数名，可以有非模板函数、模板函数和显式具体化模板函数以及它们的重载版本。
 	- 显式具体化的原型和定义以template<>开头，并通过名称来指出类型。
-	- 具体化优先于常规模板，而非
+	- 具体化优先于常规模板，而非模板函数优先于具体化和常规模板
+	
 ```C++
 // 下面是用于交换job结构的非模板函数、模板函数和具体化的原型
 
@@ -875,8 +877,10 @@ void Swap(T &, T &);
 // explicit specialization for the job type
 template <> void Swap<job>(job &, job &);
 ```
+
 - 前面指出，如果有多个原型，则编译器在选择原型时，非模板版本优先于显示具体化和模板版本，显示具体化优先于使用模板生成的版本。
 - 例如，在下面的代码中，第一次调用Swap()时使用通用版本，而第二次调用使用基于job类型的显式具体化版本。
+
 ```C++
 template <class T>  // template
 void Swap(T &, T &);
@@ -893,6 +897,7 @@ int main()
 	Swap(a, b);  // use void Swap<job>(job &, job &)
 }
 ```
+
 - Swap<job>中的<job>是可选的，因为函数的参数类型表明，这是job的一个具体化。因此，该院向也可以这样编写：``` template <> void Swap(job &, job &);   // simpler form ```
 	
 #### 2.显式具体化示例
@@ -945,14 +950,15 @@ void Swap(T& a, T& b)  // generalversion
 }
 
 // swaps just the salary and floor fields of a job structure
-
 template <> void Swap<job>(job& j1, job& j2)  // specialization
 {
 	double t1;
 	int t2;
+	
 	t1 = j1.salary;
 	j1.salary = j2.salary;
 	j2.salary = t1;
+	
 	t2 = j1.floor;
 	j1.floor = j2.floor;
 	j2.floor = t2;
@@ -969,9 +975,52 @@ void Show(job& j)
 	
 ### 8.5.4 实例化和具体化
 - 为进一步了解模板，必须理解术语实例化的具体化。	
+- 在代码中包含函数模板本身并不会生成函数定义，它只是一个用于生成函数定义的方案。编译器使用模板为特定类型生成函数定义时，得到的是模板实例(instantiation)。模板并非函数定义，但使用int的模板实例时函数定义。这种实例化方式被称为隐式实例化(implicit instantiation)
+-  最初只能通过隐式实例化来生成函数定义，但现在C++还允许显示实例化(explicit instantiation)。
+```C++
+// 显式实例化
+// 含义：使用Swap()模板生成int类型的函数定义
+template void Swap<int>(int, int);  // explict instantiation	
+
+// 显式具体化
+// 含义：不要使用Swap()模板来生成函数定义，而应使用专门为int类型显式地定义的函数定义
+template <> void Swap<int>(int &, int &);  // explicit specialization
+template <> void Swap(int &, int &);  // explicit sepcializaiton
+```
+
+- 显式具体化在关键字template后包含<>，而显式实例化没有。
+- **警告**: 试图在同一个文件（或转换单元）中使用同一种类型的显式实例或显示具体化将出错。
+
+- 隐式实例化、显式实例化和显式具体化统称为**具体化**(specialization)。它们的相同之处在于，它们表示的都是使用具体类型的函数定义，而不是通用描述。
+- 引入显式实例化后，必须使用新的语法——在声明中使用前缀template和template<>，以区分显式实例化和显式具体化。通常功能越多，语法规则越多。下面的代码总结了这些概念：
+```C++
+···
+template <class T>
+void Swap(T&, T&);  // template prototype
+
+template <> void Swap<job>(job&, job&);  // explicit specialization for job
+
+int mian(void)
+{
+	template void Swap<char>(char&, char&);  // explicit instantiation for char
+	short a, b;
+	···
+	Swap(a, b);  // implicit template instantiation for short
+	job n, m;
+	···
+	Swap(n, m);  // use explicit specilaization for job
+	char g, h;
+	···
+	Swap(g, h);  // use explicit template instantiation for char
+	···
+}
+```
+- 编译器看到char的显示实例化后，将使用模板定义来生成Swap()的char版本。对于其他Swap()调用，编译器根据函数调用中实际使用的参数，生成相应的版本。例如，当编译器看到函数调用Swap(a, b)后，将生成Swap()的short版本，因为两个参数的类型都是short。当编译器看到Swap(n, m)后，将使用job类型提供的独立定义（显式具体化）。当编译器看到Swap(g, h)后，将使用处理显示实例化时生成的模板具体化
+	
 
 ### 8.5.5 编译器选择使用哪个函数版本
-	
+- 对于函数重载、函数模板和函数模板重载，C++需要（且有一个定义良好的策略，来决定为函数调用使用哪一个函数的定义，尤其是有多个参数时。这个过程称为重载解析（overloading resolution)。详细解释这个策略将近一章的篇幅，因此我们先大致了解一下这个过程是如何进行的。
+	- 第 1 步：
 ### 8.5.6 模板函数的发展
 
 
