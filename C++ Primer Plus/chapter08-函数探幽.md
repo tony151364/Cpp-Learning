@@ -1020,7 +1020,91 @@ int mian(void)
 
 ### 8.5.5 编译器选择使用哪个函数版本
 - 对于函数重载、函数模板和函数模板重载，C++需要（且有一个定义良好的策略，来决定为函数调用使用哪一个函数的定义，尤其是有多个参数时。这个过程称为重载解析（overloading resolution)。详细解释这个策略将近一章的篇幅，因此我们先大致了解一下这个过程是如何进行的。
-	- 第 1 步：创建候选函数列表。其中包含于被调用函数的名称相同的函数和
+	- 第1步：创建候选函数列表。其中包含于被调用函数的名称相同的函数和
+	- 第2步：使用候选函数列表创建可行函数列表。
+	- 第3步：确定是否有最佳的可行函数
+- 最佳到最差的顺序：
+	- 1.完全匹配，但常规函数优于模板
+	- 2.提升转换（例如，char和shorts自动转换为int，float自动转换为double）
+	- 3.标准转换（例如，int转换为char，long转换为double）
+	- 4.用户定义的转换，如类声明中定义的转换
+- [ ] 标准转换
+- [ ] 提升转换
+	
+#### 1.完全匹配和最佳匹配
+	- Type(argument-list) 意味着用作实参的函数名与用作形参的函数指针只要返回类型和参数列表相同，就是匹配的
+	- 如果有多个匹配的原型，则编译器将无法完成重载解析过程；如果没有最佳的可行函数，编译器将生成一条错误消息。
+	- 有时候，及时两个函数都完全匹配，扔可完成重载解析。首先，指向非const数据的指针和引用优先与非const指针和引用参数匹配。但const与非const只适用于指针和引用
+- [ ] 不太理解
+	
+```C++
+// tempover.cpp  -- template overloading
+#include <iostream>
+
+template <typename T>  // template A
+void ShowArray(T arr[], int n);
+
+template <typename T>  // template B
+void ShowArray(T* arr[], int n);
+
+struct debts
+{
+	char name[50];
+	double amount;
+};
+
+int main()
+{
+	using namespace std;
+	int things[6] = { 13, 31, 103, 301, 310, 130 };
+	struct debts mr_E[3] =
+	{
+		{"Ima Wolfe", 2400.0},
+		{"Ura Foxe", 1300.0},
+		{"Iby Stout", 1800.0}
+	};
+	double* pd[3];
+
+	// set pointers to the amount members of the structures in mr_E
+	for (int i = 0; i < 3; i++)
+	{
+		pd[i] = &mr_E[i].amount;
+	}
+
+	cout << "Listing Mr.E's counts of things:\n";
+	// things is an array of int
+	ShowArray(things, 6);  // use template A
+
+	cout << "Listing Mr.E's debts:\n";
+	// pd is an array of pointers to double
+	ShowArray(pd, 3);  // use template B (more specialized)
+	return 0;
+}
+
+template <typename T>
+void ShowArray(T arr[], int n)
+{
+	using namespace std;
+	cout << "template A\n";
+	for (int i = 0; i < n; i++)
+	{
+		cout << arr[i] << ' ';
+	}
+	cout << endl;
+}
+
+template <typename T>
+void ShowArray(T* arr[], int n)
+{
+	using namespace std;
+	cout << "template B\n";
+	for (int i = 0; i < n; i++)
+	{
+		cout << *arr[i] << ' ';
+	}
+	cout << endl;
+}	
+```
 	
 	
 	
