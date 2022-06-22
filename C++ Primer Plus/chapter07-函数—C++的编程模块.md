@@ -792,7 +792,7 @@ void fill(std::array<double, Seasons>* pa)
 	for (int i = 0; i < Seasons; ++i)
 	{
 		cout << "Enter " << Snames[i] << " expenses: ";
-		cin >> (*pa)[i];  // pa[i]不对，cin传递给变量而不是地址
+		cin >> (*pa)[i];  // pa[i]不对，cin传递给变量而不是地址???
 	}
 }
 
