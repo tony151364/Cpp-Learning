@@ -1,3 +1,7 @@
+#### 看视频的重点
+- [ ] 8.5 函数模板
+
+
 # 第8章 函数探幽
 - C++相比于C语言的新特性：
   - 内联函数
@@ -863,7 +867,6 @@ void Show(int a[])
 	- 对于给定的函数名，可以有非模板函数、模板函数和显式具体化模板函数以及它们的重载版本。
 	- 显式具体化的原型和定义以template<>开头，并通过名称来指出类型。
 	- 具体化优先于常规模板，而非模板函数优先于具体化和常规模板
-	
 ```C++
 // 下面是用于交换job结构的非模板函数、模板函数和具体化的原型
 
@@ -877,10 +880,8 @@ void Swap(T &, T &);
 // explicit specialization for the job type
 template <> void Swap<job>(job &, job &);
 ```
-
 - 前面指出，如果有多个原型，则编译器在选择原型时，非模板版本优先于显示具体化和模板版本，显示具体化优先于使用模板生成的版本。
 - 例如，在下面的代码中，第一次调用Swap()时使用通用版本，而第二次调用使用基于job类型的显式具体化版本。
-
 ```C++
 template <class T>  // template
 void Swap(T &, T &);
@@ -898,7 +899,10 @@ int main()
 }
 ```
 
-- Swap<job>中的<job>是可选的，因为函数的参数类型表明，这是job的一个具体化。因此，该院向也可以这样编写：``` template <> void Swap(job &, job &);   // simpler form ```
+- Swap<job>中的<job>是可选的，因为函数的参数类型表明，这是job的一个具体化。因此，也可以这样编写：
+```C++ 
+template <> void Swap(job &, job &);   // simpler form 
+```
 	
 #### 2.显式具体化示例
 ```C++
@@ -1141,18 +1145,287 @@ int main()
 	return 0;
 }
 ```
+	
+#### 4.多个参数的函数
+- 将有多个参数的函数调用与有多个参数的原型进行匹配时，情况将非常复杂。编译器必须考虑所有参数的匹配情况。	
+
 ### 8.5.6 模板函数的发展
 
+#### 1.什么是类型
+- T1可能是short，而T2可能是char，在这种情况下，加法运算导致自动整型提升，因此结果类型为int。
+- 结构和类可能导致重载运算符+，这导致问题更加复杂。因此，在C++98中，没有办法声明xpy的类型
+```C++
+template<class T1, T2>
+void ft(T1 x, T2 y)
+{
+	
+}
+```
 
+#### 2.关键字decltype（C++11）
+- decltype提供的参数可以是表达式，因此在前面的模板函数ft()中，可使用下面代码
+```C++
+int x;
+decltype(x + y) xpy;  // make xpy the same type as x + y;
+xpy = x + y;
+	
+// 两条语句可以合二为一
+decltype(x + y) xpy = x + y;
+```
+- 对于``` decltype(expression) var ``` ,为确定类型，编译器必须遍历一个核对表。核对表的简化版如下：
+	- 第一步：如果expression是一个没有用括号括起的标识符，则var的类型与该标识符的类型相同，包括const等限定符
+	- 第二步：如果expression是一个函数调用，则var的类型与函数的返回类型相同
+	- 第三步：如果expression是一个左值，则var为指向其类型的引用。（不太懂）
+	- 第四步：如果前面的条件都不满足，则var的类型与expression的类型相同
+- [ ] 如果需要多次声明，可结合使用typedef和decltype
+```C++
+template<class T1, class T2>
+void ft(T1 x, T2 y)
+{
+	···
+	typedef decltype(x + y) xytype;
+	xytype xpy = x + y;
+	xytype arr[10];
+	xytype& rxy = arr[2];  // rxy a reference
+	···
+}	
+```
 
+#### 3.另一种函数声明语法(C++11 后置返回类型)
+- C++新增了一种声明和定义函数的语法。因为x, y还没声明，所以需要后置返回类型
+```C++
+double h(int x, float y);
+// 写成
+auto h(int x, float y) -> double;
+```
+- 这将返回类型转移到参数声明的后面。->double被称为后置返回类型(trailing return type)。其中auto是一个占位符，表示后置返回类型提供的类型，这是C++11给auto新增的一种角色。这种语法也可用于函数定义：
+- 通过结合使用这种语法和decltype，便可给gt()指定返回类型：
 
+```C++
+template<class T1, class T2>
+auto ft(T1 x, T2 y) -> decltype(x + y)
+{
+	···
+	return x + y;
+	
+}	
+```
 
+## 8.6 总结
+- 如果一个类（如 ofstream）是从另一个类型（如ostream）派生出来的，则基类引用可以指向派生类对象。
+- 只能在参数列表中从右到左提供默认参数。因此，如果为某个参数提供了默认值，则必须为该参数右边所有的参数提供默认值。
+- 函数模板自动完成重载函数的过程。
 
+## 8.7 复习题
+- 1.短小而简洁的函数，不包含循环等复杂运算。因为内联函数本质还是代码的替换。
+- 2
+```C++
+// a.
+void song(const char * name, int times = 1);
+// b???
+// c.不能吧，分配和释放感觉都有问题，要是提供了，又传进来一个，那么原来的就找不到了。但是覆盖了。（不懂）
+```
+- 3
+```C++
+#include <iostream>
+#include <string>
+using namespace std;
+void iquote(int x)
+{
+	cout << " \" " << x << " \" " << endl;
+}
 
+void iquote(double y)
+{
+	cout << " \" " << y << " \" " << endl;	
+}
 
+void iquote(string s)
+{
+	cout << " \" " << s << " \" " << endl;	
+}
+```
+- 4
+```C++
+// a.
+void ShowBox(box& B)
+{
+	cout << B.maker << endl;
+	cout << B.height << endl;
+	cout << B.width << endl;
+	cout << B.length << endl;
+	cout << B.volumn << endl;
+}
+	
+// b.
+void ChangeBoxVolume(box& B)
+{
+	B.volumn = B.height * B.width * B.length;
+}
+```
+	
+- 5.这是修改后的，对比下以前的，看看差别，尤其是指针的使用
+```C++
+// 7.15 arrobj.cpp -- functions with array objects (C++11)
+#include <iostream>
+#include <array>
+#include <string>
 
+// constant data
+const int Seasons = 4;
+// const arrya对象，包含四个string对象
+const std::array<std::string, Seasons> Snames =
+{ "Spring", "Summer", "Fall", "Winter" };
 
+void fill(std::array<double, Seasons>& pa);
+void show(std::array<double, Seasons>& da);
 
+int main()
+{
+	std::array<double, Seasons> expenses;
+	fill(expenses);
+	show(expenses);
+	return 0;
+}
 
+void fill(std::array<double, Seasons>& pa)
+{
+	using namespace std;
+	for (int i = 0; i < Seasons; ++i)
+	{
+		cout << "Enter " << Snames[i] << " expenses: ";
+		cin >> pa[i];  
+	}
+}
 
+void show(std::array<double, Seasons>& da)
+{
+	using namespace std;
+	double total = 0.0;
+	cout << "\nEXPENSES\n";
+	for (int i = 0; i < Seasons; i++)
+	{
+		cout << Snames[i] << ": $" << da[i] << endl;
+		total += da[i];
+	}
+	cout << "Total Expenses: $" << total << endl;
+}
+```
+- 6
+```C++
+#include <iostream>
+// a.
+double mass(double density, double volume)
+{
+	return density * volume;  // m = ρv
+}
+double mass(double density)
+{
+	return density * 1;
+}
+
+// b.
+void repeat(int n, char* a)
+{
+	for (int i = 0; i < n; i++)
+		std::cout << a << std::endl;
+}
+void repeat(char* a)
+{
+	for (int i = 0; i < 5; i++)
+		std::cout << a << std::endl;
+}
+
+// c.
+int average(int x, int y)
+{
+	int z = (int)(x + y) / 2;
+	return z;
+}
+
+int average(double x, double y)
+{
+	return (x + y) / 2;
+}
+
+// d.
+char mangle(char ch)
+{
+	return ch;
+}
+char* mangle(char* ch)
+{
+	return ch;
+}
+						    
+```						    
+- 7.
+```C++
+template <class T> 
+T TwoNumMax(T x, T y)
+{
+	return (x > y) ? x : y;
+}	
+```
+- 8. 看了视频再写
+- 9. 看了视频再写
+
+## 8.8 编程练习
+- 1
+```C++
+
+```
+
+- 2
+```C++
+
+```
+- 3
+```C++
+
+```
+
+- 4
+```C++
+
+```
+
+- 5
+```C++
+
+```
+
+- 6
+```C++
+
+```
+
+- 7
+```C++
+
+```
+
+- 8
+```C++
+
+```
+
+- 9
+```C++
+
+```
+
+- 10
+```C++
+
+```
+						    
+						    
+						    
+						    
+						    
+						    
+						    
+						    
+						    
 
