@@ -235,7 +235,8 @@ int main()
 ```
 ### 5.1.11 其他语法技巧——逗号运算符
 - 逗号运算符允许将两个表达式放到C++语法只允许放一个表达式的地方。
-- [ ] 为什么i = word.size()后出现h消失，不应该一个都不打印么
+- [x] 为什么i = word.size()后出现h消失，不应该一个都不打印么
+	- 这时word = "\0olleh",因为string的size为5，所以只打印前五个字符，又因为'\0'为空字符，不打印，所以最后显示的为“olle”，若cout << word[5]; 即可输出h。
 ```C++
 // 5.9 forstr2.cpp -- reversing an array
 #include <iostream>
@@ -256,7 +257,7 @@ int main()
 		word[i] = word[j];
 		word[j] = temp;
 	}
-		
+	 
 	cout << word << "\nDone\n";
 	return 0;
 }
@@ -544,7 +545,7 @@ int main()
 	int count = 0;  // use basic input
 
 	cout << "Enter characters; enter # to quit:\n";
-	cin.get(ch);
+	cin.get(ch);  // get()函数用的是引用&，所以才能修改ch的值。C的按值传递是不行的
 
 	while (ch != '#')
 	{
@@ -564,7 +565,7 @@ int main()
 - 函数重载将在第8章介绍
 
 ### 5.5.4 文件尾条件
-- 如果编程环境能够检测EOF，可以在类似与程序清单5.17的程序中使用重定向的文件，也可以使用键盘输入，并在键盘仔模拟EOF（Windows下用Ctrl+z来模拟）
+- 如果编程环境能够检测EOF，可以在类似与程序清单5.17的程序中使用重定向的文件，也可以使用键盘输入，并在键盘仔模拟EOF（Windows下用Ctrl+z来模拟；Linux下是Ctrl+D模拟，Ctrl+Z是挂起）
 ```C++
 // 5.18 textin3.cpp -- reading chars to end of file
 #include <iostream>
@@ -587,12 +588,13 @@ int main()
 - 检测到EOF后，cin将两位（eofbit和failbit）都设置为1.
 	- 可以通过eof()来查看eofbit是否被设置；如果检测到EOF，cin.eof()将返回true，否则返回false
 	- 同样，如果eofbit或falibit被设置为1， fail()函数返回true，否则返回false
-	- 注意，eof()和fail()方法报告最近读取的结果，因此应将cin.eof()或cin.fail测试放在读取后
-- [ ] 还不是太理解这个到底怎么搞的
+	- 注意，eof()和fail()方法报告最近读取的结果，因此应将cin.eof()或cin.fail()测试放在读取后
+- [x] 还不是太理解这个到底怎么搞的 （影响不大）
 
 #### 1.EOF结束输入
 - 对于文件输入，这也是有道理的，因为程序不应读取超出文件尾的内容。
-- 对于键盘输入，可以模拟EOF来结束循环。cin.clear()方法可能清除EOF标记，使输入继续进行。第17章介绍
+- 对于键盘输入，可以模拟EOF来结束循环。cin.clear()方法可以清除EOF标记，使输入继续进行。第17章介绍
+
 #### 2.常见的字符输入做法
 - cin.get(char)的返回值是一个cin对象。然而，istream类提供了一个可以将istream对象（如cin）转换为bool值的函数。当cin出现在需要bool值的地方（如在while循环的测试条件中）时，该转换函数将被调用。
 - 另外，如果最后一次读取成功了，则转换得到bool值为true；否则为false。
@@ -614,7 +616,7 @@ while (cin.get(ch))
 	++count;
 }
 ```
-- 三条指导原则（确定结束条件、对调节进行初始化以及更新条件）**全部被放在循环测试条件中！！！**（牛逼）
+- 三条指导原则（确定结束条件、对条件进行初始化以及更新条件）**全部被放在循环测试条件中！！！**（牛逼）
 ### 5.5.5 另一个cin.get()版本
 ```C++
 // 不接受任何参数的cin.get()成员函数返回输入中的下一个字符
@@ -642,7 +644,7 @@ while (ch != EOF)
 }  // 需要知道的是，EOF不表示输入中的字符，而是指出没有字符
 ```
 - 关于cin.get()还有一个微妙而重要的问题：EOF表示的不是有效字符编码，因此可能不与char类型兼容。
-```C+++
+```C++
 // 5.19 -- textlin4.cpp -- reading chars with cin.get()
 #include <iostream>
 int main(void)
@@ -696,7 +698,7 @@ const int Years = 4;
 int main()
 {
 	using namespace std;
-	const char* cities[Cities] =  // array of pointers
+	const char* cities[Cities] =  // array of pointers，字符指针数组
 	{  // to 5 strings
 		"Gribble city",
 		"Gribbletown",
@@ -788,21 +790,24 @@ const string cities[Cities] =
 ## 5.7 总结
 - 循环部分还行，cin这部分，字符串读取相关的函数和返回值看的有点懵。下次看视频可以再回顾回顾。
 ## 5.8 复习题
-- [ ] 第8题
-- [ ] 第9题
+- [x] 第8题
+- [x] 第9题
 
 ```C++
-// 1.入口条件：只要满足入口设置的条件，才能进入循环；先判断条件，后执行语句。如：for循环、while循环；出口条件：先执行，后判断条件。
-// 2.打印：0\n 1\n 2\n 3\n 4\n
-// 3.打印：0369 \n 11 \n
-// 4. 68
-// 5. k = 8, k = 9, k= 10 ...死循环
+// 1.入口条件：只要满足入口设置的条件，才能进入循环；先判断条件，后执行语句。如：for循环、while循环；
+//   出口条件：先执行，后判断条件，do while。
+// 2.打印：0\n 1\n 2\n 3\n 4\n 错。 01234\n 对
+// 3.打印：0369 \n 12 \n
+// 4. 6 \n 8
+// 5. k = 8 \n k = 9 \n k= 10 ...死循环 错。 k = 8 对
 // 6. 
 for (int i = 1; i <= 64; i *= 2)
 	cout << i << endl;
 // 7.加一个{}
 // 8.取最后以个值为表达式的值，024是八进制，转换为十进制是20，所以x = 20.逗号表达式优先级最低，所以y = 1;
-// 9.cin>>ch。把一个字符赋值给ch，包含回车。cin.get(ch)把下一个字符赋给ch，返回一个对象。ch=cin.get()返回一个对应字符ASCII编码的整数
+// 9.
+cin>>ch。把一个字符赋值给ch，忽略空白字符。
+cin.get(ch)把下一个字符赋给ch，返回一个对象。ch=cin.get()与cin.get(ch)是一样的
 ```
 ## 5.9 编程练习
 - 1
