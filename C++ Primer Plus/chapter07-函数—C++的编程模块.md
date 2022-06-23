@@ -141,9 +141,11 @@ int main()
 	double total, choices;
 	cout << "Enter the total number of number of choices on the game card and\n"
 		"the number of picks allowed:\n";
+	cout << fixed;
+	cout.precision(0);
+
 	while ((cin >> total >> choices) && choices <= total)
-	{
-		cout<< fixed;
+	{	
 		cout << "You have one chance in ";
 		cout << probability(total, choices);  // compute the odds
 		cout << " of winning.\n";
@@ -161,7 +163,7 @@ long double probability(unsigned numbers, unsigned picks)
 
 	for (n = numbers, p = picks; p > 0; n--, p--)
 		result = result * n / p;
-	
+
 	return result;
 }
 ```
@@ -1278,12 +1280,69 @@ double average(const double* arr, int size)
 
 - 3
 ```C++
+#include <iostream>
+struct box
+{
+	char maker[40];
+	float height;
+	float width;
+	float length;
+	float volume;
+};
+using namespace std;
+void ShowMembers(box B);
+void SetVolume(box& B);
 
+int main()
+{
+	using namespace std;
+	box B = { "Zhangyh", 1.0f, 2.0f, 3.0f, 0.0f };
+
+	SetVolume(B);
+	ShowMembers(B);
+	return 0;
+}
+
+void ShowMembers(box B)
+{
+	cout << "maker:" << B.maker << endl;
+	cout << "height:" << B.height << endl;
+	cout << "width:" << B.width << endl;
+	cout << "length:" << B.length << endl;
+	cout << "volume:" << B.volume << endl;
+}
+void SetVolume(box& B)
+{
+	B.volume = B.height * B.width * B.length;
+}
 ```
 
 - 4
 ```C++
+// 7.4 lotto.cpp -- probability of winning
+#include <iostream>
+long double probability(unsigned numbers, unsigned picks);
 
+int main()
+{
+	using namespace std;
+
+	cout << probability(47, 5) * probability(27, 1) << endl;
+	cout << "Bye\n";
+	return 0;
+}
+
+long double probability(unsigned numbers, unsigned picks)
+{
+	long double result = 1.0;
+	long double n;
+	unsigned p; // = unsigned int
+
+	for (n = numbers, p = picks; p > 0; n--, p--)
+		result = result * n / p;
+
+	return result;
+}
 ```
 
 - 5
