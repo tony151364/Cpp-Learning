@@ -841,13 +841,13 @@ int main()
 
 	for (int i = 2; i < AriSize; ++i)
 		factorials[i] = i * factorials[i - 1];
+	
+	cout << fixed;  // 用一般的方式输出浮点数，而非科学计数法
+	cout.precision(0);  // 小数点后保留0位
+
 	for (int i = 0; i < AriSize; ++i)
-	{
-		cout << fixed;
-		cout.precision(0);
 		cout << i << "! = " << factorials[i] << endl;
-	}
-		
+
 	return 0;
 }
 ```
@@ -857,16 +857,16 @@ int main()
 int main()
 {
 	using namespace std;
-	long long num;
-	long long sum = 0LL;
-	
-	cin >> num;
-	while (num != 0)
-	{
-		sum += num;
-		cout << "sum = " << sum  << endl;
+	double num;
+	double sum = 0.0;
+
+	do {
+		cout << "Pleaese enter a number: ";
 		cin >> num;
-	}
+		sum += num;
+		cout << "sum = " << sum << endl;
+	} while (num != 0);
+
 	return 0;
 }
 ```
@@ -885,11 +885,12 @@ int main()
 	{
 		D_money += 0.1 * 100;
 		C_money += 0.05 * C_money;
-		cout << "C_money: " << C_money << endl;
+		cout << "C_money: " << C_money
+			 << "\t\t D_money: " << D_money << endl;
 	}
 	cout << "Need years: " << year << endl;  // 27
 	cout << "Daphne has $" << D_money
-		<< "\tCleo has $" << C_money << endl;
+		<< "\nCleo has $" << C_money << endl;
 	return 0;
 }
 ```
@@ -902,12 +903,12 @@ using namespace std;
 const int Size = 12;
 int main()
 {
-	string months[Size] =
-		{
-			"January", "February", "March", "April",
-			"May", "June", "July", "August",
-			"September", "October", "November", "December"
-		};
+	const string months[Size] =
+	{
+		"January", "February", "March", "April",
+		"May", "June", "July", "August",
+		"September", "October", "November", "December"
+	};
 	int sales_volume[Size];
 	int sum = 0;
 
@@ -917,7 +918,7 @@ int main()
 		cin >> sales_volume[i];
 		sum += sales_volume[i];
 	}
-	cout << "This year's sales are " << sum << endl;
+	cout << "This year's sales are " << sum << "." << endl;
 }
 ```
 
@@ -972,8 +973,9 @@ int main()
 	int Size = 0;
 	cout << "How many cars do you wish to catalog? ";
 	cin >> Size;
-	car* cars = new car [Size];
 	cin.get();  // eat '\n'
+
+	car* cars = new car[Size];
 	for (int i = 0; i < Size; ++i)
 	{
 		cout << "Car #" << i + 1 << endl;
@@ -989,7 +991,7 @@ int main()
 	cout << "Here is your collection:\n";
 	for (int i = 0; i < Size; ++i)
 		cout << cars[i].year << " " << cars[i].producer << endl;
-	
+
 	delete[] cars;
 	return 0;
 }
@@ -1016,6 +1018,26 @@ int main()
 	}
 
 	cout << "You entered a total of "<< n << " words" << endl;
+	return 0;
+}
+```
+```C++
+// 另一种语法形式
+#include <iostream>
+#include <cstring>
+const int ArSize = 20;
+
+int main()
+{
+	using namespace std;
+	char word[ArSize];
+	int n = 0;
+
+	cout << "Enter words (to stop, type the word done):" << endl;
+	for (cin >> word; strcmp(word, "done") != 0; ++n)
+		cin >> word;
+
+	cout << "You entered a total of " << n << " words" << endl;
 	return 0;
 }
 ```
