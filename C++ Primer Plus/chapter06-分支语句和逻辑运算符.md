@@ -278,14 +278,28 @@ age > 30 && age < 45 || weight > 300  // 被解释为：
 
 ### 6.2.6 其他表示方式
 - 当键盘不提供逻辑符号时，可以用C++标准提供的而另一种表示方式——标识符and、or和not来替代。
-- [ ] 标识符and、or和not都是C++保留字，这意味着不能将它们用作变量名等。它们不是关键字，因为它们都是已有语言特性的另一种表示方式。它们不是C语言的保留字，若要使用则需要包含头文件iso646.h。C++不要求使用头文件
+- [x] 标识符and、or和not都是C++保留字，这意味着不能将它们用作变量名等。它们不是关键字，因为它们都是已有语言特性的另一种表示方式。它们不是C语言的保留字，若要使用则需要包含头文件iso646.h。C++不要求使用头文件
 - 一些区分：
 	- 保留字：语言中已经定义过的字，使用者不能再将这些字作为变量名或过程名使用。在一些语言中，一些保留字可能并没有应用于当前的语法中。，这就成了保留字与关键字的区别
 	- 关键字：在语言中有特定含义，称为语法中的一部分的那些字。关键字一定是保留字，反过来也差不多。（在Java中，goto是个保留字不是关键字，因此你不能使用它）
 	- 标识符：关键字和变量名都算标识符。只不过程序员在遵循一定规则下，可以自己定义变量名。
 	- 变量名：是标识符的实例
 	- 我觉得：最终还是变量名和关键字这俩，那两个的概念解释实在太少，暂时就这么理解吧。
+```C++
+#include <iostream>
+#include <ciso646>
 
+int main()
+{
+	using namespace std;
+
+	cout << (0 and 1) << "\t" << (0 && 1)<< endl;
+	cout << (1 or 0) << "\t" << (0 || 1) << endl;
+	cout << not 0 <<"\t" << !0 << endl;
+
+	return 0;
+}
+```
 ## 6.3 字符函数库cctype
 - C++从C语言继承了一个与字符相关的、非常方便的函数软件包——cctype
 - isalpha(ch); ch是一个字符返回一个非零值，否则返回0
@@ -557,7 +571,7 @@ int main()
 - 控制台输入/输出；文件输入/输出
 
 ### 6.8.1 文本I/O和文本文件
--[ ] 阅读cin的原理
+- [ ] 学完一遍后，阅读cin的原函数是如何编写的。
 - 本章讨论的文件I/O相当于控制台I/O，因此仅适用于文本文件(txt等)
 ### 6.8.2 写入到文本文件
 - cout用于控制台的一些内容：
@@ -583,8 +597,8 @@ int main()
 	- 4.就像使用cout那样使用该ofstream对象
 ```C++
 // 6.15 -- outline.cpp
-#include <iostream>
-#include <fstream>
+#include <iostream>  // ostream->cout		istream->cin
+#include <fstream>   // ofsteam		  	ifstream
 int main()
 {
 	using namespace std;
@@ -615,7 +629,7 @@ int main()
 	cout << "Now asking $" << d_price << endl;
 
 	// now do exact same things using outFile instead of cout
-	outFile << fixed;
+	outFile << fixed;  // outFile的用法和cout一模一样，只不过cout输出的屏幕，outFile输出到文件中
 	outFile.precision(2);
 	outFile.setf(ios_base::showpoint);
 	outFile << "Make and model: " << automobile << endl;
@@ -662,6 +676,7 @@ int main()
 	using namespace std;
 	char filename[SIZE];
 	ifstream inFile;  // object for handling file input
+	
 	cout << "Enter name of data file: ";
 	cin.getline(filename, SIZE);
 	inFile.open(filename);  // associate inFile with a file
@@ -671,6 +686,7 @@ int main()
 		cout << "Program terminating.\n";
 		exit(EXIT_FAILURE);  // EXIT_FAILURE:用于同操作系统通信的参数值
 	}
+	
 	double value;
 	double sum = 0.0;
 	int count = 0;  // number of items read
@@ -742,11 +758,12 @@ while (inFile >> value)  // read and test for success
 ## 6.9 总结
 - cctype字符函数库提供了一组方便的、功能强大的工具，可用于分析字符输入。
 ## 6.10 复习题
+- [X] 第3题
 - [ ] 第8题
 ```C++
 // 1.减少运算量，因为' '和'\n'不可能同时出现
-// 2.ch的值将会由字符型转换为int型，输出结果也为int，需要char(ch+1)才行
-// 3.输出：ct1 = 3, ct2 = 0
+// 2.ch将会由字符型提升为int型，输出结果也为int，需要char(ch+1)才行
+// 3.输出：ct1 = 3, ct2 = 0 （错误） ct1 = 9， ct2 = 9.
 // 4. 
 //	a: weight >= 115 && weight < 125 
 //	b: ch == 'q' || ch == 'Q'
@@ -754,7 +771,7 @@ while (inFile >> value)  // read and test for success
 //  d: x % 26 != 0 && x % 2 == 0
 //  e: guest == 1 || (donation >= 1000  && donation << 2000)
 //  f: (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
-// 5.是相同的
+// 5.是相同的 （错误）。如果x为10, 则!x 为 0, !!x = 1。如果x为bool变量，则!!x 为 x
 // 6.
 x >= 0 ? x : -x;
 // 7.
@@ -766,10 +783,12 @@ switch (ch)
 	case 'D': d_grade++; break;
 	default: f_grade++;
 }
-// 8.原来的程序：输入非数字cin会缓存这个字符，程序陷入死循环。但是如果是字符，输错也不会陷入死循环，因为数字可以被当做对应的字符？？？
+// 8.原来的程序：输入非数字cin会缓存这个字符，程序陷入死循环。但是如果是字符，输错成数字也不会陷入死循环，因为数字可以被当做对应的字符
 // 9.
 int line = 0;
 char ch;
+
+// while ( cin.get(ch) && ch != 'Q')
 while ((ch = cin.get()) != 'Q')
 {
 	if ( ch == '\n')
@@ -786,7 +805,7 @@ int main()
 {	
 	using namespace std;
 	char ch;
-
+	
 	while ((ch = cin.get()) != '@')
 	{
 		if (islower(ch))  // islower
@@ -803,6 +822,32 @@ int main()
 	return 0;
 }
 ```
+```C++
+// 修改后
+#include <iostream>
+#include <cctype>
+
+int main()
+{
+	using namespace std;
+	char ch;
+
+	while (cin >> ch && ch != '@')
+	{
+		if (islower(ch))  // islower
+			ch = toupper(ch);
+		else if (isupper(ch))  // isUpper
+			ch = tolower(ch);
+		else if (isdigit(ch))
+			continue;
+			
+		cout << ch << endl;
+	}
+
+	cout << "Program terminated!" << endl;;
+	return 0;
+}
+```
 - 2
 ```C++
 #include <iostream>
@@ -813,29 +858,38 @@ int main()
 {
 	array<double, 10> donations;
 	int i = 0;
-	double sum = 0;
+	double sum = 0.0;
 
 	cout << "Please Enter donation less than 10:\n";
-	while (cin >> donations[i])
+	while ((i < 10) && (cin >> donations[i]))  // i < 10要放在左边，防止数组越界
 	{
 		sum += donations[i];
-		if (++i > 9)
-			break;
+		i++;
 	}
 
 	if (i == 0)
-		return;
+		return 0;
+	else
+	{
+		cout << "i = " << i << endl;
+		cout << "sum = " << sum << endl;
+	}
+		
 
 	double average = sum / i;
 	int count = 0;
+
 	for (int j = 0; j < i; j++)
 	{
 		if (donations[j] > average)
 			count++;
 	}
-	cout << "Average: " << average << endl;
+	cout << fixed;
+	cout << "\nAverage: " << average << endl;
 	cout << count << " numbers that are greater than the average" << endl;
 	return 0;
+
+}// 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 		
 }// 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 ```
@@ -897,6 +951,41 @@ int main()
 		}
 		else
 			break;
+	}
+
+	switch (ch)
+	{
+	case 'a': cout << "give your a apple." << endl; break;
+	case 'c': cout << "You describe yourself as a born-again carnivore." << endl; break;
+	case 'p': cout << "You are a talented pianist." << endl; break;
+	case 't': cout << "a maple is a tree." << endl; break;
+	default: cout << "玩局《暖雪》吧！" << endl;
+	}
+
+	return 0;
+}
+```
+```C++
+// 修改后
+#include <iostream>
+using namespace std;
+
+int main()
+{
+	char ch;
+	cout << "Please enter one of the following choices:" << endl;
+	cout << "a) apple \t\t c) carnivore\n";
+	cout << "p) pianist \t\t t) tree\n";
+	cout << "g) game\n";
+
+	cin >> ch;
+	while (ch != 'a' && ch != 'c' && ch != 'p' && ch != 't' && ch != 'g')
+	{
+		cin.clear();
+		while (cin.get() != '\n')
+			continue;
+		cout << "Please enter a, c, p, t, or g: ";
+		cin >> ch;
 	}
 
 	switch (ch)
