@@ -64,6 +64,9 @@
 
 
 
+- 编译配置分为两部分：State 和 Target
+- State包括：Debug、DebugGame、Development、shipping
+- Targe包括：空、Client、Editor、Server
 
 
 
