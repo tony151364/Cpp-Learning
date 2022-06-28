@@ -47,3 +47,62 @@ public:
 
 #### 1.访问控制
 - 使用类对象的程序都可以直接访问公有部分
+
+-[ ] 复制过来
+
+### 0.2.3 实现类成员函数
+- 成员函数有两个特殊的特征：
+	- 定义成员函数时，使用作用域解析运算符(::)来表示函数所属的类；
+	- 类方法可以访问类的private组件
+- Stock类的其他成员函数不必使用作用域解析运算符，就可以使用update()方法，这是因为他们属于同一个类，因此update()是可见的。
+- Stock::update()是函数的**限定**名(qualified name)；而简单的update()是全名的缩写（非限定名，unqualified name），它只能在类作用域中使用。
+	
+```C++
+// stock00.cpp -- implementing the Stock class
+// version 00
+#include <iostream>
+#include "stock00.h"
+
+void Stock::acqire(const std::string& co, long n, double pr);
+{
+	company = co;
+	if (n < 0)
+	{
+		std::cout << "Number of shares can't be negative; "
+			<< company << " shares set to 0.\n";
+		shares = 0;
+	}
+	else
+		shares = n;
+	share_val = pr;
+	set_tot();
+}
+
+void Stock::buy(long num, double price)
+{
+	if (num < 0)
+	{
+		std::cout << "Number of shares purchased can't be negative."
+			<< "Transaction is aborted.\n";
+	}
+	else
+	{
+		shares += num;
+		share_val = price;
+		set_tot();
+	}
+}
+```
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
