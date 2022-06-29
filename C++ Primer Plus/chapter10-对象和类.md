@@ -19,9 +19,9 @@
 - 通常，C++程序员将接口（类定义）放在头文件中，并将实现放在源代码文件中。
 
 ```C++
-// 10.1 stock00.h
+// 10.1 stock00.h -- stock class interface
 // version 00
-#ifdef STOCK00_H_
+#ifndef STOCK00_H_
 #define STOCK00_H_
 
 #include <string>
@@ -29,13 +29,13 @@
 class Stock  // class declaration
 {
 private:
-	std::string company;
-	long shares;
-	double share_val;
-	double total_val;
-	void set_tot() { total_val = shares * share_val; }  // 成员函数可以就地定义，也可以用原型表示
+	std::string company; 
+	long shares;  // 所持有的股票数量
+	double share_val;  // 每股的价格
+	double total_val;  // 股票总价格
+	void set_tot() { total_val = shares * share_val; } 
 public:
-	void Acquire(const std::string& co, long n, double pr);
+	void acquire(const std::string& co, long n, double pr);
 	void buy(long num, double price);
 	void sell(long num, double price);
 	void update(double price);
@@ -43,6 +43,8 @@ public:
 };  // note semicolon at the end
 
 #endif // STOCK00_H_
+
+
 ```
 
 #### 1.访问控制
@@ -73,7 +75,8 @@ public:
 #include <iostream>
 #include "stock00.h"
 
-void Stock::acqire(const std::string& co, long n, double pr);
+// 管理对某个公司股票的首次购买
+void Stock::acquire(const std::string& co, long n, double pr)
 {
 	company = co;
 	if (n < 0)
@@ -88,6 +91,7 @@ void Stock::acqire(const std::string& co, long n, double pr);
 	set_tot();
 }
 
+// 增加持有的股票，同时确保买入的股票不为负数
 void Stock::buy(long num, double price)
 {
 	if (num < 0)
@@ -102,17 +106,365 @@ void Stock::buy(long num, double price)
 		set_tot();
 	}
 }
+
+// 减少持有的股票，同时确保卖出的股票不为负数
+void Stock::sell(long num, double price)
+{
+	using std::cout;
+	if (num < 0)
+	{
+		cout << "Number of share sold can't be negative. "
+			<< "Transaction is aborted.\n";
+	}
+	else if (num > shares)
+	{
+		cout << "You can't sell more than you have! "
+			<< "Transaction is aborted.\n";
+	}
+	else
+	{
+		shares -= num;
+		share_val = price;
+		set_tot();
+	}
+}
+
+void Stock::update(double price)
+{
+	share_val = price;
+	set_tot();
+}
+
+void Stock::show()
+{
+	using std::cout;
+	using std::ios_base;
+
+	// set format to #.###
+	ios_base::fmtflags orig =
+		cout.setf(ios_base::fixed, ios_base::floatfield);
+	std::streamsize prec = cout.precision(3);
+
+	std::cout << "Company: " << company
+		<< "Share: " << shares << '\n'
+		<< " Share Price: $" << share_val;
+
+	// set format to #.##
+	cout.precision(2);
+	std::cout << " Total Worth: $" << total_val << '\n';
+
+	// restore original format
+	cout.setf(orig, ios_base::floatfield);
+	cout.precision(prec);
+}
 ```
+#### 2. 内联方法
+- 其定义位于类声明中的函数都将自动成为内联函数，因此Stock::set_tot()是一个内联函数。为此，只需要在类实现部分中定义函数时使用inline限定符即可
+- 内联函数的特殊规则要求在每个使用它们的文件中都对其进行定义。确保内联定义对多个文件程序中的所有文件都可用、最简便的方法是：**将内联定义放在定义类的头文件中**（有些开发系统包含智能链接程序，允许将内联定义放在一个独立的实现文件中）。
+- [ ] 可以复习下前面的内联函数相关内容
+- 程序清单10.1中的set_tot()的内联定义与上述代码（定义紧跟在类声明后面）是等价的。
+
+#### 3.方法使用哪个对象
+- 在OOP中，调用成员函数被称为发送消息
+- 因此将同样的消息发送给两个不同的对象将调用同一个方法，但该方法被用于两个不同的对象
 	
+### 10.2.4 使用类
+- 要创建类对象，可以声明类变量，也可以使用new为类对象分配存储空间。可以将对象作为函数的参数和返回值，也可以一个对象赋给另一个。C++提供了一些工具，可用于初始化对象、让cin和cout识别对象，甚至在相似的类对象之间进行自动类型转换。
 	
+```C++
+// 10.3 usestock0.cpp -- the client program
+// compile with stock00.cpp
+#include <iostream>
+#include "stock00.h"
+
+int main()
+{
+	Stock fluffy_the_cat;
 	
+	fluffy_the_cat.acquire("ManoSmart", 20, 12.50);
+	fluffy_the_cat.show();
 	
-	
-	
-	
-	
-	
-	
-	
+	fluffy_the_cat.buy(15, 18.125);
+	fluffy_the_cat.show();
+
+	fluffy_the_cat.sell(400, 20.00);
+	fluffy_the_cat.show();
+
+	fluffy_the_cat.buy(300000, 40.125);
+	fluffy_the_cat.show();
+
+	fluffy_the_cat.sell(300000, 0.125);
+	fluffy_the_cat.show();
+
+	return 0;
+}
+```
+
+#### 客户/服务器模型
+- OOP程序员常依照客户/服务器模型来讨论设计程序。在这个概念中，客户是实用类的程序。类声明（包括类方法）构成了服务器。它……。这样程序员独立地对客户和服务器进行改进，对服务器的修改不会对客户的行为造成意外的影响。
+
+### 10.2.5 修改实现
+- 已修改
+
+### 10.2.6 小结
+- 公有部分的内容构成了设计的抽象部分——公有接口。将数据封装到私有部分中可以保护数据的完整性，这被称为数据隐藏。因此，C++通过类使得实现抽象、数据隐藏和封装等OOP特性很容易。
+```C++
+class className
+{
+private:
+	data member declarations
+public:
+	member function prototypes;
+}
+```
+- 公有部分的内容构成了设计的抽象部分——公有接口。
+- 设计三步骤：
+	- 第一步：提供类声明
+	- 第二步：实现类成员函数。需要用作用域解析运算符来指出成员函数属于哪个类。
+	- 第三步：在main()函数使用即可 。
+
+## 10.3 类的构造函数和析构函数
+- C++的目标之一是让使用类对象就像使用标准类型一样，能初始化。
+- 构造函数的原型和函数头有一个尤其的特征——虽然没有返回值，但没有被声明为void类型。实际上，构造函数没有声明类型。
+
+### 10.3.1 声明和定义构造函数
+- 现在需要
+
+#### 成员名和参数名
+- 构造函数的参数表示的不是类成员，而是赋给类成员的值。因此，参数名不能与类成员相同。
+- 常见做法：
+	- 1.在数据成员中使用m_前缀
+	- 2.在成员名中使用后缀_
+
+### 10.3.2 使用构造函数
+- 两种使用构造函数的方式：
+	- 1.显式调用构造函数``` Stock food = Stock("World Cabbage", 250, 1.25);  ``` 
+	- 2.隐式地调用构造函数``` Stock food("World Cabbage", 250, 1.25);  ``` 
+- 一般来说，使用对象来调用方法，但无法使用对象来调用构造函数，因为**在构造函数造出对象之前，对象是不存在的。** 因此构造函数被用来创建对象，而不能通过对象来调用。
+
+### 10.3.3 默认构造函数
+- 默认构造函数是在未提供显式初始值时，用来创建对象的构造函数。也就是说，它是用于下面这种声明的构造函数：``` Stock fluffy_the_cat;  // uses the default constructor ```
+- 程序清单10.3就是这样做的！这条语句管用的原因在于，如果没有提供任何构造函数，则C++将自动提供默认的构造函数。它是默认构造函数的隐式版本，不做任何工作。对于Stock类来说，默认构造函数可能如下： ``` Stock::Stock() {} ```
+- 如果提供了非构造函数(如Stock(const char* co, int n, double pr))，但没有提供默认构造函数，则创建的时候会出错。
+- 这样做的原因可能是想禁止创建微初始化的对象。然而，如果要创建对象，而不现实的初始化，则必须定义一个不接受任何参数的默认构造函数。
+- 定义默认构造函数的方式有两种：
+	- 一种是给已有构造函数的所有参数提供默认值: ``` Stock(const string& co = "Error", int n = 0, double pr = 0.0); ``` 
+	- 通过函数重载来定义另一个构造函数——一个没有参数的构造函数；``` Stock(); ```
+
+- 由于只能有一个默认构造函数，因此不要同时采用这两种方式。实际上，通常应初始化所有的对象，以确保所有成员一开始就有已知的合理值。
+
+```C++
+// 下面是为Stock类定义的一个默认构造函数：
+Stock::Stock()  // default constructor
+{
+	company = "no name";
+	shares = 0;
+	share_val = 0.0;
+	total_val = 0.0;
+}
+```
+- **提示：** 在设计类时，通常应提供对所用类成员做隐式初始化的默认构造函数。
+```C++
+// 使用上述任何一种方式（没有参数或所有参数都有默认值）创建了默认构造函数后，
+// 便可以声明对象变量，而不对它们进行显式初始化：
+Stock first;  // calls default constructor implicitly
+Stock first = Stock();  // calls it explicitly
+Stock *prelief = new Stock;  // calls it implicitly
+// 然而，不要被非默认构造函数的隐式形式所误导：
+Stock first("Concrete Conglomerate");  // calls constructor
+Stock secend();  // declares a function
+Stock third;  // calls default constructor
+```
+- 第一个声明调用非默认构造函数，即接受参数的构造函数；
+- 第二个声明指出，second()是一个返回Stock对象的函数。隐式地调用默认构造函数时，不要使用圆括号。
+
+### 10.3.4 析构函数
+- 对象过期时，程序将自动调用一个特殊的成员函数——析构函数，并在发现导致对象被删除的代码后，提供默认析构函数的定义。
+- 如果构造函数使用new来分配内存，则析构函数将使用delete来释放这些内存。
+- 它和构造函数一样，可以显式声明，没声明时编译器也会默认生成一个，但是啥都不接收。
+- 什么时候应调用析构函数？这由编译器决定，通常不应在代码中显式地调用析构函数
+	- 如果创建的是**静态存储类对象**，则其析构函数将在程序结束时自动被调用。
+	- 如果创建的是**自动存储类对象**，则其析构函数将在程序执行完代码块时（该对象是在其中定义的）自动被调用。
+	- 如果创建的是**new创建的对象**，则它将驻留在栈内存或自由存储区中，当使用delete来释放内存时，则析构函数将自动被调用。
+	- 最后，程序可以创建临时对象来完成特定操作，在这种情况下，程序将在结束对该对象的使用时自动调用其析构函数
+
+### 10.3.5 改进Stock类
+
+#### 1.头文件
+- 将构造函数和析构函数的原型加入到原来的类声明中。删除了acquire函数——不需要了。
+```C++
+// 10.1 stock00.h -- stock class interface
+// version 00
+#ifndef STOCK10_H_  // 防止多次包含，有点像Python的 if __name__ == "__main__"
+#define STOCK10_H_
+#include <string>
+
+class Stock  // class declaration
+{
+private:
+	std::string company; 
+	long shares;  // 所持有的股票数量
+	double share_val;  // 每股的价格
+	double total_val;  // 股票总价格
+	void set_tot() { total_val = shares * share_val; }
+public:
+	// two constructors
+	Stock();  // default constructor
+	Stock(const std::string& co, long n = 0, double pr = 0.0);
+	~Stock();
+	void buy(long num, double price);
+	void sell(long num, double price);
+	void update(double price);
+	void show();
+};  // note semicolon at the end
+
+#endif // STOCK00_H_
+```
+
+#### 2.实现文件
+```C++
+// stock00.cpp -- implementing the Stock class
+// version 00
+#include <iostream>
+#include "stock00.h"
+
+// constructors (verbose versions)
+Stock::Stock()  // default constructor
+{
+	std::cout << "Default constructor called\n";
+	company = "no name";
+	shares = 0;
+	share_val = 0.0;
+	total_val = 0.0;
+}
+
+Stock::Stock(const std::string& co, long n, double pr)
+{
+	std::cout << "Constructor using " << co << "called\n";
+	company = co;
+
+	if (n < 0)
+	{
+		std::cout << "Number of shares can't be negative; "
+			<< company << " shares set to 0.\n";
+		shares = 0;
+	}
+	else
+		shares = n;
+	share_val = pr;
+	set_tot();
+}
+
+// class destructor
+Stock::~Stock()  // version class destructor
+{
+	std::cout << "Bey, " << company << "\n";
+}
+
+// other methods
+void Stock::buy(long num, double price)
+{
+	if (num < 0)
+	{
+		std::cout << "Number of shares purchased can't be negative."
+			<< "Transaction is aborted.\n";
+	}
+	else
+	{
+		shares += num;
+		share_val = price;
+		set_tot();
+	}
+}
+
+void Stock::sell(long num, double price)
+{
+	using std::cout;
+	if (num < 0)
+	{
+		cout << "Number of share sold can't be negative. "
+			<< "Transaction is aborted.\n";
+	}
+	else if (num > shares)
+	{
+		cout << "You can't sell more than you have! "
+			<< "Transaction is aborted.\n";
+	}
+	else
+	{
+		shares -= num;
+		share_val = price;
+		set_tot();
+	}
+}
+
+void Stock::update(double price)
+{
+	share_val = price;
+	set_tot();
+}
+
+void Stock::show()
+{
+	using std::cout;
+	using std::ios_base;
+
+	// set format to #.###
+	ios_base::fmtflags orig =
+		cout.setf(ios_base::fixed, ios_base::floatfield);
+	std::streamsize prec = cout.precision(3);
+
+	std::cout << "Company: " << company
+		<< "Share: " << shares << '\n'
+		<< " Share Price: $" << share_val;
+
+	// set format to #.##
+	cout.precision(2);
+	std::cout << " Total Worth: $" << total_val << '\n';
+
+	// restore original format
+	cout.setf(orig, ios_base::floatfield);
+	cout.precision(prec);
+}
+```
+
+#### 3.客户文件
+```C++
+// 10.6 usestock2.cpp -- using the Stock class compile with stock10.cpp
+#include <iostream>
+#include "stock00.h"
+
+int main()
+{
+	{
+		using std::cout;
+		cout << "Using constructors to create new objects\n";
+		
+		Stock stock1("NanoSmart", 12, 20.0);  // syntax 1
+		stock1.show();
+		Stock stock2 = Stock("Boffo Objects", 2, 2.0);  // syntax 2
+		stock2.show();
+
+		cout << "Assigning stock1 to stock2:\n";
+		stock2 = stock1;
+		cout << "Listing stock1 and stock2:\n";
+		stock1.show();
+		stock2.show();
+
+		cout << "Using a constructor to reset an object\n";
+		stock1 = Stock("Nifty Foods", 10, 50.0);  // temp object
+		cout << "Revised stock1:\n";
+		stock1.show();
+		cout << "Done\n";
+	}
+
+	return 0;
+}
+```
+
+
+
+
+
 	
 	
