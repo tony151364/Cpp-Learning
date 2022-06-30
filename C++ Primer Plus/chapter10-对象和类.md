@@ -70,7 +70,7 @@ public:
 	- 定义成员函数时，使用作用域解析运算符（::）来标识函数所属的类。
 	- 类方法可以访问类的private组件 
 ```C++
-// stock00.cpp -- implementing the Stock class
+// 10.2 stock00.cpp -- implementing the Stock class
 // version 00
 #include <iostream>
 #include "stock00.h"
@@ -293,7 +293,7 @@ Stock third;  // calls default constructor
 #### 1.头文件
 - 将构造函数和析构函数的原型加入到原来的类声明中。删除了acquire函数——不需要了。
 ```C++
-// 10.1 stock00.h -- stock class interface
+// 10.4 stock00.h -- stock class interface
 // version 00
 #ifndef STOCK10_H_  // 防止多次包含，有点像Python的 if __name__ == "__main__"
 #define STOCK10_H_
@@ -323,7 +323,7 @@ public:
 
 #### 2.实现文件
 ```C++
-// stock00.cpp -- implementing the Stock class
+// 10.5 stock00.cpp -- implementing the Stock class
 // version 00
 #include <iostream>
 #include "stock00.h"
@@ -356,7 +356,7 @@ Stock::Stock(const std::string& co, long n, double pr)
 }
 
 // class destructor
-Stock::~Stock()  // version class destructor
+Stock::~Stock() 
 {
 	std::cout << "Bey, " << company << "\n";
 }
@@ -461,10 +461,102 @@ int main()
 	return 0;
 }
 ```
+```
+// 输出内容
+Using constructors to create new objects
+Constructor using NanoSmart called
+Company: NanoSmartShare: 12
+ Share Price: $20.000 Total Worth: $240.00
+Constructor using Boffo Objects called
+Company: Boffo ObjectsShare: 2
+ Share Price: $2.000 Total Worth: $4.00
+Assigning stock1 to stock2:
+Listing stock1 and stock2:
+Company: NanoSmartShare: 12
+ Share Price: $20.000 Total Worth: $240.00
+Company: NanoSmartShare: 12
+ Share Price: $20.000 Total Worth: $240.00
+Using a constructor to reset an object
+Constructor using Nifty Foods called
+Bey, Nifty Foods
+Revised stock1:
+Company: Nifty FoodsShare: 10
+ Share Price: $50.000 Total Worth: $500.00
+Done
+Bey, NanoSmart  // stock2（被stock1传入到stock2中）
+Bey, Nifty Foods  //stock1被重置为“Nifty Food”
+```
+- **提示**：为什么main()中多＋一个大括号？
 
+#### 4.程序说明
+- C++标准允许编译器使用两种方式来执行第二种语法。一种是使其行为和第一种语法完全相同：略
+- 另一种方式是允许调用构造函数来创建一个临时对象，然后将临时对象复制到stock2中，并丢弃它。如果编译器使用的是这种方式，则将会生成下面的输出。略
+- **注意：**在默认情况下，将一个对象赋给同类型的另一个对象时，C++将源对象的每个数据成员的内容复制到目标对象中相应的数据成员中
+- 在main中``` stock1 = Stock("Nifty Foods", 10, 50.0); ``` stock1对象已经存在，因此这条语句不是对stock1进行初始化，而是将新值赋给它。这是通过让构造程序创建一个新的、临时的对象，然后将其内容复制给stock1来实现的。随后程序调用析构函数，以删除该临时对象
+- 因为局部变量（stock1和stock2）放在栈中，因此最后创建的对象将最先被删除
 
+- **提示：**如果既可以通过初始化，也可以通过赋值来设置对象的值，则应采用初始化方式。通常这种方式的效率更高。
 
-
-
+#### 5.C++列表初始化
+- C++11中可以将列表初始化应用于类
 	
-	
+#### 6.const成员函数
+```C++
+const Stock land = Stock("Lasldfoas sdlf !");
+land.show();
+```
+- 对于C++来说，编译器拒绝第二行。因为show()的代码无法确保调用对象不能被修改——调用对象和const一样，不应被修改。我们以前通过将函数参数声明为const引用或指向const的指针来解决这种问题。但这里存在语法问题：show()方法没有任何参数。相反，它所使用的对象是由方法调用隐式地提供的。需要一种新的语法——保证函数不会修改调用的对象。
+```C++
+void show() const;  // 将const关键字放在函数的括号后面
+
+void stock::show() const;  // 函数头的定义
+```
+- 以这种方式声明和定义的类函数被称为const成员函数。就像应尽可能将const引用和指针用作函数形参一样，只要类方法不修改调用对象，就应将其声明为const。从现在开始，我们将遵守这一规则。
+
+### 10.3.6 构造函数和析构函数小结
+```C++
+Bozo(const char * fname, const char * lname);  // constructor prototype
+
+Bozo bozetta = Bozo("Bozetta", "Biggens");  // primary form
+Bozo fufu("Fufu", "O'Dweeb");  // short form
+Bozo* pc = new Bozo("Popo", "Le Peu");  // dynamic object
+
+Bozo bozetta = {"Bozetta", "Biggens"};  // C++11
+Bozo fufu {"Fufu", "O'Dweeb"};  // C++11
+Bozo* pc = new Bozo {"Popo", "Le Peu"};  // C++11
+
+```
+- **警告：** 接受一个参数的构造函数允许使用赋值语法将对象初始化为一个值：``` classname object = value; ```
+
+- 默认构造函数可以没有任何参数；如果有，则必须给所有参数都提供默认值：
+```C++
+Bozo();  // default constructor prototype
+Bistro(const char* s = "Chez Zero");  // default for Bistro class
+
+// 对于未被初始化的对象，程序将使用默认构造函数来创建
+ Bozo bubi;  // use default
+ Bozo *pb = new Bozo;  // use default
+```
+
+- 如果构造函数使用了new，则必须提供使用了delete的析构函数
+
+## 10.4 this 指针
+- 有时候方法可能涉及两个对象，在这种情况下需要使用C++的this指针。
+- 要让程序知道存储的数据，最直接的方法是提供一个返回值。
+```C++
+const Stock& topval(const Stock& s) const;
+```
+- ↑该函数隐式地访问一个对象，而显式的访问另一个对象，并返回其中一个对象的引用。括号中的const表明，该函数不会修改被显式地访问的对象；而括号后面的const表示，该函数不会修改被隐式地访问的对象。由于该函数返回了两个const对象之一的引用，因此返回类型也应为const引用。
+- 假设要对Stock对象stock1和stock2进行比较，并将其中股价总值较高的那一个赋给top对象，则可以使用下面两条语句之一：
+```C++
+top = stock1.topval(stock2);  // 隐式访问stock1，而显式访问stock2
+top = stock2.topval(stock1);  // 隐式访问stock2，而显式访问stock1
+```
+- 实际上，这种表示法有些混乱。如果可以使用关系运算符 > 来比较这两个对象，将更为清晰。可以使用运算符重载（参见第11章）完成这项工作。
+- this指针指向用来调用成员函数的对象（this被作为隐藏参数传递给方法）。一般来说，所有的类方法都将this指针设置为调用它的对象的地址。确实，topval()中的total_val只不过是this->total_val的简写（第4章使用->运算符，通过指针来访问结构成员。这也适用于类成员）
+- **注意：** 每个成员函数（包括构造函数和析构函数）都有一个this指针。this指针指向调用对象。如果方法需要引用整个调用对象，则可以使用表达式\*this。在函数的括号后面使用const限定符将this限定为const，这样将不能使用this来修改对象的值。
+- 然而，要返回的并不是this。因为this是对象的地址，而是对象本身，即\*this（将解除引用运算符\*用于指针，将得到指针的值）。现在，可以将\*this作为调用对象的别名完成前面的方法定义。
+
+
+
+
