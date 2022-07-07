@@ -557,6 +557,337 @@ top = stock2.topval(stock1);  // 隐式访问stock2，而显式访问stock1
 - **注意：** 每个成员函数（包括构造函数和析构函数）都有一个this指针。this指针指向调用对象。如果方法需要引用整个调用对象，则可以使用表达式\*this。在函数的括号后面使用const限定符将this限定为const，这样将不能使用this来修改对象的值。
 - 然而，要返回的并不是this。因为this是对象的地址，而是对象本身，即\*this（将解除引用运算符\*用于指针，将得到指针的值）。现在，可以将\*this作为调用对象的别名完成前面的方法定义。
 
+- 返回类型为引用意味着返回的是调用对象本身，而不是其副本。
+
+```C++
+#pragma once
+// 10.7 stock20.h -- argument version
+#ifndef STOCK20_H_  // 防止多次包含，有点像Python的 if __name__ == "__main__"
+#define STOCK20_H_
+#include <string>
+
+class Stock  // class declaration
+{
+private:
+	std::string company;
+	long shares;  // 所持有的股票数量
+	double share_val;  // 每股的价格
+	double total_val;  // 股票总价格
+	void set_tot() { total_val = shares * share_val; }
+public:
+	// two constructors
+	Stock();  // default constructor
+	Stock(const std::string& co, long n = 0, double pr = 0.0);
+	~Stock();
+	void buy(long num, double price);
+	void sell(long num, double price);
+	void update(double price);
+	void show() const;
+	const Stock& topval(const Stock& s) const;
+};  // note semicolon at the end
+
+#endif // STOCK20_H_
+```
+
+```C++
+// 10.8 Stock20.h.cpp -- augmented version
+//
+#include "Stock20.h"
+#include <iostream>
+
+
+// constructors (verbose versions)
+Stock::Stock()  // default constructor
+{
+	std::cout << "Default constructor called\n";
+	company = "no name";
+	shares = 0;
+	share_val = 0.0;
+	total_val = 0.0;
+}
+
+Stock::Stock(const std::string& co, long n, double pr)
+{
+	std::cout << "Constructor using " << co << "called\n";
+	company = co;
+
+	if (n < 0)
+	{
+		std::cout << "Number of shares can't be negative; "
+			<< company << " shares set to 0.\n";
+		shares = 0;
+	}
+	else
+		shares = n;
+	share_val = pr;
+	set_tot();
+}
+
+// class destructor
+Stock::~Stock()
+{
+	std::cout << "Bey, " << company << "\n";
+}
+
+// other methods
+void Stock::buy(long num, double price)
+{
+	if (num < 0)
+	{
+		std::cout << "Number of shares purchased can't be negative."
+			<< "Transaction is aborted.\n";
+	}
+	else
+	{
+		shares += num;
+		share_val = price;
+		set_tot();
+	}
+}
+
+void Stock::sell(long num, double price)
+{
+	using std::cout;
+	if (num < 0)
+	{
+		cout << "Number of share sold can't be negative. "
+			<< "Transaction is aborted.\n";
+	}
+	else if (num > shares)
+	{
+		cout << "You can't sell more than you have! "
+			<< "Transaction is aborted.\n";
+	}
+	else
+	{
+		shares -= num;
+		share_val = price;
+		set_tot();
+	}
+}
+
+void Stock::update(double price)
+{
+	share_val = price;
+	set_tot();
+}
+
+void Stock::show() const
+{
+	using std::cout;
+	using std::ios_base;
+
+	// set format to #.###
+	ios_base::fmtflags orig =
+		cout.setf(ios_base::fixed, ios_base::floatfield);
+	std::streamsize prec = cout.precision(3);
+
+	std::cout << "Company: " << company
+		<< "Share: " << shares << '\n'
+		<< " Share Price: $" << share_val;
+
+	// set format to #.##
+	cout.precision(2);
+	std::cout << " Total Worth: $" << total_val << '\n';
+
+	// restore original format
+	cout.setf(orig, ios_base::floatfield);
+	cout.precision(prec);
+}
+
+const Stock& Stock::topval(const Stock& s) const {
+	if (s.total_val > total_val)
+	{
+		return s;
+	}
+	else
+	{
+		return *this;
+	}
+}
+```
+
+## 10.5 对象数组
+- 初始化对象数组的方案是，首先使用默认构造函数创建数组元素，然后花括号中的构造函数将创建临时对象，然后将临时对象的内容复制到相应的元素中。因此，要创建类对象数组，则这个类必须有默认构造函数。
+```C++
+// 10.9 usestock2.cpp -- using the Stock class
+// compile with stock20.cpp
+#include "Stock20.h"
+#include <iostream>
+
+const int STKS = 4;
+
+int main()
+{
+	Stock stocks[STKS] = {
+		Stock("NanoSmart", 12, 20.0),
+		Stock("Boffo Object", 200, 2.0),
+		Stock("Monolithic Obelisks", 130, 3.25),
+		Stock("Fleep Enterprises", 60, 6.5)
+	};
+
+	std::cout << "Stock holding:\n";
+	int st;
+	for (st = 0; st < STKS; st++)
+	{
+		stocks[st].show();
+	};
+	
+	// set pointer to first element
+	const Stock* top = &stocks[0];
+	for (st = 1; st < STKS; st++)
+	{
+		top = &top->topval(stocks[st]);
+	}
+
+	// now top points to the most valuable holding
+	std::cout << "\nMost valuable holding:\n";
+	top->show();
+	return 0;
+}
+```
+
+## 10.6 类作用域
+- 在类中定义的名称（如类数据成员名和类成员函数名）的作用域都为整个类，作用域为整个类的名称只在该类中是已知的，在类外是不可知的。因此，可以在不同类中使用相同的类成员名而不会引起冲突。
+### 10.6.1 作用域位为类的常量
+- 两种方式
+	- 1.在类中声明一个枚举。但用这种方式声明枚举并不会创建类数据成员。也就是说，每个独立的对象并不会把枚举包含进去。另外，Months只是一个符号名称，在作用域为整个类的代码中遇到它时，编译器将用30来替代它。
+	- [ ] 没看懂
+	- 2.用static。该常量将与其他静态变量存储在一起，而不是存储在对象在。因此，只有一个Moinths常量，被所有Bakery对象共享。
+
+## 10.6.2 作用域内枚举(C++11)
+- 枚举可能会重名，C++11提供新类型的枚举来解决这种问题，就是在变量名前加上class或struct。
+- C++11还提高了作用域内枚举的类型安全。在有些情况下，常规枚举将转换为整形，如将其赋给int变量或用于比较表达式时，但作用域内枚举不能隐式地转换为整形:
+```C++
+enum egg_old {Small, Medium, Large, Jumbo};  // unscoped
+enum class t_shirt {Small, Medium, Large, Xlarge};  // scoped
+egg_old one = Medium;  // unscoped
+.....
+
+// 但在必要时，可进行显式类型转换
+int Frodo = int(t_shirt::Small);  // Frodo set to 0
+// C++11中，默认情况下，枚举的底层类型为int。还提供了一种语法，可以修改
+enum class : short pizza {Small, Medium, Large, XLarge};  // 底层类型指定为short
+```
+
+## 10.7 抽象数据类型
+```C++
+// 10.10 stack.h -- class definition for the stack ADT
+#ifndef STACK_H_
+#define STACK_H__
+
+typedef unsigned long Item;
+
+class Stack
+{
+private:
+	enum {MAX = 10};  // constant specific to class
+	Item items[MAX];  // holds stack items
+	int top;  // index for top stack item
+public:
+	Stack();
+	bool isempty() const;
+	bool isfull() const;
+	// push() returns false if static already is full, true otherwise
+	bool push(const Item& item);  // add item to stack
+	// pop() returns false if stack already is empth, true otherwise
+	bool pop(Item& item);  // pop top into item
+};
+#endif
+
+```
+```C++
+// 10.11 stacl.cpp -- Stack member functions
+#include "stack.h"
+Stack::Stack()  // Crate an empty stack
+{
+	top = 0;
+}
+
+bool Stack::isempty() const
+{
+	return top == 0;
+}
+
+bool Stack::isfull() const
+{
+	return top == MAX;
+}
+bool Stack::push(const Item& item)
+{
+	if (top < MAX)
+	{
+		items[top++] = item;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool Stack::pop(Item& item)
+{
+	if (top > 0)
+	{
+		item = items[--top];
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+``` 
+```C++
+// 10.12 stacker.cpp -- testing the Stack class
+#include <iostream>
+#include <cctype>
+#include "stack.h"
+int main()
+{
+	using namespace std;
+	Stack st;  // create an empty stack
+	char ch;
+	unsigned long po;
+
+	cout << "Please enter A to add a purchese order,\n"
+		<< "P to process a PO, or Q to quit.\n";
+	while (cin >> ch && toupper(ch) != 'Q')
+	{
+		while (cin.get() != '\n')
+		{
+			continue;
+		}
+		if (!isalpha(ch))
+		{
+			cout << '\a';
+			continue;
+		}
+		switch (ch)
+		{
+		case 'A':
+		case 'a': 
+			cout << "Enter a PO number to add: ";
+			cin >> po;
+			if (st.isfull())
+			{
+				cout << "stack already full\n";
+			}
+			else
+			{
+				st.push(po);
+			}
+			break;
+		case 'P':
+		case 'p':
+			if (st.isempty())
+				cou
+		}
+	}
+}
+```
+
 
 
 
