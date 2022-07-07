@@ -794,10 +794,9 @@ public:
 	bool pop(Item& item);  // pop top into item
 };
 #endif
-
 ```
 ```C++
-// 10.11 stacl.cpp -- Stack member functions
+// 10.11 stack.cpp -- Stack member functions
 #include "stack.h"
 Stack::Stack()  // Crate an empty stack
 {
@@ -867,7 +866,7 @@ int main()
 		switch (ch)
 		{
 		case 'A':
-		case 'a': 
+		case 'a':
 			cout << "Enter a PO number to add: ";
 			cin >> po;
 			if (st.isfull())
@@ -882,9 +881,19 @@ int main()
 		case 'P':
 		case 'p':
 			if (st.isempty())
-				cou
+				cout << "stack already full\n";
+			else
+			{
+				st.pop(po);
+				cout << "PO #" << po << " popped\n";
+			}
+			break;
 		}
+		cout << "Please enter A to add a purchase order, \n"
+			<< "P to process a Po, or Q to qiut.\n";
 	}
+	cout << "Bye\n";
+	return 0;
 }
 ```
 
