@@ -329,11 +329,6 @@ const char* const months[12] =
 ### 9.2.5 静态持续性、内部链接性
 
 
-## 9.3 名称空间
-- 在C++中，名称可以是变量、函数、结构、枚举、类以及类和结构的成员
-
-### 9.3.1 传统的C++名称空间
-- 潜在作用域(potential scope)比声明区域(declaration region)
 
 
 
