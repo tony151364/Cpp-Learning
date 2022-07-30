@@ -5,4 +5,4 @@
 
 ## 官方文档解读
 - [ ] [虚幻四C++入坑指南合集版](https://www.bilibili.com/video/BV14K411J7v2)
-- [ ] [【虚幻UE4官方教程】] (https://www.bilibili.com/video/BV1GS4y1L7aP)
+- [ ] [【虚幻UE4官方教程】](https://www.bilibili.com/video/BV1GS4y1L7aP)
