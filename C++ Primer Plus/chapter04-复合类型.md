@@ -676,13 +676,14 @@ int color = blue;  // valid, spectrum type promoted to int
 band = 3;  // invaild, int not converted to spectrum
 color = 3 + red;  // valid, red converted to int
 ```
+
 - 如果int值是有效的，可以通过强制类型转换，把它赋给枚举
-	- ```C++ band = spectrum(3);``` 
+	- ``` band = spectrum(3); ``` 
 - 如果对一个不适当的值进行强制类型转换，结果是不确定的。参阅后面“枚举的取值范围”一节
 	- ``` band = spec(40009); ``` 
 - 枚举的规则相当严格。实际上，枚举更常被用来定义相关的符号常量，而不是新类型。可以定义switch语句中的符号常量。
 - 如果打算只使用常量，而不创建枚举类型的变量，则可以省略枚举类型的名称
-	-```C++ enum{red, orange, yellow, green, blue, voilet, indigo, ultraviolet};
+	- ``` enum{red, orange, yellow, green, blue, voilet, indigo, ultraviolet}; ```
 
 ### 4.6.1 设置枚举的值
 ```C++
