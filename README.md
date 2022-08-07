@@ -3,16 +3,13 @@
 - [ ] 每看完一本书，都去做一个项目，小的项目也可。
 
 ## 待做
-- [ ] Lua学习
 - [ ] XML结构、C++对它如何读取
 - [ ] JSON文件，以及C++对其的读取
 
-## 游戏
-- [虚幻引擎](Unreal%20Engine)
-- [Lua](Lua)
-
 ## 书本
-- [C语言程序设计](C-Learning)
+- [Lua](Lua)
+- [UE4](Unreal%20Engine)
+- [C语言](C-Learning)
 - [C++ Prime Plus](C++%20Primer%20Plus)
 
 ## 视频
