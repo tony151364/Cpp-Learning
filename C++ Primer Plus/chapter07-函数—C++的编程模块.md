@@ -1347,12 +1347,124 @@ long double probability(unsigned numbers, unsigned picks)
 
 - 5
 ```C++
+#include "stdafx.h"
+#include <iostream>
 
+long double factorial(unsigned n);
+
+int main()
+{
+	using std::cin;
+	using std::cout;
+	using std::fixed;
+	unsigned n;
+
+	cout << fixed;
+	cout.precision(0);
+
+	while (cin >> n)
+	{
+		cout << "Enter  a factor: "
+		int n;
+		while(!(cin >> n))
+		{
+			cin.clear();
+			while(cin.get() != '\n')
+				continue;
+			cout << "Bad input, Please enter a number: ";
+		}
+		cout << n << "! = " << factorial(n) << "\n";
+	}
+
+    return 0;
+}
+
+long double factorial(unsigned n)
+{
+	if (n <= 0)
+	{
+		return 1;
+	}
+	else
+	{
+		return n * factorial(n - 1);
+	}
+}
 ```
 
 - 6
 ```C++
+// vect.cpp : Defines the entry point for the console application.
+//
 
+#include "stdafx.h"
+#include <iostream>
+
+void FillArray(double* dNums, int& nSize);
+void ShowArray(const double* dNums, const int& nSize);
+void ReverseArray(double* dNums, const int& nSize);
+
+using namespace std;
+
+int main()
+{
+	int nSize;
+
+	cout << "Enter size: ";
+	cin >> nSize;
+	cin.get();
+
+	double* dNums = new double[nSize];
+	FillArray(dNums, nSize);
+	ShowArray(dNums, nSize);
+
+	ReverseArray(dNums, nSize);
+	cout << "after reverse: " << endl;
+	ShowArray(dNums, nSize);
+}
+
+void FillArray(double* dNums, int& nSize)
+{
+	if (nSize <= 0)
+	{
+		return;
+	}
+	
+	int i;
+	for(i = 0; i < nSize; ++i)
+	{
+		cout << "Enter a double number: ";
+		if (!(cin >> dNums[i]))
+		{
+			break;
+		}
+	}
+
+	cout << "there have " << i << " nums.\n";
+	nSize = i;
+}
+
+void ShowArray(const double* dNums, const int& nSize)
+{
+	for (int i = 0; i < nSize; ++i)
+	{
+		cout << dNums[i] << " ";
+	}
+
+	cout << endl;
+}
+
+void ReverseArray(double* dNums, const int& nSize)
+{
+	double temp;
+
+	for (int i = 0, j = nSize-1; i < j; ++i, --j)
+	{
+		temp = dNums[i];
+		dNums[i] = dNums[j];
+		dNums[j] = temp;
+	}
+}
 ```
 
 - 7
