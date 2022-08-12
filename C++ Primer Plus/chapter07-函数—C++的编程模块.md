@@ -762,7 +762,7 @@ void display(const string sa[], int n)
 - 除了getline()外，该程序像对待内置类型（如int）一样对待string，如声明、赋值、打印。
 
 ## 7.8 函数与array对象
-- 在C++中，类对象是基于结构的，因此结构编程方面的有些考虑因素也适用于类。例如，可按值将对象传递给函数，这时函数处理的是院士对象的副本。另外，也可传递指向对象的指针，这让函数能直接操作原始对象。
+- 在C++中，类对象是基于结构的，因此结构编程方面的有些考虑因素也适用于类。例如，可按值将对象传递给函数，这时函数处理的是原始对象的副本。另外，也可传递指向对象的指针，这让函数能直接操作原始对象。
 - 使用array需要包含头文件array，而名词array位于名称空间std中。
 - 注意：模板array并非只能存储基本数据类型，它还可存储类对象。
 
@@ -1469,7 +1469,80 @@ void ReverseArray(double* dNums, const int& nSize)
 
 - 7
 ```C++
+// 7.7 arrfun3.cpp -- array functions and const
+#include <iostream>
 
+const int Max = 5;
+
+double* fill_array(double ar[], int limit);
+void show_array(const double ar[], double* n);
+void revalue(double r, double ar[], double* n);
+
+using namespace std;
+
+int main()
+{
+	double properties[Max];
+	double* size = fill_array(properties, Max);
+	show_array(properties, size);
+
+	if (size > 0)
+	{
+		cout << "Enter revaluation factor: ";
+		double factor;
+		while (!(cin >> factor))  // bad input
+		{
+			cin.clear();
+			while (cin.get() != '\n')
+				continue;
+			cout << "Bad input; Please enter a number: ";
+		}
+		revalue(factor, properties, size);
+		show_array(properties, size);
+	}
+	cout << "Done.\n";
+	return 0;
+}
+
+double* fill_array(double ar[], int limit)
+{
+	double temp;
+	int i;
+	for (i = 0; i < limit; i++)
+	{
+		cout << "Enter value #" << i + 1 << ": ";
+		cin >> temp;
+		if (!cin)
+		{
+			cin.clear();
+			while (cin.get() != '\n')
+				continue;
+			cout << "Bad input; input process terminated.\n";
+			break;
+		}
+		else if (temp < 0)  // signal to terminate
+			break;
+		ar[i] = temp;
+	}
+
+	return &ar[i-1];
+}
+
+void show_array(const double ar[], double* n)
+{
+	for (int i = 0; (ar + i) <= n; ++i)
+	{
+		cout << "Property #" << i + 1 << ": $";
+		cout << ar[i] << endl;
+	}
+}
+
+// multiplies each element of ar[] by r
+void revalue(double r, double ar[], double* n)
+{
+	for (int i = 0; &ar[i] <= n; i++)
+		ar[i] *= r;
+}
 ```
 
 - 8
