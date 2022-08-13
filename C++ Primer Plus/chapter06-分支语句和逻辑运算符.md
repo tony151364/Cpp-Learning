@@ -759,21 +759,22 @@ while (inFile >> value)  // read and test for success
 - cctype字符函数库提供了一组方便的、功能强大的工具，可用于分析字符输入。
 ## 6.10 复习题
 - [X] 第3题
-- [ ] 第8题
+- [X] 第5题
+- [X] 第8题
 ```C++
 // 1.减少运算量，因为' '和'\n'不可能同时出现
-// 2.ch将会由字符型提升为int型，输出结果也为int，需要char(ch+1)才行
+// 2.ch将会由字符型提升为int型，输出结果也为int，需要char(ch+1)，或者char(++ch)
 // 3.输出：ct1 = 3, ct2 = 0 （错误） ct1 = 9， ct2 = 9.
 // 4. 
-//	a: weight >= 115 && weight < 125 
-//	b: ch == 'q' || ch == 'Q'
-//	c: x != 26 && x % 2 == 0
+//  a: weight >= 115 && weight < 125 
+//  b: ch == 'q' || ch == 'Q'
+//  c: x != 26 && x % 2 == 0
 //  d: x % 26 != 0 && x % 2 == 0
 //  e: guest == 1 || (donation >= 1000  && donation << 2000)
 //  f: (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
 // 5.是相同的 （错误）。如果x为10, 则!x 为 0, !!x = 1。如果x为bool变量，则!!x 为 x
 // 6.
-x >= 0 ? x : -x;
+(x >= 0) ? x : -x;
 // 7.
 switch (ch)
 {
@@ -783,7 +784,7 @@ switch (ch)
 	case 'D': d_grade++; break;
 	default: f_grade++;
 }
-// 8.原来的程序：输入非数字cin会缓存这个字符，程序陷入死循环。但是如果是字符，输错成数字也不会陷入死循环，因为数字可以被当做对应的字符
+// 8.原来的程序：输入非数字cin会缓存这个字符，程序陷入死循环。但是如果是字符型，输错成其他的数字或者输错字符，程序都可以正常运行
 // 9.
 int line = 0;
 char ch;
@@ -847,6 +848,30 @@ int main()
 	cout << "Program terminated!" << endl;;
 	return 0;
 }
+
+// 再修改后
+#include <iostream>
+#include <cctype>
+
+int main()
+{
+	using namespace std;
+	char ch;
+
+	while ((ch = cin.get()) != '@')
+	{
+		if (isdigit(ch))
+			continue;
+		else if (islower(ch))
+			ch = toupper(ch);
+		else  // upper and other
+			ch = tolower(ch);
+
+		cout << ch;
+	}
+
+	cout << "Program terminated!" << endl;;
+}
 ```
 - 2
 ```C++
@@ -890,7 +915,48 @@ int main()
 	return 0;
 
 }// 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
-		
+
+// 修改后
+#include <iostream>
+#include <array>
+using namespace std;
+
+int main()
+{
+	array<double, 10> donations;
+	int i = 0;
+	double sum = 0.0;
+
+	cout << "Please Enter donation less than 10:\n";
+	while ((i < 10) && (cin >> donations[i]))  // i < 10要放在左边，防止数组越界
+	{
+		sum += donations[i];
+		i++;
+	}
+
+	if (i == 0)
+		return 0;
+	else
+	{
+		cout << "i = " << i << endl;
+		cout << "sum = " << sum << endl;
+	}
+
+
+	double average = sum / i;
+	int count = 0;
+
+	while(i - 1 >= 0)
+	{
+		if (donations[--i] > average)
+			count++;
+	}
+
+	cout << fixed;
+	cout << "\nAverage: " << average << endl;
+	cout << count << " numbers that are greater than the average" << endl;
+	return 0;
+
 }// 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0
 ```
 ```C++
