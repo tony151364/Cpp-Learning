@@ -880,7 +880,7 @@ void Swap(T &, T &);
 // explicit specialization for the job type
 template <> void Swap<job>(job &, job &);
 ```
-- 前面指出，如果有多个原型，则编译器在选择原型时，非模板版本优先于显示具体化和模板版本，显示具体化优先于使用模板生成的版本。
+- 编译器在选择原型时的优先级：非模板函数 > 显示具体化模板函数 > 常规模板函数
 - 例如，在下面的代码中，第一次调用Swap()时使用通用版本，而第二次调用使用基于job类型的显式具体化版本。
 ```C++
 template <class T>  // template
