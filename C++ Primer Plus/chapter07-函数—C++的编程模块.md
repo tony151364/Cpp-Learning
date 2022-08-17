@@ -1547,7 +1547,56 @@ void revalue(double r, double ar[], double* n)
 
 - 8
 ```C++
+#include "stdafx.h"
 
+// 7.15 arrobj.cpp -- functions with array objects (C++11)
+#include <iostream>
+#include <array>
+#include <string>
+
+// constant data
+const int Seasons = 4;
+// const arrya对象，包含四个string对象
+const char* Snames[Seasons] = 
+{ "Spring", "Summer", "Fall", "Winter" };
+
+struct Expenses
+{
+	double  spend[Seasons];
+} expenses;
+
+void fill(Expenses* pa);
+void show(const Expenses& da);
+
+int main()
+{
+	fill(&expenses);
+	show(expenses);
+	return 0;
+}
+
+void fill(Expenses* pa)
+{
+	using namespace std;
+	for (int i = 0; i < Seasons; ++i)
+	{
+		cout << "Enter " << Snames[i] << " expenses: ";
+		cin >> pa->spend[i];
+	}
+}
+
+void show(const Expenses& da)
+{
+	using namespace std;
+	double total = 0.0;
+	cout << "\nEXPENSES\n";
+	for (int i = 0; i < Seasons; i++)
+	{
+		cout << Snames[i] << ": $" << da.spend[i] << endl;
+		total += da.spend[i];
+	}
+	cout << "Total Expenses: $" << total << endl;
+}
 ```
 
 - 9
