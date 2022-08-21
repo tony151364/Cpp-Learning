@@ -784,7 +784,7 @@ int main()
 {
 	using namespace std;
 	using VECTOR::Vector;
-	srand(time(0));
+	srand(time(0));  // time(0) 函数返回当前的时间，通常为从某一个日期开始的秒数
 	double direction;
 	Vector step;
 	Vector result(0.0, 0.0);
@@ -803,7 +803,8 @@ int main()
 		{
 			direction = rand() % 360;
 			step.reset(dstept, direction, Vector::POL);
-			result = result + step;
+			// 这条语句将result设置为RECT模式，而不管result和step的初始模式是什么
+			result = result + step;  // 如果偏爱其他方式，例如，result保留原来的模式，可以通过为类定义赋值运算来覆盖默认的复制方式。第12章将介绍这样的示例
 			steps++;
 		}
 
@@ -825,3 +826,32 @@ int main()
 	return 0;
 }
 ```
+- 因此，如果发现自己在随机漫步时，请保持自信，迈大步走。虽然在蜿蜒前进的过程中仍旧无法控制前进的方向，但至少会走得远一点
+- [ ] 随机数种子的原理
+
+## 11.6 类的自动类型转换和强制类型转换
+- 将一个标准类型变量的值赋给另一种标准类型的变量时，如果这两种类型兼容，则C++自动将这个值转换为接受变量的类型。
+```C++
+// 下面的语句都将导致数值类型转换
+long count = 8;  // int value 8 converted to type long
+double time = 11;  // int value 11 convered to type double
+int side = 3.33;  // double value 3.33 convered to type int 3
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
