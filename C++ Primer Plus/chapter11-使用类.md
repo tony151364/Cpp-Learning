@@ -535,9 +535,10 @@ firend Time operator+(const Time& t1, const Time & t2);
 - 具体用哪个版本，根据具体情况而定
 
 ## 11.5 再谈重载：一个矢量类
-
+- 另外设计这个类时将使得用户修改了矢量的一种表示后，对象将自动更新另一种表示。使对象有这种智能，是C++类的另一个优点
 ```C++
-// 11.13 vect.h -- Vector class with <<, mode state
+#pragma once
+// 11.3 vector.h -- Vector class with << , mode state
 #ifndef VECTOR_H_
 #define VECTOR_H_
 
@@ -548,13 +549,279 @@ namespace VECTOR
 	class Vector
 	{
 	public:
-		enum Mode
+		enum Mode { RECT, POL };  // RECT for rectangular, POL for Polar modes
+
+	private:
+		double x;
+		double y;
+		double mag;  // length of vector
+		double ang;  // direction of vector in degrees
+		Mode mode;  // RECT or POL
+
+	private:
+		void set_mag();
+		void set_ang();
+		void set_x();
+		void set_y();
+
+	public:
+		Vector();
+		Vector(double n1, double n2, Mode from = RECT);
+		void reset(double n1, double n2, Mode form = RECT);
+		~Vector();
+		double xval() const { return x; }  // report x value
+		double yval() const { return y; }
+		double magval() const { return mag; }
+		double angval() const { return ang; }
+		void polar_mode();
+		void rect_mode();
+
+		// operator overloading
+		Vector operator+ (const Vector& b) const;
+		Vector operator- (const Vector& b) const;
+		Vector operator- () const;
+		Vector operator* (double n) const;
+
+		// fiends
+		friend Vector operator*(double n, const Vector& a);
+		friend std::ostream&
+			operator << (std::ostream& os, const Vector& v);
 	};
 }
+#endif
 ```
 
+```C++
+// 11.4 vector.cpp -- methods for the Vector class
+#include <cmath>
+#include "vect.h"  // include <iostream>
+using std::sqrt;
+using std::sin;
+using std::cos;
+using std::atan;
+using std::atan2;
+using std::cout;
 
+namespace VECTOR
+{
+	// compute degrees in one radian
+	const double Rad_to_deg = 45.0 / atan(1.0);
+	// should be about 57.234523452
 
+	// private methods
+	// calculates magnitude from x and y
+	void Vector::set_mag()
+	{
+		mag = sqrt(x * x + y * y);
+	}
+	
+	void Vector::set_ang()
+	{
+		if (x == 0.0 && y == 0.0)
+			ang = 0.0;
+		else
+			ang = atan2(y, x);
+	}
 
+	void Vector::set_x()
+	{
+		x = mag * cos(ang);
+	}
 
+	void Vector::set_y()
+	{
+		y = mag * sin(ang);
+	}
 
+	// public methods
+	Vector::Vector()   // defualt construcot
+	{
+		x = y = mag = ang = 0.0;
+		mode = RECT;
+	}
+
+	// construct vector from rectangular coordinates if form is r
+	// (the default) or else from polar coordinates if form is p
+	Vector::Vector(double n1, double n2, Mode form)
+	{
+		mode = form;
+		if (form == RECT)
+		{
+			x = n1;
+			y = n2;
+			set_mag();
+			set_ang();
+		}
+		else if (form == POL)
+		{
+			mag = n1;
+			ang = n2 / Rad_to_deg;
+			set_x();
+			set_y();
+		}
+		else
+		{
+			cout << "Incorrect 3rd argument: to Vecor() -- ";
+			cout << "vector set to 0\n";
+			x = y = mag = ang = 0.0;
+			mode = RECT;
+		}
+
+		
+	}
+
+	// reset vector from recangluar coodinate if 
+	// RECT 
+	// form is POL
+	void Vector::reset(double n1, double n2, Mode form)
+	{
+		mode = form;
+		if (form == RECT)
+		{
+			x = n1;
+			y = n2;
+			set_mag();
+			set_ang();
+		}
+		else if (form == POL)
+		{
+			mag = n1;
+			ang = n2 / Rad_to_deg;
+			set_x();
+			set_y();
+		}
+		else
+		{
+			cout << "Incorrect 3rd argument to Vector() -- ";
+			cout << "vector set to 0\n";
+			x = y = mag = ang  = 0.0;
+			mode = RECT;
+		}
+	}
+
+	Vector::~Vector()  // destructor
+	{
+
+	}
+
+	void Vector::polar_mode()  // set to polar mode
+	{
+		mode = POL;
+	}
+
+	void Vector::rect_mode()  // set to rectangular mode
+	{
+		mode = RECT;
+	}
+
+	// operator overloading
+	// add two Vectors
+	Vector Vector::operator+(const Vector& b) const
+	{
+		return Vector(x + b.x, y + b.y);
+	}
+
+	// substract Vector b from a
+	Vector Vector::operator-(const Vector& b) const
+	{
+		return Vector(x - b.x, y - b.y);
+	}
+
+	// reverse sign of Vector
+	Vector Vector::operator-() const
+	{
+		return Vector(-x, -y);
+	}
+
+	Vector Vector::operator*(double n) const
+	{
+		return Vector(n * x, n * y);
+	}
+
+	// friend methods
+	// multiply n by Vector a
+	Vector operator*(double n, const Vector& a)
+	{
+		return a * n;
+	}
+
+	std::ostream& operator << (std::ostream& os, const Vector& v)
+	{
+		if (v.mode == Vector::RECT)
+			os << "(x, y) = (" << v.x << ", " << v.y << ")";
+		else if (v.mode == Vector::POL)
+		{
+			os << "(m, a) = (" << v.mag << ", "
+				<< v.ang * Rad_to_deg << ")";
+		}
+		else
+			os << "Vector object mode is invalid";
+		return os;
+	}
+}  // end namespace VECTOR
+```
+
+### 11.5.1 使用状态成员
+- mode控制构造函数，reset方法等函数使用那种形式，这样的成员被称为状态函数，因为这种成员描述的是对象所处的状态
+- 类非常适于在一个对象中表示实体的不同方面。首先在一个对象中存储多种表示方式；然后，编写这样的类函数，以便给一种表示方式赋值时，将自动给其他方式赋值。
+
+### 11.5.2 为Vector类重载算术运算符
+- **提示：** 如果方法通过计算得到一个新的类对象，则应考虑是否可以使用类构造函数来完成这种工作。这样做不仅可以避免麻烦，而且可以确保新的对象是按照正确的方式创建的。
+
+- **注意：** 因为运算符重载是通过函数来实现的，所以只要运算符函数的特征标不同，使用的运算符数量与相应的内置C++运算符相同，就可以多次重载同一个运算符。
+
+### 11.5.3 对实现的说明
+- 将接口与实现分离是OOP的目标之一，这样允许对实现进行调整，而无需修改使用这个类的程序中的代码。
+
+### 11.5.4 使用Vector类来模拟随机漫步
+```C++
+// 11.5 randwalk.cpp -- using the Vector class
+#include <iostream>
+#include <cstdlib>  // rand(), srand() prototypes
+#include <ctime>  // time() prototype
+#include "vect.h"
+int main()
+{
+	using namespace std;
+	using VECTOR::Vector;
+	srand(time(0));
+	double direction;
+	Vector step;
+	Vector result(0.0, 0.0);
+	unsigned long steps = 0;
+	double target;
+	double dstept;
+
+	cout << "Enter target distance (q to qiut): ";
+	while (cin >> target)
+	{
+		cout << "Enter step length: ";
+		if (!(cin >> dstept))
+			break;
+
+		while (result.magval() < target)
+		{
+			direction = rand() % 360;
+			step.reset(dstept, direction, Vector::POL);
+			result = result + step;
+			steps++;
+		}
+
+		cout << "After " << steps << "steps, the subject "
+			"has the following location:\n";
+		cout << result << endl;
+		result.polar_mode();
+		cout << "or\n" << result << endl;
+		cout << "Average outward distance per step = "
+			<< result.magval() / steps << endl;
+		steps = 0;
+		result.reset(0.0, 0.0);
+		cout << "Enter target distance (q to quit): ";
+	}
+	cout << "Bye!\n";
+	cin.clear();
+	while (cin.get() != '\n')
+		continue;
+	return 0;
+}
+```
