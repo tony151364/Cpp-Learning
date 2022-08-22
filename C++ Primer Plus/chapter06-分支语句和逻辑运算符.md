@@ -1036,14 +1036,13 @@ int main()
 #include <iostream>
 using namespace std;
 
+void show(void);
+
 int main()
 {
 	char ch;
-	cout << "Please enter one of the following choices:" << endl;
-	cout << "a) apple \t\t c) carnivore\n";
-	cout << "p) pianist \t\t t) tree\n";
-	cout << "g) game\n";
-
+	
+	show();
 	cin >> ch;
 	while (ch != 'a' && ch != 'c' && ch != 'p' && ch != 't' && ch != 'g')
 	{
@@ -1065,12 +1064,23 @@ int main()
 
 	return 0;
 }
+
+void show(void)
+{
+	cout << "Please enter one of the following choices:" << endl;
+	cout << "a) apple \t\t c) carnivore\n";
+	cout << "p) pianist \t\t t) tree\n";
+	cout << "g) game\n";
+}
 ```
 
 - 4.这道题有点花里胡哨，到时候看视频跟着敲得了。
 ```C++
 #include<iostream>
+
 const int strsize = 30;
+const int memberSize = 4;
+
 struct bop {
 	char fullname[strsize];  // real name
 	char title[strsize];  // job title
@@ -1078,22 +1088,101 @@ struct bop {
 	int preference;  // 0 = fullname, 1 = title, 2 = bopname
 };
 
+bop members[memberSize] =
+{
+	{"Rick", "level_A", "RR", 0},
+	{"Jack", "level_B", "JJ", 1},
+	{"Micheal", "Level_C", "MM", 2},
+	{"Rose", "Levle_B", "RR", 0}
+};
+
+void ShowMenu();
+void ShowFullName();
+void ShowBopName();
+void ShowTitle();
+void ShowPerference();
+
 int main()
 {
-	using namespace std;
+	using std::cout;
+	using std::cin;
 
-	bop* members = new bop[3];
-	cout << "Benevolent Order of Programmer Report" << endl;
-
-	while (true)
-	{
-		cout << "a. display by name \t\t b. display the title\n";
-		cout << "c. display by bopname \t\t d.display by preference\n";
-		cout << "q.quit\n";
-		cout << "Enter your choice: "
-	}
+	ShowMenu();
 	
+	char ch;
+	cout << "Enter your choice: ";
+	cin >> ch;
+	while (ch != 'q')
+	{
+		switch (ch)
+		{
+		case 'a': ShowFullName(); break;
+		case 'b': ShowTitle(); break;
+		case 'c': ShowBopName(); break;
+		case 'd': ShowPerference(); break;
+		default: std::cout << "Wrong input!" << std::endl;
+		}
+
+		cin.clear();
+		while (cin.get() != '\n')
+			continue;
+		
+		ShowMenu();
+		std::cout << "Next choice: ";
+		cin >> ch;
+	}
+
+	std::cout << "Bye!" << std::endl;
 	return 0;
+}
+
+void ShowMenu()
+{
+	using std::cout;
+
+	cout << "--------------------------------------------------------\n";
+	cout << "Benevolent Order of Programmer Report\n";
+	cout << "a. display by name \t\t b. display the title\n";
+	cout << "c. display by bopname \t\t d.display by preference\n";
+	cout << "q.quit\n";
+	cout << "--------------------------------------------------------\n";
+}
+
+void ShowFullName()
+{
+	for(int i = 0; i < memberSize; ++i)
+	{
+		std::cout << members[i].fullname << std::endl;
+	}
+}
+
+void ShowBopName()
+{
+	for (int i = 0; i < memberSize; ++i)
+	{
+		std::cout << members[i].bopname << std::endl;
+	}
+}
+
+void ShowTitle()
+{
+	for (int i = 0; i < memberSize; ++i)
+	{
+		std::cout << members[i].title << std::endl;
+	}
+}
+
+void ShowPerference()
+{
+	for (int i = 0; i < memberSize; ++i)
+	{
+		switch (members[i].preference)
+		{
+		case 0: std::cout << members[i].fullname << std::endl; break;
+		case 1: std::cout << members[i].title << std::endl; break;
+		case 2: std::cout << members[i].bopname << std::endl; break;
+		}
+	}
 }
 ```
 
