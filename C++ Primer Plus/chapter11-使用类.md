@@ -839,10 +839,136 @@ int side = 3.33;  // double value 3.33 convered to type int 3
 ```
 
 
+```C++
+// 11.6 stonewt.h -- definition for the Stonewt class 
+#ifndef STONEWT_H_
+#define STONEWT_H_
+class Stonewt
+{
+private:
+	enum {Lbs_per_stn = 14};
+	int stone;
+	double pds_left;
+	double pounds;
+public:
+	Stonewt(double lbs);
+	Stonewt(int stn, double lbs);
+	Stonewt();
+	~Stonewt();
+	void show_lbs() const;
+	void show_stn() const;
+};
+#endif
+```
 
+```C++
+// 11.17 stonewt.cpp -- Stonewt methods
+#include <iostream>
+using std::cout;
+#include "stonewt.h"
 
+Stonewt::Stonewt(double lbs)
+{
+	stone = int(lbs) / Lbs_per_stn;  // integer division
+	pds_left = int(lbs) % Lbs_per_stn + lbs - int(lbs);
+	pounds = lbs;
+}
 
+Stonewt::Stonewt(int stn, double lbs)
+{
+	stone = stn;
+	pds_left = lbs;
+	pounds = stn * Lbs_per_stn + lbs;
+}
 
+Stonewt::Stonewt()
+{
+	stone = pounds = pds_left = 0;
+}
+
+Stonewt::~Stonewt()  // destructor
+{
+
+}
+
+void Stonewt::show_stn() const
+{
+	cout << stone << " stone, " << pds_left << " pounds\n";
+}
+
+// show weight in pounds
+void Stonewt::show_lbs() const
+{
+	cout << pounds << " pounds\n";
+}
+```
+- C++新增了关键字explicit，用于关闭这种自动转换的特性
+```C++
+explicit Stonewt(double lbs);  // no implicit conversions allowed
+
+Stonewt myCat;  // create a Stonewt object
+myCat = 19.6；  // not vaild if Stonewt(double) is declared as explicit
+myCat = Stonewt(19.6);  // ok, an explicit conversion
+myCat = (Stonewt) 19.6;  // ok, old form for explicit typecast
+```
+
+- **注意：** 只接受一个参数的构造函数定义了从参数类型到类类型的转换。如果使用关键字explicit限定了这种构造函数，则它只能用于显示转换
+
+- 编译器在什么时候使用Stonewt(double)函数呢？如果在声明中使用了关键字explicit，则Stonewt（double）智能用于显示强制类型转换，否则还可以用于下面的隐式转换。
+	- 将Stonewt对象初始化为double值时。
+	- 将double值赋给Stonewt对象时。
+	- 将double值传递给接受Stonewt参数的函数时。
+	- 返回值被声明为Stonewt的函数视图返回double值时。
+	- 在上述任意一种情况下，使用可转换为double类型的内置类型时。
+- 下面详细介绍最后一点。函数原型化提供的参数匹配过程，允许使用Stonewt（double）构造函数来转换其他数值类型。也就是说，下面两条语句都首先将int转换为double，然后使用Stonewt（double）构造函数
+```C++
+Stonewt Jumbo(7000);  // uses Stonewt(double), converting int to double
+Jumbo = 7300;  // uses Stonewt(double), converting int to double
+```
+
+```C++
+// 11.18 stone.cpp -- user-defined conversions
+// compile with stonewt.cpp
+#include <iostream>
+using std::cout;
+#include "stonewt.h"
+void display(const Stonewt& st, int n);
+
+int main()
+{
+	Stonewt incognito = 275;  // uses constructor to initialize
+	Stonewt wolfe(285.7);  // same as Stonewt wolfe = 285.7;
+	Stonewt taft(21, 8);
+
+	cout << "The celebrity weighed ";
+	incognito.show_stn();
+	cout << "The detective weighted ";
+	wolfe.show_stn();
+	cout << "The President weighted ";
+
+	taft.show_lbs();
+	incognito = 276.8;  // uses constructor for conversion
+	taft = 325;  // same as taft = Stonewt(325);
+	cout << "After dinner, the President weighted ";
+	incognito.show_stn();
+	cout << "After dinner, the President wieghted ";
+	taft.show_lbs();
+	display(taft, 2);
+	cout << "The wrestler weighted even more.\n";
+	display(422, 2);
+	cout << "No stone left unearned\n";
+	return 0;
+}
+
+void display(const Stonewt& st, int n)
+{
+	for (int i = 0; i < n; i++)
+	{
+		cout << "Wow! ";
+		st.show_stn();
+	}
+}
+```
 
 
 
