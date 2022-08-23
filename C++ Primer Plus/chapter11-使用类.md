@@ -970,6 +970,55 @@ void display(const Stonewt& st, int n)
 }
 ```
 
+### 11.6.2 转换函数和友元函数
+- 在讨论Time类时指出过，可以使用成员函数或友元函数来重载加法。
+```C++
+// 下面为Stonewt类重载加法运算符
+Stonewt Stonewt::operator+ (const Stonewt& st) const
+{
+	double pds = pounds + st.pounds;
+	Stonewt sum(pds);
+	return sum;
+}
+```
+
+- 也可以将加法作为友元函数来实现，如下所示
+```C++
+Stonewt operator+(const Stonewt& st1, const Stonewt& st2)
+{
+	double pds = st1.pounds + st2.pounds;
+	Stonewt sum(pds);
+	return sum;
+}
+```
+
+- 别忘了，可以提供方法定义或友元函数定义，但不能都提供。
+```C++
+// 上面任何一种格式都允许这样做
+Stonewt jennySt(9, 12);
+Stonewt bennySt(12, 8);
+Stonewt total;
+total = jennySt + bennySt;
+
+// 如果提供了Stonewt(double) 构造函数，则也可以这样做
+Stonewt JennySt（9, 12);
+double kennyD = 176.0;
+Stonewt total;
+total = jennySt + kennyD;
+
+// 但只有友元函数才允许这样做
+Stonewt JennySt（9， 12);
+double pennyD = 146.0;
+Stonewt total;
+total = pennyD + jennySt;
+// 为了解其中的原因，将每一种加法都转换为相应的函数调用。
+total = jennySt + bennySt;
+// 被转换为：
+total = jennySt + bennySt;  // member function
+// 或
+total = operator+(jennySt, bennySt);  // friend function
+```
+
 
 
 
