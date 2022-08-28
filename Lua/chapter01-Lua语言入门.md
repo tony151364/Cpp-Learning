@@ -46,8 +46,9 @@ end
 ```
 
 ## 1.2 一些语法规范
-- 哑变量(Dummy variable)
+- Lua标识符：由任意字母、数字和下划线组成的字符串（注意不能以数字开头）
 
+- 作者通常将“下划线+小写字母”用作哑变量(Dummy variable)
 ```lua
 --[[
 print(10)
@@ -74,3 +75,95 @@ a = 1; b = 2
 - 用户数据常被用来表示由应用或者C语言编写的库所创建的类型。
 
 ### 1.4.1 nil
+- nil是一种类型，该类型也只有一个值nil
+- nil的主要作用就是与其他值进行区分
+- Lua用你nil来表示无效值
+
+### 1.4.2 Boolean
+- 在Lua语言中，Boolean值并非是用于条件测试的唯一方式，任何值都可以表示条件。
+- Lua将false和nil以外的值视为真，0和空字符也为真。
+- and：如果第一个操作数为false，则返回第一个操作数，否则返回第二个操作数。
+- or：第一个操作数不为false，则返回第一个操作数，否则返回第二个操作数
+- 因为and的优先级大于or的优先级，所以((a and b) or c) 与(a and b or c)等价。它们还与C语言的三目运算符a?b:c等价
+- x = x or v 等价于 if not x then x = v end
+- not永远返回Boolean类型的值
+
+## 1.5 独立解释器
+- lua \[options] \[script\[args]]
+- e 参数允许我们在命令行输入代码：如``` %lua -e "print(math.sin(12))" ```
+- -l用于加载库
+- -i用于在运行完其他命令行参数后进入交互模式。
+```lua
+-- 下面的命令行会加载lib库，然后执行x = 10的赋值语句，并最终进入交互模式
+% lua -i -llib -e "x = 10"
+-- 如果不想输出结果，可以在末尾加一个分号
+> io.flush()
+```
+
+- LUA_INIT使得我们可以灵活地配置独立解释器。例如，我们可以预先加载程序包(Package)、修改路径、定义自定义函数、对函数进行重命名或删除函数，等等；
+
+## 1.6 练习
+```lua
+-- 1.1 如果输入负数会发生栈溢出(stack overflow)，处理方法为：输入负数返回负数本身
+function fact (n)
+	if n < 0 then
+		return n
+	elseif n == 0 then
+		return 1
+	else
+		return n * fact(n - 1)
+	end
+end
+
+print("enter a number:")
+a = io.read("*n")  -- 读取一个数字
+print(fact(a))
+
+-- 1.2
+-- lua.exe -i D:\learning\Lua\hello.lua
+-- dofile方式有点麻烦
+
+-- 1.3 AppleScript
+
+-- 1.4 只要不是Lua保留字，且不以数字开头，都是有效的标识符
+until?  -- invaild
+
+end?  -- invaild
+-- 1.5 因为type(nil)的返回值类型为string
+
+--1.6
+local function isBool(value)
+    return value == true or value == false
+end
+
+print(isBool(false))
+print(isBool(true))
+print(isBool(1))
+print(isBool(nil))
+print(isBool("true"))
+print(isBool("false"))
+
+-- 1.7
+--不是必需的。 推荐还是用括号，增强可读性
+local x,y,z = true,true,false
+if x and y and (not z) or (( not y) and x) then
+    print("success1")
+end
+if x and y and not z or not y and x then
+    print("success2")
+end
+
+x,y,z = true,false,false
+if x and y and (not z) or (( not y) and x) then
+    print("success3")
+end
+if x and y and not z or  not y and x then
+    print("success4")
+end
+
+
+--1.8
+if arg and arg[0] then
+    print(arg[0])
+end
+```
