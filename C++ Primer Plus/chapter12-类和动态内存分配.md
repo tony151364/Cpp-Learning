@@ -75,6 +75,7 @@ std::ostream& operator << (std::ostream& os, const StringBad& st)
 }
 ```
 - **注意：** 静态数据成员在类声明中声明，在包含类方法的文件中初始化。初始化时使用作用域运算符来指出静态成员所属的类。但如果静态成员是整型或枚举型const，则可以在类声明中初始化。
+- 该程序将对象声明放在一个内部代码块中，因为析构函数将在定义对象的代码块执行完毕时调用。如果不这样做，析构函数将在main()函数执行完毕时调用，导致您无法在执行窗口关闭前看到析构函数显示的消息。
 ```C++
 // 12.3 vegnews.cpp -- using new and delete with classes
 // compile with stringbad.cpp
@@ -96,15 +97,22 @@ int main()
 		cout << "headline1: " << headline1 << endl;
 		cout << "headline2: " << headline2 << endl;
 		cout << "sports: " << sports << endl;
+		
+		callmel(headline1);
+		cout << "headline1: " << headline1 << endl;
+		
 		callmel(headline2);
 		cout << "headline2: " << headline2 << endl;
+		
 		cout << "Initialize one object to another:\n";
 		StringBad sailor = sports;
 		cout << "sailor: " << sailor << endl;
+		
 		cout << "Assign one object to another:\n";
 		StringBad knot;
 		knot = headline1;
 		cout << "knot: " << knot << endl;
+		
 		cout << "Exiting the block.\n";
 	}
 	cout << "End of main()\n";
@@ -124,4 +132,59 @@ void callme2(StringBad sb)
 	cout << "    \"" << sb << "\"\n";
 }
 ```
-- 该程序将对象声明放在一个内部代码块中，因为析构函数将在定义对象的代码块执行完毕时调用。如果不这样做，析构函数将在main()函数执行完毕时调用，导致您无法在执行窗口关闭前看到析构函数显示的消息。
+- callme2()按值传递headline2，导致headline2作为函数参数来传递从而导致析构函数被调用。其次，虽然按值传递可以防止原始参数被修改，但时间少函数已使原始字符串无法识别。
+```C++
+StringBad saillor = sports;
+// ↑ 等价于 ↓
+StringBad sailor = StringBad(sports);  // constructor using sports
+// 因为sports的类型为StringBad，因此相应的构造函数原型应该如下
+StringBad(const StringBad& );
+
+// 当您使用一个对象来初始化另一个对象时，编译器将自动生成上述构造函数（称为复制构造函数，因为它创建对象的一个副本）
+// 自动生成的构造函数不知道需要更新静态变量num_string，因此会将计数方案乱搞
+```
+- 实际上，这个例子说明的所有问题都是由编译器自动生成的成员函数引起的，下面介绍这个主题
+
+
+### 12.1.2特殊成员函数
+- C++自动提供下面这些成员函数
+	- 默认构造函数，如果没有定义构造函数。
+	- 默认构造函数，如果没有定义。
+	- 复制构造函数，如果没有定义
+	- 赋值构造函数，如果没有定义
+	- 地址运算符，如果没有定义
+
+- C++11 提供了另外两个特殊成员函数：移动构造函数(move constructor)和移动赋值运算符(move assignment operator),将在第18章讨论
+
+#### 1.默认构造函数
+- 带参数的构造函数也可以是默认构造函数，只要所有参数都有默认值
+```C++
+// 但只能有一个构造函数。也就是说，不能这样做
+Klunk() { klunk_ct = 0 }  // constructor #1
+Klunk(int n = 0) { klunk_ct = n; }  // ambiguous construtor #2
+
+// 第二个声明即与构造函数#1（没有参数）匹配，也与构造函数#2（使用默认参数 0）匹配。这将导致编译器发出一条错误消息
+Klunk kar(10);  // clearly matches Klunt (int n)
+Klunk bus;  // could match either constructor
+```
+
+## 2.复制构造函数
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
