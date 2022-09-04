@@ -168,23 +168,105 @@ Klunk kar(10);  // clearly matches Klunt (int n)
 Klunk bus;  // could match either constructor
 ```
 
-## 2.复制构造函数
+####2.复制构造函数
 - 复制构造函数用于将一个对象复制到新创建的对象中。也就是说，它用于初始化过程中（包括按值传递参数）而不是常规的赋值过程
+```C++
+// 类的赋值构造函数原型通常如下
+Class_name(const Class_name &);
+// 它接受一个指向类对象的常量引用作为参数。例如，String类的复制构造函数的原型如下：
+StringBad(const StringBad& );
+```
+- 对于赋值构造函数需要知道两点
+    - 何时调用
+    - 有何功能
+#### 3.何时调用赋值构造函数
+- 新建一个对象并将其初始化为同类对象时，赋值构造函数都将被调用。
+```C++
+// 下面4种声明都将调用复制构造函数：
+StringBad ditto(motto);  // calls StringBad(const StringBad&)
+StringBad metoo = motto;  // calls StringBad(const StringBad &)
+StringBad also = StringBad(motto);  // calls StringBad(const StringBad&)
+StringBad* pStringBad = new StringBad(motto)  // call StringBad(const StringBad &)
+```
+- 其中中间的2种声明可能会使用复制构造函数直接创建metoo和also，也可能使用复制构造函数生成一个临时对象，这取决于具体的时间。最后一种声明使用motto初始化一个匿名对象，并将新对象的指针赋给pstring指针。
 
-## 12.2 改进后的新String类
+#### 4.默认的复制构造函数的功能
+- 默认的复制构造函数逐个复制非静态成员(成员复制也称为浅复制)，复制的是成员的值。
+- [ ] 如果成员本身就是类对象，则将使用这个类的复制构造函数来复制成员对象。静态函数(如num_strings)不受影响，因为他们属于整个类
 
 
+### 12.1.3 回到Stringbad：复制构造函数到底哪里出了问题
+- 解决办法是提供一个对计数进行更新的显示构造函数
+```C++
+StringBad ...
+```
 
+- [ ] 感觉还是有点说不太通
 
+#### 1.定义一个显示复制构造函数以解决问题
+- （浅拷贝和深拷贝，这Python的列表也有啊）
+- 解决类设计中这种问题的方法是进行深度复制(deep copy),保证每个对象都有自己的字符串，而不会释放已经释放的字符串
+```C++
+// 可以这样编写String的复制构造函数
+StringBad::StringBad(const StringBad& st)
+{
+    num_Strings++;  // handle static member update
+    len = st.len;  // same length
+    str = new char [len + 1];
+    std::strcpy(str, st.str);
 
+    cout << num_strings << ": \""  <<str
+    << " \" object created\n";
+}
+```
 
+- 必须定义构造函数的原因在于，一些类成员是使用new初始化的、指向数据的指针
 
+### 12.1.4  Stringbad 的其他问题：赋值运算符
+- ANSI C 允许结构复制，而C++允许类对象赋值，这是通过自动为类重载赋值运算符实现的。这种运算符的原型如下：
+```C++
+Class_name& Class_name::operator={const Class_name &};
+```
 
+#### 1.赋值运算符的功能以及何时使用它
+```C++
+StringBad metoo = knot;  // use copy constructor, possibly assignment, too
+```
+- 这条语句是显示可能分两步来处理这条语句：使用复制构造函数创建一个临时对象，然后通过赋值将临时对象的值复制到新对象中。也就是说，初始化会调用复制构造函数，而使用=运算符也可能调用赋值运算符。
+- 与复制构造函数相似，赋值运算符的隐式实现也对成员进行逐个复制。如果成员本身就是类对象，则程序将使用为整个类定义的赋值运算符来复制该成员
 
+#### 2.赋值的问题出在哪里
+- 出现的问题与隐式复制构造函数相同：数据受损。这也是成员复制的问题，将导致headline1.str和knot.str指向相同的地址。因此，当对knot调用析构函数时，将删除字符串"Celery Stalks at Midnight”；当对headline1调用析构函数时，将试图删除前面已经删除的字符串。
+- 独立声明(Declaration of Independence)
 
+#### 3.解决赋值的问题
+- 解决办法就是进行深度复制
+    - 由于目标对象可能引用了以前分配的数据，所以函数应使用delete[]来释放这些数据。
+    函数应避免将对象赋给自身；否则，给对象重新复制前，释放内存操作可能删除对象的内容。
+    函数返回一个指向调用对象的引用
+```C++
+S0 = S1 = S2;
+// 是用函数表示法，上述代码为：
+S0.operator=(S1.operatpr=(S2)));
+因此，S1.operator=(S2)的返回值是函数S0.operatpr=()的参数
+因为返回值是一个指向StringBad对象的引用，因此参数类型是正确的
+```
+- 下面的代码说明了如何为StringBad类编写赋值运算符：
 
+```C++
+StringBad& StringBad::operator=(const StringBad& st)
+{
+    if (this == &st)  // 检查自我复制
+        return *this;
+    
+    delete [] str;
+    len = st.len;
+    str = new char [len + 1];
+    std::strcpy(str, st.str);
+    return *this;
+}
+```
+- 第10章介绍过，赋值运算符是只能由类成员函数重载的运算符之一
+- 复制操作并不创建新的对象，因此不需要调整静态数据成员num_strings的值
 
-
-
-
-
+- 将复制构造函数和赋值运算符调价到StringBad类后，所有的问题都解决了。
