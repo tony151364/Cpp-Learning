@@ -7,6 +7,7 @@
 - [UE4](Unreal%20Engine)
 - [C语言](C-Learning)
 - [C++ Prime Plus](C++%20Primer%20Plus)
+- [VS官方文档](https://docs.microsoft.com/zh-cn/visualstudio/debugger/debugger-feature-tour)
 
 ## 视频
 https://www.bilibili.com/video/BV1Dd4y1R7VS?p=65&vd_source=928a1dfefd237f369fbcfba68e4163ac
