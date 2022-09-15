@@ -270,3 +270,58 @@ StringBad& StringBad::operator=(const StringBad& st)
 - 复制操作并不创建新的对象，因此不需要调整静态数据成员num_strings的值
 
 - 将复制构造函数和赋值运算符调价到StringBad类后，所有的问题都解决了。
+
+## 12.2 修订后的默认构造函数
+
+### 12.2.1 修订后的默认构造函数
+```C++
+String::String()
+{
+	len = 0;
+	str = new char[1];
+	str[0] = '\0';
+}
+
+// 为什么代码是
+str = new char[1];
+// 而不是
+str = new char;
+// 上面两种分配方式的内存量相同，区别在于前者与类析构函数兼容，而后者不兼容。因此对于下述代码
+str = new char[1];
+str[0] = '\0';  .. default strubg
+// 可修改为：
+str = 0;  // sets str to the null pointer
+```
+- [ ] 对于其他方式初始化的指针，使用delete[] 时，结果是不确定的：
+
+#### C++11 空指针
+- C++98中：字面值0有两个含义，数字零值，也可以表示空指针
+- 有些程序员使用0来表示空指针，有些使用NULL
+- C++11 使用nullptr表示空指针
+
+### 12.2.2 比较成员函数
+- 将比较函数作为友元，有助于将String对象与常规的C字符串进行比较。例如假设answer是String对象，则下面的代码：
+```C++
+if ("love" == answer)
+// 将被转换成
+if (operator == ("love", answer))
+// 然后，编辑器将使用某个构造函数将代码转换为
+if (operator == (String("love"), answer))
+// 这与原型是匹配的
+```
+
+### 12.2.3 使用中括号表示法访问字符
+
+
+
+
+
+
+
+
+
+
+
+
+
+
