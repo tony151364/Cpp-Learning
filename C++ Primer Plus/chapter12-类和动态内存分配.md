@@ -311,6 +311,68 @@ if (operator == (String("love"), answer))
 ```
 
 ### 12.2.3 使用中括号表示法访问字符
+- C-风格字符串，使用中括号来访问其中的字符
+- C++中，中括号是一个运算符，可以进行重载。对于中括号运算符而言：
+	- 一个操作数位于第一个中括号的前面city
+	- 另一个操作数位于中括号的中间\[0]
+	- city\[0] 
+
+```C++
+String opera("The Magic Flute");
+
+opera.operatpr[](4)
+
+char& String::operator[](int i)
+{
+	return str[i];
+}
+// 将返回类型声明为char &，便可以给特定元素赋值
+String means("might");
+means[0] = 'r';  // 被转化为means.operator[][0] = 'r';
+// 这里将r赋给方法的返回值，而函数返回的是指向means.str[0]的引用，因此上述代码等同于下面的代码：
+means.str[0] = 'r';
+// 代码的最后一行访问的是私有数据，但由于operator[]()是类的一个方法，因此能够修改数组的内容。最终的结果由“might”被改为“right”
+
+```
+- 常量版本的注意事项
+
+### 12.2.4 静态类成员函数
+- 可以将成员函数声明为静态的（函数声明必须包括关键字static，但如果函数定义是独立的，则其中不能包含关键字static）这样做有两个重要的后果
+- 首先，不能通过对象调用静态成员函数；实际上，静态成员函数甚至不能使用this指针。如果静态成员函数是在公有部分声明的，则可以使用类名和作用域解析运算符来调用它。
+```C++
+// 例如，可以给String类添加一个名为HowMany()的静态成员函数，方法是在类生命中添加如下原型/定义：
+static int HowMany() { return num_strings; }
+
+// 调用它的方式如下：
+int count = String::HowMany();  // invoking a static member function
+```
+- 其次，由于静态成员函数不与特定的对象相关联，因此只能使用静态数据成员。例如，静态方法HowMany()可以访问静态成员num_string，但不能访问str和len。
+- [ ] 同样，也可以使用静态成员函数设置类级(classwide)标记，以控制某些类接口的行为。例如，类级标记可以控制显示类内容的方法所使用的格式。
+
+### 12.2.5 进一步重载赋值运算符
+```C++
+String name;
+char temp[40];
+cin.getline(temp, 40);
+name = temp;  // use constructor to convert type
+```
+- [ ] 先来回顾一下最后一条语句是怎样工作的：
+	- 1.程序使用构造函数String(const char \*) 来创建一个临时String对象, 其中包含temp中的字符串副本。第11章介绍过，只有一个参数的构造函数被用作转换函数
+	- 2.本章后面的程序清单12.6中的程序使用Sting & String::operator = (const String &)函数将临时对象中的信息复制到name对象中。
+	- 3.程序调用析构函数~删除临时对象
+
+- 为了提高效率，最简单的方式是重载赋值运算符，使之能够直接使用常规字符串，这样就不用创建和删除临时对象了。下面是一种可能的实现
+```C++
+String & String::operator=(const char * s)
+{
+	delete [] str;
+	len = std::strlen(s);
+	str = new char[len + 1];
+	std::strcpy(str, s);
+	return *this;
+```
+- 一般来说，必须释放str指向的内存，并为新字符串分配足够的内存。
+
 
 
 
