@@ -14,7 +14,7 @@ https://www.bilibili.com/video/BV1Dd4y1R7VS?p=65&vd_source=928a1dfefd237f369fbcf
 - [浙江大学翁恺](https://www.bilibili.com/video/BV1dE41167hJ)
 - [建议](suggestion)
 
-##  练习
-- [面试题](newcoder)
+##  工作
+- [周报](Work/周报.md)
 
 
