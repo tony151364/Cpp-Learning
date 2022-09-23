@@ -1,5 +1,9 @@
 #### 待做
 - [ ] 阅读玩家控制器代码
+- [ ] Character -> Pawn -> GameObject ?
+	- state machine
+	- GameObject
+
 
 #### 经验
 - [ ] 每个函数只做一件事
