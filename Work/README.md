@@ -1,20 +1,10 @@
-#### 待做
-- [ ] 阅读玩家控制器代码
-- [ ] Character -> Pawn -> GameObject ?
-	- state machine
-	- GameObject
-
-
-#### 经验
+#### 教训
+- [ ] 编码前一定要确定方案
+- [ ] 树莓味可乐别买了，下次买原味可乐
 - [ ] 每个函数只做一件事
 - [ ] for比while好，阅读时while判断越界比for难一点
 - [ ] 任务可能是让我先看懂代码
 
-#### 我发现的bug
-- [ ] 骑乘蛤蟆人物变大
-- [x] 恐龙出现时，出现提示框，这时候打开背包，等到恐龙走了，快捷栏会出现
-- [ ] 非食物驯养，原因在于服务器TameModuleX::DoFeedNpcFood流程判断错误
-- [x] 吃食物会切换手中武器
 
 #### 待解决:
 - [ ] 翻译功能的const char *
@@ -38,6 +28,13 @@ TAMEFOOD_VTOR::iterator itr_itmfind = std::find_if(tamedata.Foods.begin(), tamed
 			[tt](TAMEFOOD item) {return strcmp(tt, item.ID.c_str()) == 0; });
 // tame_module.cpp 的 line 987
 ```
-
-#### SVN阅读
-- 
+- [ ] 阅读玩家控制器代码
+- [ ] Character -> Pawn -> GameObject ?
+	- state machine
+	- GameObject
+	
+#### 我发现的bug
+- [ ] 骑乘蛤蟆人物变大
+- [x] 恐龙出现时，出现提示框，这时候打开背包，等到恐龙走了，快捷栏会出现
+- [ ] 非食物驯养，原因在于服务器TameModuleX::DoFeedNpcFood流程判断错误
+- [x] 吃食物会切换手中武器
