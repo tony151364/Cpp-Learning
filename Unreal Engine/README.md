@@ -2,8 +2,8 @@
 ### 1.[虚幻Unreal入门第一季 虚幻C++基础训练](https://www.bilibili.com/video/BV1nL411j7E1)
 - [x] 删除类
 - [x] 下次从P25开始看
-- [ ] 物品移动
-- [ ] 撞击
+- [x] 物品移动
+- [x] 撞击
 
 ### 2.[UE4 C++ 入门（无参考项目）](https://www.bilibili.com/video/BV1RE411d7J8)
 - [ ] 岩石移动练习
