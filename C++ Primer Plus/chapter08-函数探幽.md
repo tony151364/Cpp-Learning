@@ -558,7 +558,7 @@ void file_it(ostream& os, double fo, const double fe[], int n)
 		os.width(12);
 		os << fe[i];
 		os.width(15);
-		os << int(fo / fe[i] + 0.5) << endl;
+		os << int(fo / fe[i] + 0.5) << endl;  // +0.5：四舍五入，向上取整
 	}
 	os.setf(initial);  // restore initial formatting state
 }
