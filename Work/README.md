@@ -7,13 +7,14 @@
 - [ ] for比while好，阅读时while判断越界比for难一点
 
 #### 待解决:
-- [ ] 翻译功能的const char *
-- [ ] 双层GroupBox点击两次
-- [x] 堆栈找不到物品名字的数据
-- [x] fade效果怎么做: 在item_bar中已实现。
-- [x] 宏能不能用inline切换：可以的，效果该不错
-
-- [ ] 能不能主动调用回调函数 
+- [x] 1.翻译功能的const char *：类似const char* 能自动转string，const wchar_t*能自动转wstring
+- [ ] 2.wstring
+- [ ] 3.双层GroupBox点击两次：猜测，会不会和7类似
+- [x] 4.堆栈找不到物品名字的数据：在其他部分花费太多时间，导致错误物品数据加载的细节
+- [x] 5.fade效果怎么做: 在item_bar中已实现。
+- [x] 6.宏能不能用inline切换：可以的，效果还不错
+- [x] 7.拖拽物品到快捷栏(Grid)很卡，设置Enable form true to false;
+- [ ] 8.能不能主动调用回调函数 
 ```C++
 GetCore()->ExecCallback(this, "on_item_bar_select_changed",
 		CVarList() << new_index << old_index);
