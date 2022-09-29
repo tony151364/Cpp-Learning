@@ -1,5 +1,5 @@
 #### 看代码
-- [ ] 最后脑袋过一遍，看看是不是都理解了
+- [ ] 最后过一遍，看看是不是都理解了
 
 #### 教训
 - [ ] 任务可能是让我先看懂代码，而不是急着做出来
@@ -21,6 +21,9 @@
 ```C++
 GetCore()->ExecCallback(this, "on_item_bar_select_changed",
 		CVarList() << new_index << old_index);
+		
+GuiUtil_RunCallback(this, "on_selected", CVarList());  // combo_box.cpp (line 544)
+GetDelegateControl()->OnSuborEvent(this, event, args);
 ```
 
 - [x] tinyxml最外层是否只能有一个
