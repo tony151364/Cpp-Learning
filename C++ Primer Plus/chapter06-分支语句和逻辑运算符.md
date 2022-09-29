@@ -1294,7 +1294,65 @@ int main()
 	return 0;
 }
 ```
+```C++
+// 修改后，这题有点模棱两可，代码可能有差别
+#include <iostream>
+#include <string>
+using namespace std;
+struct Patron {
+	string name;
+	double money = 0.0;
+};
 
+int main()
+{
+	int size;
+	cout << "Enter the number of patrons: ";
+	cin >> size;
+	Patron* patrons = new Patron[size];
+
+	for (int i = 0; i < size; ++i)
+	{
+		cin.get();
+
+		cout << "Enter " << i + 1 << "th name:";
+		getline(cin, patrons[i].name); // 为啥不是->？因为数组的元素不是指针，是结构体
+		
+		cout << "Enter " << i + 1 << "th money:";
+		cin >> patrons[i].money;
+	}
+
+	cout.setf(ios_base::fixed);
+	cout.precision(0);
+
+	cout << "-----Grand Patrons:-----\n";
+	for (int i = 0; i < size; ++i)
+	{
+		if (patrons[i].money > 10000)
+		{
+			cout << patrons[i].name
+				<< ": " << patrons[i].money << endl;
+		}	
+	}
+		
+	cout << "-----Patrons:-----\n";
+	for (int i = 0; i < size; ++i)
+	{
+		if (patrons[i].money <= 10000)
+		{
+			cout <<  patrons[i].name << ": " << patrons[i].money << endl;
+		}
+		else
+		{
+			cout << "none\n";
+		}
+	}
+		
+	delete[] patrons;
+
+	return 0;
+}
+```
 - 7
 ```C++
 // 跟着敲
