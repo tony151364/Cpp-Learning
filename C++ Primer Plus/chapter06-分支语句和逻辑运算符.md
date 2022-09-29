@@ -1220,6 +1220,38 @@ double tax(double n)
 }
 ```
 
+```C++
+// 修改后
+#include <iostream>
+double tax(double);
+
+int main()
+{
+	using namespace std;
+	double money;
+
+	cout << "Enter your money: ";
+	while ((cin >> money) || money >= 0)
+	{
+		cout << "Tax: " << tax(money) << endl;
+		cout << "Enter your money: ";
+	};
+
+	cout << "Done.\n";
+}
+
+double tax(double n)
+{
+	if (n <= 5000)
+		return 0;
+	else if (n >= 5001 && n <= 15000)
+		return (n - 5000) * 0.1;
+	else if (n >= 15001 && n <= 35000)
+		return 10000 * 0.1 + (n - 15000) * 0.15;
+	else
+		return 10000 * 0.1 + 20000 * 0.15 + (n - 35000) * 0.2;
+}
+```
 - 6
 ```C++
 #include <iostream>
