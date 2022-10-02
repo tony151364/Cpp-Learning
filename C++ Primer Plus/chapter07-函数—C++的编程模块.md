@@ -1,5 +1,9 @@
-- C++自带了一个包含函数的大型库（标准ANSI库加上多个C++类），但真正的编程乐趣在于编写自己的函数
+### 难点
+- [ ] 函数指针
+- [ ] 函数指针数组
 
+## 开头
+- C++自带了一个包含函数的大型库（标准ANSI库加上多个C++类），但真正的编程乐趣在于编写自己的函数
 ## 7.1 复习函数的基本知识
 - 要使用C++函数，必须：
   - 提供函数定义；
@@ -1601,12 +1605,139 @@ void show(const Expenses& da)
 
 - 9
 ```C++
+#include <iostream>
+using namespace std;
+const int SLEN = 30;
+struct student
+{
+	char fullname[SLEN];
+	char hobby[SLEN];
+	int ooplevel;
+};
 
+int getinfo(student pa[], int n);
+void display1(student st);
+void display2(student* st);
+void display3(const student pa[], int n);
+
+int main(void)
+{
+	cout << "Enter class size: ";
+	int class_size;
+	cin >> class_size;
+	while (cin.get() != '\n')
+		continue;
+
+	student* ptr_stu = new student[class_size];
+	int extered = getinfo(ptr_stu, class_size);
+	for (int i = 0; i < extered; i++)
+	{
+		display1(ptr_stu[i]);
+		display2(&ptr_stu[i]);
+	}
+	display3(ptr_stu, extered);
+	delete[] ptr_stu ;
+	cout << "Done\n";
+	return 0;
+}
+
+int getinfo(student pa[], int n)
+{
+	int i = 0;
+	for (; i < n; ++i)
+	{
+		cout << "Input fullname: ";
+		cin.getline(pa[i].fullname, SLEN);
+		if (strcmp(pa[i].fullname, "") == 0)
+		{
+			break;
+		}
+		
+		cout << "Input Hobby: ";
+		cin.getline(pa[i].hobby, SLEN);
+		
+		cout << "Input ooplevel: ";
+		cin >> pa[i].ooplevel;
+		cin.get();
+	}
+
+	return i;
+}
+
+void display1(student st)
+{
+	cout << "display1:\n";
+	cout << st.fullname << endl;
+	cout << st.hobby << endl;
+	cout << st.ooplevel << endl;
+}
+
+void display2(student* st)
+{
+	cout << "display2:\n";
+	cout << st->fullname << endl;
+	cout << st->hobby << endl;
+	cout << st->ooplevel << endl;
+}
+
+void display3(const student pa[], int n)
+{
+	cout << "display3:\n";
+	for (int i = 0; i < n; i++)
+	{
+		cout << pa[i].fullname << endl;
+		cout << pa[i].hobby << endl;
+		cout << pa[i].ooplevel << endl;
+	}
+}
 ```
 
 - 10
 ```C++
+#include<iostream>
 
+double add(double x, double y);
+double sub(double x, double y);
+double multiply(double x, double y);
+double divide(double x, double y);
+double claculate(double x, double y, double(*func)(double, double));
+
+int main()
+{
+
+}
+
+double add(double x, double y)
+{
+	return x + y;
+}
+
+double sub(double x, double y)
+{
+	return x - y;
+}
+
+double multiply(double x, double y)
+{
+	return x * y;
+}
+
+double divide(double x, double y)
+{
+	if (x == 0 || y == 0)
+	{
+		return 0;
+	}
+	else
+	{
+		return x / y;
+	}
+}
+
+double claculate(double x, double y, double (*func)(double, double))
+{
+	return func(x, y);
+}
 ```
 
 
