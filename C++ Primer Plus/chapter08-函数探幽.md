@@ -1252,6 +1252,15 @@ void iquote(string s)
 ```
 - 4
 ```C++
+struct box
+{
+    char maker[40];
+    float height;
+    float width;
+    float length;
+    float volume;
+};
+
 // a.
 void ShowBox(box& B)
 {
@@ -1366,18 +1375,74 @@ char* mangle(char* ch)
 ```						    
 - 7.
 ```C++
-template <class T> 
-T TwoNumMax(T x, T y)
+template<class T>
+T max(T x, T y)
 {
-	return (x > y) ? x : y;
-}	
+    return (x > y) ? x : y;
+}
 ```
-- 8. 看了视频再写
+- 8. 
+```C++
+#include <iostream>
+struct box
+{
+    char maker[40];
+    float height;
+    float width;
+    float length;
+    float volume;
+};
+
+template<class T>
+T max(T x, T y);
+
+int main()
+{
+    box box1, box2;
+
+    box1.volume = 33.4f;
+    box2.volume = 33.4f;
+    std::cout << max(box1.volume, box1.volume);
+}
+
+template<class T>
+T max(T x, T y)
+{
+    return (x > y) ? x : y;
+}
+```
 - 9. 看了视频再写
 
 ## 8.8 编程练习
 - 1
 ```C++
+#include<iostream>
+using std::cout;
+using std::endl;
+void PrintString(char* str);
+void PrintString(char* str, int n);
+
+int main()
+{
+	char str[20] = "adsffasd";
+	
+	PrintString(str);
+	PrintString(str, 3);
+}
+
+void PrintString(char* str)
+{
+	cout << str << endl;
+}
+
+void PrintString(char* str, int n)
+{
+	for (int i = 0; i < n; ++i)
+	{
+		cout << "times: " << i + 1 << endl;
+		PrintString(str);
+	}
+}
 
 ```
 
