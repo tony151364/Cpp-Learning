@@ -31,5 +31,6 @@
 #### 7.2 [【教程】虚幻5教程 斯坦福专用课程 UE4 & C++ 专业游戏开发教程 24.5小时 中文字幕](https://www.bilibili.com/video/BV1nU4y1X7iQ)
 
 ## 二、UE4进阶
-
+- [【UE4】Unreal中C++编程游戏开发大师级训练教程(中英双字)](https://www.bilibili.com/video/BV134411x7s9)
+- [C++到底是如何从代码到游戏的？仅凭一个人可独立制作游戏吗？游戏制作教程，程序](https://www.bilibili.com/video)
 ## 三、UE5
