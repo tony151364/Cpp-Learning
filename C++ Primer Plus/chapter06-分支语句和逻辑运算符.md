@@ -1400,7 +1400,7 @@ int main(void)
 ```
 
 - 8
-- [ ] 每行末尾都会多读一个字符，是不是换行没忽略？
+- [x] 每行末尾都会多读一个字符，是不是换行没忽略？
 ```C++
 #include <iostream>
 #include <fstream>
@@ -1426,7 +1426,7 @@ int main()
 	// 2.处理文件+显示结果
 	char value;
 	int count = 0;
-	
+
 	while (inFile.good())
 	{
 		inFile >> value;
@@ -1436,10 +1436,59 @@ int main()
 		{
 			++count;
 			cout << "count: " << count
-				<<"Values: " << value << endl;
+				<< "\tValues: " << value << endl;
 		}
-		
+
 	}
+	if (inFile.eof())
+		cout << "End of file reached.\n" << count << " characters";
+	else if (inFile.fail())
+		cout << "Input terminated by data mismatch.\n";
+	else
+		cout << "Input terminated for unknown reason.\n";
+
+	// 3.关闭文件
+	inFile.close();
+	return 0;
+}
+```
+```C++
+// 修改后
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+using namespace std;
+const int SIZE = 60;
+
+int main()
+{
+	// 1.打开文件
+	char filename[SIZE];
+	ifstream inFile;  // object for handling file input
+	cout << "Enter name of data file: ";
+	cin.getline(filename, SIZE);  // string: getline(cin, filename);
+	inFile.open(filename);  // associate inFile with a file
+	if (!inFile.is_open())
+	{
+		cout << "Could not open the file" << filename << endl;
+		cout << "Program terminating.\n";
+		exit(EXIT_FAILURE);
+	}
+
+	// 2.处理文件+显示结果
+	char value;
+	int count = 0;
+
+	while (inFile.good())  // or inFile.eof()  
+	{
+		if (inFile >> value)
+		{
+			++count;
+			cout << "count: " << count
+				<< "\tValues: " << value << endl;
+		}
+	}
+
 	if (inFile.eof())
 		cout << "End of file reached.\n" << count << " characters";
 	else if (inFile.fail())
