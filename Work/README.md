@@ -17,13 +17,13 @@
 - [x] 5.fade效果怎么做: 在item_bar中已实现。
 - [x] 6.宏能不能用inline切换：可以的，效果还不错
 - [x] 7.拖拽物品到快捷栏(Grid)很卡，设置Enable form true to false;
-- [ ] 8.能不能主动调用回调函数 
+- [x] 8.能不能主动调用回调函数 
 ```C++
 GetCore()->ExecCallback(this, "on_item_bar_select_changed",
-		CVarList() << new_index << old_index);
+		CVarList() << new_index << old_index); // 不能用，不知道为啥
 		
-GuiUtil_RunCallback(this, "on_selected", CVarList());  // combo_box.cpp (line 544)
-GetDelegateControl()->OnSuborEvent(this, event, args);
+GuiUtil_RunCallback(this, "on_selected", CVarList());  // 可以用
+GetDelegateControl()->OnSuborEvent(this, event, args); // 子控件事件，我应该用不上
 ```
 - [x] 9.tinyxml最外层是否只能有一个：不是的，可以后多个
 - [x] 10.连按覆盖以前效果：map->erase
