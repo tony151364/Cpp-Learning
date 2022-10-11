@@ -392,7 +392,6 @@ float * pm = &g_moon;  // INVALID
 - C++禁止第二种情况的原因很简单——如果将g_moon的地址赋给pm，则可以使用pm来修改g_moon的值，这使得g_moon的const状态很荒谬，因此C++禁止将const的地址赋给非const指针。
 - 如果读者非要这样做，可以使用强制类型转换来突破这种限制，第15章讨论对运算符const_cast
 
-#### 多重指针
 - 如果将指针指向指针，情况更复杂。假如涉及的是一级间接关系，则将非const指针赋给const指针是可以的
 ```C++
 int age = 39;  // age++ is a valid operation
@@ -421,12 +420,19 @@ int j = sum(months, 12};  // not allowed
 - 将指针参数声明为指向常量数据的指针有两条理由：
 	- 避免无意间修改数据而造成编程错误
 	- 使用const能使函数处理const和非const实参，否则将只能接受非const数据
+
+#### 尽可能使用const
+- 将指针参数声明为指向常量数据的指针有两条理由：
+	- 这样可以避免由于无意间修改数据而导致的编译错误
+	- 使用const使得函数能够处理const和非const实参，否则只能接受非const数据 
 ```C++
 int age = 39;
-const int * pt = &age;
-// 能防止修改pt指向的值，
+const int * pt = &age;  // *pt不能变，pt可以变。age也可以修改
+int* const pt = &age;  // pt不能变,*pt可以变
+const int* const pt = &age;  // 都不能改，非常安全
 ```
-- [ ] 这个部分先略过，之后看视频再细看，看了几遍都觉得懵
+- 图7-5很清晰
+- [x] 这个部分先略过，之后看视频再细看，看了几遍都觉得懵
 
 ## 7.4 函数和二维数组
 ```C++
