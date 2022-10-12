@@ -1522,12 +1522,101 @@ void Upper(std::string& str)
 
 - 4
 ```C++
+#include <iostream>
+#include <cstring>  // for strlen(), strcpy()
+#include <cstdlib>
+using namespace std;
 
+struct stringy
+{
+	char* str;  // points to a string
+	int ct;  // length of string(not counting '\0')
+};
+
+void set(stringy& s1, char* s2);
+void show(const char* s1, int times = 1);
+void show(const stringy& s1, int times = 1);
+
+//prototypes for set(), show(), and show() go here
+int main()
+{
+	stringy beany;
+	char testing[] = "Reality isn't what it used to be.";
+
+	set(beany, testing);
+	show(beany);
+	show(beany, 2);
+	testing[0] = 'D';
+	testing[1] = 'u';
+	show(testing);  // prints testing string once
+	show(testing, 3);
+	show("Done!");
+
+	delete[] beany.str;
+	return 0;
+}
+
+void set(stringy& s1, char* s2)
+{
+	int nlen = strlen(s2);
+
+	s1.str = new char[nlen + 1];
+
+	strcpy_s(s1.str, nlen + 1, s2);
+	s1.ct = nlen;
+}
+
+void show(const char* s1, int times)
+{
+	while (times--)
+	{
+		cout << s1 << endl;
+	}
+}
+
+void show(const stringy& s1, int times)
+{
+	while (times--)
+	{
+		cout << s1.str << endl;
+	}
+}
 ```
 
 - 5
 ```C++
+#include <iostream>
 
+const int ArrSize = 5;
+
+template <typename T>
+T Max5(const T* Arr);
+
+int main()
+{
+	int nArr[ArrSize] = { 1, 2, 3, 4, 5 };
+	double dArr[ArrSize] = { 3.4, 5.6, 2.3, 4.5, 1.0 };
+
+	std::cout << Max(nArr) << std::endl;
+	std::cout << Max(dArr) << std::endl;
+	return 0;
+}
+
+template <typename T>
+T Max5(const T* Arr)
+{
+	T max = Arr[0];
+
+	for (int n = 1; n < ArrSize; n++)
+	{
+		if (max < Arr[n])
+		{
+			max = Arr[n];
+		}
+	}
+
+	return max;
+}
 ```
 
 - 6
@@ -1539,28 +1628,3 @@ void Upper(std::string& str)
 ```C++
 
 ```
-
-- 8
-```C++
-
-```
-
-- 9
-```C++
-
-```
-
-- 10
-```C++
-
-```
-						    
-						    
-						    
-						    
-						    
-						    
-						    
-						    
-						    
-
