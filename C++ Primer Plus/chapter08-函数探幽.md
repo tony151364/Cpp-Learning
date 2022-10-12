@@ -1448,6 +1448,43 @@ void PrintString(char* str, int n)
 
 - 2
 ```C++
+#include<iostream>
+#include <string>
+#include <cstdlib>
+
+const int ArSize = 30;
+struct CandyBar
+{
+	char sBrandName[ArSize];
+	double dWeight;
+	int nCalorie;
+};
+void SetCandyBar(CandyBar& candy, char* brandName = "Millennium Munch",
+	double weight = 2.85, int calorie = 350);
+void ShowCandyBar(const CandyBar& candy);
+
+int main()
+{
+	CandyBar Candy01;
+
+	SetCandyBar(Candy01, "So many candy", 3.34, 800);
+	ShowCandyBar(Candy01);
+	return 0;
+}
+
+void SetCandyBar(CandyBar& candy, char* brandName, double weight, int calorie)
+{
+	strcpy_s(candy.sBrandName, brandName);
+	candy.dWeight = weight;
+	candy.nCalorie = calorie;
+}
+
+void ShowCandyBar(const CandyBar& candy)
+{
+	std::cout << "BrandName: " << candy.sBrandName << std::endl;
+	std::cout << "Weight: " << candy.dWeight << std::endl;
+	std::cout << "Calorie: " << candy.nCalorie << std::endl;
+}
 
 ```
 - 3
