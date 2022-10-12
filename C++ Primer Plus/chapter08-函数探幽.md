@@ -1489,7 +1489,35 @@ void ShowCandyBar(const CandyBar& candy)
 ```
 - 3
 ```C++
+#include <iostream>
+#include <string>
+#include <cstdlib>
 
+void Upper(std::string& str);
+
+int main()
+{
+	std::string str;
+	
+	std::cout << "Enter a string(q to quit):";
+	while (getline(std::cin, str) && str != "q")
+	{
+		Upper(str);
+		std::cout << str << std::endl;
+		std::cout << "Next string (q to quit): ";
+	}
+
+	std::cout << "Bye.\n";
+	return 0;
+}
+
+void Upper(std::string& str)
+{
+	for (auto &i:str)
+	{
+		i = toupper(i);
+	}
+}
 ```
 
 - 4
