@@ -1621,7 +1621,35 @@ T Max5(const T* Arr)
 
 - 6
 ```C++
+#include<iostream>
+template <typename, T>
+T maxn(const T* a, int n);
 
+int main()
+{
+	template char maxn<char>(char*, int n);
+	int nA[] = { 1, 2, 3, 4, 5, 6 };
+	double dB[] = { 14.5, 23.3, 3.5, 6.4 };
+
+	maxn(nA, 6);
+	maxn(nB, 4);
+}
+
+template <typename, T>
+T maxn(const T* a, int n)
+{
+	T temp = a[0];
+
+	for (int i = 1; i < n; ++i)
+	{
+		if (temp < a[i])
+		{
+			temp = a[i];
+		}
+	}
+
+	return temp;
+}
 ```
 
 - 7
