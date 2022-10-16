@@ -2,7 +2,7 @@
 
 ## 一、UE4入门
 
-### 1.课程
+### 1.课程(已完结)
 #### 1.1 [虚幻Unreal入门第一季 虚幻C++基础训练](https://www.bilibili.com/video/BV1nL411j7E1)
 - 不要将指针的类型设置为EditAnywhere，否则在蓝图中会很难操作
 
@@ -12,7 +12,7 @@
 
 ### 3.基础巩固
 #### 3.1 [UE4 C++ 入门（无参考项目）](https://www.bilibili.com/video/BV1RE411d7J8)
-  - [ ] 岩石移动练习
+  - [x] 岩石移动练习
 
 
 ### 4.官方练习 + 蓝图
