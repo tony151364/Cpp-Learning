@@ -551,7 +551,7 @@ while (i < n)
 
 
 ### 7.6.1 传递和返回结构
--当结构比较小时，按值传递最合理。
+- 当结构比较小时，按值传递最合理。
 ```C++
 // 7.11 travel.cpp -- using structures with functions
 #include <iostream>
@@ -657,7 +657,9 @@ void show_polar(polar dapos)
 	cout << " degrees\n";
 }
 ```
+
 - 如果程序在输入循环后还需要进行输入，则必须使用cin.clear()重置输入，然后还需要读取不合法的输入来丢弃它们。程序7.7演示了这种技术。
+
 ```C++
 for (i = 0; i < limit; i++)
 {
