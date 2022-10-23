@@ -806,7 +806,7 @@ void fill(std::array<double, Seasons>* pa)
 	for (int i = 0; i < Seasons; ++i)
 	{
 		cout << "Enter " << Snames[i] << " expenses: ";
-		cin >> (*pa)[i];  // pa[i]不对，cin传递给变量而不是地址???
+		cin >> (*pa)[i];  // pa是array对象的指针，pa不是array对象，(*pa)才是array对象，所以用的时候需要先把pa转换为array对象
 	}
 }
 
