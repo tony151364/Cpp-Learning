@@ -172,10 +172,867 @@ RatedPlayer::RatedPlayer(unsigned int r, const TableTennisPlayer& tp)
 
 }
 ```
+```C++
+// 13.3 usett1.cpp -- using a base class and derived class
+#include <iostream>
+#include "tabtenn1.h"
+
+int main()
+{
+	using std::cout;
+	TableTennisPlayer player1("Chuck", "Blizzard", true);
+	TableTennisPlayer player2("Tara", "Boomdea", false);
+
+	player1.Name();
+	if (player1.HasTable())
+	{
+		cout << ": has a table.\n";
+	}
+	else
+	{
+		cout << ": hasn't a table.\n";
+	}
+
+	player2.Name();
+	if (player2.HasTable())
+	{
+		cout << ": has a table.\n";
+	}
+	else
+	{
+		cout << ": hasn't a table.\n";
+	}
+
+	return 0;
+}
+```
+
+### 13.1.4 派生类和基类之间的特殊关系
+- 1.派生类对象可以调用基类的方法，条件是方法不是私有的
+- 2.基类指针可以在不进行显式类型转换的情况下指向派生类对象
+- 3.基类引用可以在不进行显示类型转换的情况下引用派生类对象
+```C++
+RatedPlayer rplayer(1140, "Mallory", "Duck", true);
+TableTennisPlayer& rt = rplayer;
+TableTennisPlayer* pt = &rplayer;
+rt.Name();  // invoke Name() with reference
+pt->Name();  // invoke Name() with pointer
+```
+- 然鹅，基类指针或引用只能用于调用基类方法，因此不能使用rt或pt来调用派生类的ResetRanking方法
+- 不可以将基类对象和地址赋给派生类对象。
+- [ ]如果允许基类隐式地引用派生类对象，则可以使用基类引用为派生类对象调用基类的方法。因为派生类继承了基类的方法，所以这样做不会出现问题。如果可以将基类对象赋给派生类引用，将发生什么情况呢？派生类引用能够为基对象调用派生类方法，这样做会出问题。
+- 如果基类引用和指针可以指向派生类对象，将出现一些很有趣的结果。其中之一是基类引用定义的函数或指针参数可以用于基类对象或派生类对象。例如，下面：
+```C++
+void Show(const TableTennisPlayer& rt)
+{
+	using std::cout;
+	cout << "Name: ";
+	rt.Name();
+	cout << "\nTable: ";
+	if (rt.HasTable())
+		cout << "yes\n";
+	else
+		cout << "no\n";
+}
+```
+- 形参rt是一个基类引用，它可以指向基类对象或派生类对象，所以可以在Show()中使用TableTennis参数或Ratedplayer参数：
+```C++
+TableTennisPlayer player1("Tara", "Boomdea", false);
+RatedPlayer rplayer1(1140, "Mallory", "Duck", true);
+Show(player1);  // works with TableTennisPlayer argument
+Show(rplayer1);  // works with RatedPlayer argument
+```
+- 对于形参为指向基类的指针的函数，也存在相似的关系。它可以使用基类对象的地址或派生类对象的地址作为实参
+
+- 引用兼容性属性也让您能够将基类对象初始化为派生类对象，尽管不那么直接。假设有这样的代码
+```C++
+RatedPlayer olaf1(1840, "Olaf", "Loaf", true);
+TableTennisPlayer olaf2(olaf1);
+
+// 要初始化olaf2，匹配的构造函数的原型如下：
+TableTennisPlayer(const RatedPlayer&);  // doesn't exist
+
+// 类定义中没有这样的构造函数，但存在隐式复制构造函数
+// implicit copy constructor
+TableTennisPlayer(const TableTennisPlayer&);  // 形参是基类的引用，因此它可以引用派生类。
+```
+- 这样，将olaf2初始化为olaf1时，将要使用该构造函数，它复制firstname、lastname和hasTable成员。换句话来说，它将olaf2初始化为嵌套在RatedPlayer对象olaf1中的TableTennisPlayer对象。
+
+```C+
+// 同样，也可以将派生对象赋给基类对象：
+RatedPlayer olaf1(1840, "Olaf", "Loaf", true);
+TableTennisPlayer winner;
+winner = olaf1;  // assign derived to base object
+
+// 在这种情况下，程序将使用隐式重载赋值运算符：
+TableTennisPlayer& operator = (const TableTennisPlayer&) const;
+```
+
+## 13.2 继承：is-a 关系
+- 继承可以在基类的基础上添加属性，但不能删除基类的属性
+- C++三种继承：
+	- 公有继承
+	- 私有继承
+	- 保护继承
+- 公有继承最常用，建立起**is-a**(is a kind of)的关系，即派生类对象也是一个基类对象，可以对基类对象执行任何操作，也可以对派生类对象执行。
+
+## 13.3 多态公有继承
+- 结合李建忠老师所说的面向对象的核心是多态，想到一句话：继承的目的是为了多态
+- 若希望同一个方法在派生类和基类中的行为是不同的。换句话说，方法的行为应取决于调用该方法的对象。这种较复杂的行为称为多态——具有多种形态。
+- 有两种方法来实现：
+	- 在派生类中重新定义基类的方法
+	- 使用虚方法
+- **is-a**关系通常是不可逆的。也就是说，水果不是香蕉；同样，Brass对象不具备BrassPlus对象的所有功能。
+
+### 13.3.1 开发Brass类和BrassPlus类
+```C++
+// 13.7 brass.h -- bank account classes
+#ifndef BRASS_H_
+#define BRASS_H_
+#include <string>
+
+class Brass
+{
+private:
+	std::string fullName;
+	long acctNum;
+	double balance;
+
+public:
+	Brass(const std::string& s = "Nullbody", long an = -1,
+		double bal = 0.0);
+	void Deposit(double amt);
+	virtual void Withdraw(double amt);
+	double Balance() const;
+	virtual void ViewAcct() const;
+	virtual ~Brass() {};
+};
+
+// Brass Plus Account Class
+class BrassPlus :public Brass
+{
+private:
+	double maxLoan;
+	double rate;
+	double owesBank;
+public:
+	BrassPlus(const std::string& s = "Nullbody", long an = -1,
+		double bal = 0.0, double ml = 500, double r = 0.11125);
+	BrassPlus(const Brass& ba, double ml = 500, double r = 0.11125);
+
+	virtual void ViewAcct() const;
+	virtual void Withdraw(double amt);
+	void ResetMax(double m) { maxLoan = m; }
+	void ResetRate(double r) { rate = r; }
+	void ResetOwes() { owesBank = 0; }
+};
+#endif
+```
+
+- 虚方法(virtual method)
+	- 如果没有使用关键字virtual，程序将根据引用类型或指针类型选择方法；
+	- 如果使用了关键字virtual，程序将根据引用类型或指针指向的对象的类型来选择方法
+	- 方法在基类中被声明为虚的后，它在派生类将自动成为虚方法。然而，在派生类声明中使用关键字virtual来指出哪些函数是虚函数也不失为一个好办法。
+```C++
+// 如果ViewAcct()是虚的，则行为如下：
+// behavior with virtual ViewAcct()
+// method chosen according to object type
+Brass dom("Dominic Banker", 11224, 4183.45);
+BrassPlus dot("Dorothy Banker", 12118, 2592.00);
+Brass& b1_ref = dom;
+Brass& b2_ref = dot;
+b1_ref.ViewAcct();  // use Brass::ViewAcct()
+b2_ref.ViewAcct();  // use BrassPlus::ViewAcct()
+```
+
+- 虚析构函数：这样做是为了确保释放派生类对象时，按正确的顺序调用析构函数。本章后面将详细介绍这个问题。
+
+#### 1.类实现
+```C++
+// 13.8 brass.cpp -- bank account class methods
+#include <iostream>
+#include "brass.h"
+using std::cout;
+using std::endl;
+using std::string;
+
+// formatting stuff
+typedef std::ios_base::fmtflags format;  // ?
+typedef std::streamsize precis;
+format setFormat();
+void restore(format f, precis p);
+
+// Brass methods
+Brass::Brass(const string& s, long an, double bal)
+{
+	fullName = s;
+	acctNum = an;
+	balance = bal;
+}
+
+void Brass::Deposit(double amt)
+{
+	if (amt < 0)
+	{
+		cout << "Negative deposit not allowed; "
+			<< "deposit is cancelled.\n";
+	}
+	else
+	{
+		balance += amt;
+	}
+}
+
+void Brass::Withdraw(double amt)
+{
+	// set up ###.## format
+	format initialState = setFormat();
+	precis prec = cout.precision(2);
+
+	if (amt < 0)
+	{
+		cout << "Withdrawal amount must be positive; "
+			<< "withdrawal canceled.\n";
+	}
+	else if (amt <= balance)
+	{
+		balance -= amt;
+	}
+	else
+	{
+		cout << "Withdrawal amount of $" << amt
+			<< " exceeds your balance.\n"
+			<< "Withdrawl canceled.\n";
+	}
+
+	restore(initialState, prec);
+}
+
+double Brass::Balance() const
+{
+	return balance;
+}
+
+void Brass::ViewAcct() const
+{
+	// set up ###.## format
+	format initialState = setFormat();
+	precis prec = cout.precision(2);
+	cout << "Client: " << fullName << endl;
+	cout << "Account Number: " << acctNum << endl;
+	cout << "Balance:$" << balance << endl;
+	restore(initialState, prec);  // restore original format
+}
+
+// BrassPlus Methods
+BrassPlus::BrassPlus(const string& s, long an, double bal,
+	double ml, double r) :Brass(s, an, bal)
+{
+	maxLoan = ml;
+	owesBank = 0.0;
+	rate = r;
+}
+
+BrassPlus::BrassPlus(const Brass& ba, double ml, double r) 
+	: Brass(ba)  // uses implicit copy constructor
+{
+	maxLoan = ml;
+	owesBank = 0.0;
+	rate = r;
+}
+
+// redefine how ViewAcct() works
+void BrassPlus::ViewAcct() const
+{
+	// set up ###.## format
+	format initialState = setFormat();
+	precis prec = cout.precision(2);
+
+	Brass::ViewAcct();  // display base portion
+	cout << "Maximum loan: $ " << maxLoan << endl;
+	cout << "Owed to bank: $" << owesBank << endl;
+	cout.precision(3);
+	cout << "Loan Rate: " << 100 * rate << "%\n";
+
+	restore(initialState, prec);  // restore original format
+}
+
+// redefine how Withdraw() works
+void BrassPlus::Withdraw(double amt)
+{
+	// set up ###.## format
+	format initialState = setFormat();
+	precis prec = cout.precision(2);
+
+	double bal = Balance();
+	if (amt <= bal)
+	{
+		Brass::Withdraw(amt);
+	}
+	else if (amt <= bal + maxLoan - owesBank)
+	{
+		double advance = amt - bal;
+		owesBank += advance * (1.0 + rate);
+		cout << "Bank advance: $" << advance << endl;
+		Deposit(advance);
+		Brass::Withdraw(amt);
+	}
+	else
+	{
+		cout << "Credit limit exceeded, Transaction cancelled.\n";
+	}
+
+	restore(initialState, prec);
+}
+
+// 设置定点表示法，并返回以前的标记设置
+format setFormat()
+{
+	return cout.setf(std::ios_base::fixed,
+		std::ios_base::floatfield);
+}
+
+// 重置格式和精度
+void restore(format f, precis p)
+{
+	cout.setf(f, std::ios_base::floatfield);
+	precis prec = cout.precision(p);
+}
+```
+- 派生类构造函数在初始化基类私有数据时，采用的是成员初始化列表方法，将基类信息传递给基类构造函数，然后使用构造函数初始化BrassPlus类新增的数据项。
+- 在派生类方法中，使用域解析运算符来调用基类方法。
+- 对于派生类没有重定义的方法，不用使用域解析运算符。
+
+#### 2.使用Brass和BrassPlus类
+```C++
+// 13.9 usebrass1.cpp -- testing bank account classes
+// compile with brass.cpp
+#include <iostream>
+#include "brass.h"
+
+int main()
+{
+	using std::cout;
+	using std::endl;
+
+	Brass Piggy("Porcelot Pigg", 381299, 4000.00);
+	BrassPlus Hoggy("Horatio Hogg", 382288, 3000.00);
+	
+	Piggy.ViewAcct();
+	cout << endl;
+	Hoggy.ViewAcct();
+	cout << endl;
+
+	cout << "Depositing $1000 into the Hogg Account:\n";
+	Hoggy.Deposit(1000.00);
+	cout << "Now balance:$" << Hoggy.Balance() << endl;
+	
+	cout << "Withdrawing $4200 form the Pigg Account:\n";
+	Piggy.Withdraw(4200);
+	cout << "Piggy account balance:$" << Piggy.Balance() << endl;
+
+	cout << "Withdrawing $4200 from the Hogg Account:\n";
+	Hoggy.Withdraw(4200.00);
+	Hoggy.ViewAcct();
+
+	return 0;
+}
+```
+
+### 3.演示虚方法的行为
+- 可以创建只想Brass的指针数组。这样，每个元素的类型都相同，但由于使用的是公有继承模型，因此Brass指针既可以指向Brass对象，也可以指向BrassPlus对象。因此可以使用一个数组来表示多种类型的对象。这就是多态性
+```C++
+// 13.10 usebrass2.cpp -- polymorphic example
+// compile with brass.cpp
+#include <iostream>
+#include <string>
+#include "brass.h"
+const int CLIENTS = 4;
+
+int main()
+{
+	using std::cin;
+	using std::cout;
+	using std::endl;
+
+	Brass* p_clients[CLIENTS];
+	std::string temp;
+	long tempnum;
+	double tempbal;
+	char kind;
+
+	for (int i = 0; i < CLIENTS; i++)
+	{
+		cout << "Enter client's name: ";
+		getline(cin, temp);
+		cout << "Enter client's account number: ";
+		cin >> tempnum;
+		cout << "Enter opening balance:$";
+		cin >> tempbal;
+		cout << "Enter 1 for Brass Account or "
+			<< "2 for BrassPlus Account: ";
+
+		while (cin >> kind && (kind != '1' && kind != '2'))
+		{
+			cout << "Enter either 1 or 2: ";
+		}
+
+		if (kind == '1')
+		{
+			p_clients[i] = new Brass(temp, tempnum, tempbal);
+		}
+		else
+		{
+			double tmax, trate;
+
+			cout << "Enter the overdraft limit: $";
+			cin >> tmax;
+
+			cout << "Enter the interest rate "
+				<< "as a decimal fraction: ";
+			cin >> trate;
+
+			p_clients[i] = new BrassPlus(temp, tempnum, tempbal, tmax, trate);
+		}
+
+		while (cin.get() != '\n')
+		{
+			continue;
+		}
+	}
+	cout << endl;
+
+	for (int i = 0; i < CLIENTS; i++)
+	{
+		p_clients[i]->ViewAcct();
+		cout << endl;
+	}
+
+	for (int i = 0; i < CLIENTS; i++)
+	{
+		delete p_clients[i];  // free memory
+	}
+
+	cout << "Done\n";
+	return 0;
+}
+```
+
+- [ ] 如果Brass::ViewAcct()被声明为虚的，则在任何情况下都将调用Brass::ViewAcct()
+
+#### 4.为何需要虚析构函数
+- 如果析构函数不是虚的，则将只调用对应于指针类型的析构函数。对于程序清单13.10，这意味着只有Brass的析构函数被调用，即使指针指向的是一个BrassPlus对象。如果析构函数是虚的，将调用相应对象类型的析构函数。因此，如果指针指向的是BrassPlus对象，将调用BrassPlus的析构函数，然后自动调用基类的析构函数。因此，使用虚析构函数可以确保正确的析构函数序列被调用。对于程序清单13.10，这种正确的行为并不重要，因此析构函数没有执行任何操作。然而，如果BrassPlus包含一个执行某些操作的析构函数，则Brass必须有一个徐析构函数，即使该析构函数不执行任何操作。
+
+## 13.4 静态联编和动态联编
+- 将源代码中的函数调用解释为执行特定的函数。在C++中，由于函数重载的缘故，这项任务更复杂。编译器必须查看函数参数以及函数名才能确定使用哪个函数。
+- 然而，C/C++编译器可以在编译过程中完成这种联编。在编译过程中进行联编被称为静态联编(static binding)，又称为早期联编(early binding).
+- 然而，虚函数使这项工作变得更困难。正如程序清单13.10所示的那样，使用那一个函数是不能在编译时确定的，因为编译器不知道用户将选择哪种类型的对象。所以，编译器必须生成能够在程序运行时选择正确的虚方法的代码，这被称为动态联编(dynamic binging)，又称为晚期联编(late binding)
+
+### 13.4.1 指针和引用类型的兼容性
+- 总之，编译器对非虚方法使用静态联编，对虚方法使用动态联编。
+
+#### 1.为什么有两种类型的联编以及默认为静态联编
+- 原因有两个：效率和概念模型。
+- 首先来看效率：
+	为使程序能够在运行阶段进行决策，必须采取一些方法来跟踪基类指针或引用指向的对象类型，这增加了额外的处理开销。例如，如果类不会用作基类，则不需要动态联编。同样，如果派生类(如RatedPlayer)不重新定义基类的方法，也不需要使用动态联编。
+	- 在这些情况下，使用静态联编更合理，效率也更高。由于静态联编的效率更高，因此被设置为C++的默认选择。
+	- Strousstrup说，C++的指导原则之一是，不要为不适用的特性付出代价（内存或者处理时间）。
+- 再来看概念模型：	
+	- 仅将那些预期将被重新定义的方法声明为虚的
+	- 其他的不需要重定义它。
+	
+#### 2.虚函数工作原理
+- C++规定了虚函数的行为，但将实现方法留给了编译器作者。不需要知道实现方法就可以使用虚函数，但了解虚函数的工作原理有利于更好地理解概念。
+- 编译器处理虚函数的方法：给每个对象添加一个隐藏成员。隐藏成员中保存了一个指向函数地址数组的指针。这种数组称为**虚函数表(virtual function table, vtbl)**。虚函数表中存储了为类对象进行声明的虚函数的地址。
+- 例如，基类对象包含一个指针，该指针指向基类中所有虚函数的地址表。派生类对象将包含一个指向独立地址表的指针。
+- 如果派生类提供了虚函数的新定义，该虚函数表将保存新函数的地址；
+- 如果派生类没有重新定义虚函数，该vtbl将保存函数原始版本的地址。如果派生类定义了新的虚函数，则该函数的地址也将被添加到vtbl。注意，无论类包含的虚函数是1个还是10个，都只需要在对象添加1个地址成员。
+
+- 总之，使用虚函数时，在内存和执行速度方面有一定的成本，包括：
+	- 每个对象都将增大，增大量为存储地址的空间；
+	- 对于每个类，编译器都创建一个虚函数地址表（数组）；
+	- 对于每个函数调用，都需要执行一项额外的操作，即到表中查找地址。
+
+### 13.4.3 有关虚函数的注意事项
+
+#### 1.构造函数
+- 创建派生类对象时，将调用派生类的构造函数，而不是积累的构造函数，然后，派生类的构造函数将使用基类的一个构造函数，这种顺序不同于继承机制。因此，派生类不继承基类的构造函数，所以将类构造函数声明为虚的没什么意义。
+
+#### 2.折构函数
+- 析构函数应当是虚函数，除非类不用作基类。
+- 通常基类提供一个虚析构函数，即使它并不需要析构函数。
+
+#### 3.友元
+- 友元不是类成员，所以也不是虚函数。如果由于这个原因引起了设计问题，可以通过让友元函数使用虚成员函数来解决。
+
+#### 4.没有重定义
+
+#### 5.重新定义将隐藏方法
+- 基类定义一个虚函数，派生类又定义一个一样的，这就会出问题。
+```C++
+class Dwelling
+{
+public:
+	virtual void showperks(int a) const;
+...
+};
+
+class Hoverl:public->Dwelling
+{
+public：
+	virtual void showperks() const;
+};
+
+// 这将导致问题，可能会出现类似于下面的编译器警告
+Warning:Hovel::showperks(void) hides Dwelling::showperks(int)
+
+// 也可能不会出现警告。但不管结果怎样，代码将具有如下含义：
+Hover trump;
+trump.showperks();  // valid
+trump.showperks(5);  // invaild
+```
+- 总之，重新定义继承的方法并不是重载。如果在派生类中重新定义函数，将不是使用相同的特征标覆盖基类声明，而是隐藏同名的基类方法，不管参数特征标如何。
+- 这引出了两条经验规则：
+	- [ ] 第一，如果重新定义继承的方法，应确保与原来的原型完全相同，但如果返回类型是基类引用或指针，则可以修改为指向派生类的引用或指针（这种例外是新出现的）。这种特性被称为返回类型协变(convariance of return type)，因此允许返回类型随类型的变化而变化。
+	- [ ] 第二，如果基类声明被重载了，则应在派生类中重新定义所有的基类版本。如果只重新定义一个版本，则另外两个版本将被隐藏，派生类对象将无法使用它们。如果不需要修改，则新定义可只调用基类版本。
+	
+```C++
+void Hovel::showperks() const {Dwelling::showperks();}
+```
+
+## 13.5 访问控制：protected
+- 对于外部世界来说，保护成员的行为与私有成员相似；但对于派生类来说，保护成员的行为与公有成员相似。
+- 派生类可以直接访问基类中用protected修饰的变量，也可以直接修改。也就是说，对于派生类来说，该变量就是个公有变量。
+- **警告**：最好对类数据成员采用私有访问控制，不要使用保护访问控制。同时通过基类方法使派生类能够访问基类数据。
+- 然而，对于成员函数来说，保护访问控制很有用，它让派生类访问公众不能使用的内部函数。
+
+## 13.6 抽象基类(abstract base class, ABC)
+- C++通过纯虚函数(pure virtual function)提供未实现的函数。纯虚函数结尾处=0.
+```C++
+virtual double Area() const = 0;  // a pure virtual function
+```
+- [ ] 当类声明中包含纯虚函数时，则不能创建该类的对象。这里的理念是，包含纯虚函数的类只用作基类。要成为真正的ABC，必须至少包含一个纯虚函数。
+- 总之，在原型中使用=0指出类是一个抽象基类，在类中可以不定义该函数。从ABC派生出的类将根据派生类的具体特征，使用常规虚函数来实现这种接口。
+- 继承抽象类的类称为具体类(concrete class)
+
+### 13.6.1 应用ABC概念
+```C++
+#pragma once
+// 13.11 acctabc.h -- bank account classes
+#ifndef ACCTABC_H_
+#define ACCTABC_H_
+#include <iostream>
+#include <string>
+
+// Abstract Base Class
+class AcctABC
+{
+private:
+	std::string fullName;
+	long acctNum;
+	double balance;
+protected:
+	struct Formatting
+	{
+		std::ios_base::fmtflags flag;
+		std::streamsize pr;
+	};
+	const std::string& FullName() const { return fullName };
+	long AcctNum() const { return acctNum; }
+	Formatting SetFormat() const;
+	void Restore(Formatting& f) const;
+
+public:
+	AcctABC(const std::string& s = "Nullbody", long an = -1,
+		double bal = 0.0);
+	void Deposit(double amt);
+	virtual void Withdraw(double amt) = 0;  // pure virtual function
+	double Balance() const { return balance; };
+	virtual void ViewAcct() const = 0;  // pure virtual function
+	virtual ~AcctABC() {};
+};
+
+class Brass:public AcctABC
+{
+public:
+	Brass(const std::string& s = "Nullbody", long an = -1,
+		double bal = 0.0) : AcctABC(s, an, bal) { };
+	virtual void Withdraw(double amt);
+	virtual void ViewAcct() const;
+	virtual ~Brass() {};
+};
+
+// Brass Plus Account Class
+class BrassPlus :public AcctABC
+{
+private:
+	double maxLoan;
+	double rate;
+	double owesBank;
+public:
+	BrassPlus(const std::string& s = "Nullbody", long an = -1,
+		double bal = 0.0, double ml = 500, double r = 0.11125);
+	BrassPlus(const Brass& ba, double ml = 500, double r = 0.11125);
+
+	virtual void ViewAcct() const;
+	virtual void Withdraw(double amt);
+	void ResetMax(double m) { maxLoan = m; }
+	void ResetRate(double r) { rate = r; }
+	void ResetOwes() { owesBank = 0; }
+};
+#endif
+```
+
+```C++
+#pragma once
+// 13.12 acctABC.cpp -- bank account class methods
+#include <iostream>
+#include "acctabc.h"
+using std::cout;
+using std::ios_base;
+using std::endl;
+using std::string;
+
+
+// Abstract Base Class
+AcctABC::AcctABC(const string& s, long an, double bal)
+{
+	fullName = s;
+	acctNum = an;
+	balance = bal;
+}
+
+void AcctABC::Deposit(double amt)
+{
+	if (amt < 0)
+	{
+		cout << "Negative deposit not allowed; "
+			<< "deposit is cancelled.\n";
+	}
+	else
+	{
+		balance += amt;
+	}
+}
+
+void AcctABC::Withdraw(double amt)
+{
+	balance -= amt;
+}
+
+// protected methods for formatting
+AcctABC::Formatting AcctABC::SetFormat() const
+{
+	Formatting f;
+	f.flag =
+		cout.setf(ios_base::fixed, ios_base::floatfield);
+	f.pr = cout.precision(2);
+	return f;
+}
+
+// 重置格式和精度
+void AcctABC::Restore(Formatting& f) const
+{
+	cout.setf(f.flag, ios_base::floatfield);
+	cout.precision(f.pr);
+}
+
+// Brass methods
+void Brass::Withdraw(double amt)
+{
+	if (amt < 0)
+	{
+		cout << "Withdrawal amount must be positive; "
+			<< "withdrawal canceled.\n";
+	}
+	else if (amt <= Balance())
+	{
+		AcctABC::Withdraw(amt);
+	}
+	else
+	{
+		cout << "Withdrawal amount of $" << amt
+			<< " exceeds your balance.\n"
+			<< "Withdrawl canceled.\n";
+	}
+}
+
+void Brass::ViewAcct() const
+{
+	Formatting f = SetFormat();
+	cout << "Brass Client: " << FullName() << endl;
+	cout << "Account Number: " << AcctNum() << endl;
+	cout << "Balance:$" << Balance() << endl;
+	Restore(f);
+}
+
+// BrassPlus Methods
+BrassPlus::BrassPlus(const string& s, long an, double bal,
+	double ml, double r) :AcctABC(s, an, bal)
+{
+	maxLoan = ml;
+	owesBank = 0.0;
+	rate = r;
+}
+
+BrassPlus::BrassPlus(const Brass& ba, double ml, double r)
+	: AcctABC(ba)  // uses implicit copy constructor
+{
+	maxLoan = ml;
+	owesBank = 0.0;
+	rate = r;
+}
+
+// redefine how ViewAcct() works
+void BrassPlus::ViewAcct() const
+{
+	Formatting f = SetFormat();
+
+	cout << "BrassPlus Client: " << FullName() << endl;
+	cout << "Account Number: " << AcctNum() << endl;
+	cout << "Balance:$" << Balance() << endl;
+	cout << "Maximum loan: $ " << maxLoan << endl;
+	cout << "Owed to bank: $" << owesBank << endl;
+	cout.precision(3);
+	cout << "Loan Rate: " << 100 * rate << "%\n";
+
+	Restore(f);  // restore original format
+}
+
+void BrassPlus::Withdraw(double amt)
+{
+
+	Formatting f = SetFormat();
+
+	double bal = Balance();
+	if (amt <= bal)
+	{
+		AcctABC::Withdraw(amt);
+	}
+	else if (amt <= bal + maxLoan - owesBank)
+	{
+		double advance = amt - bal;
+		owesBank += advance * (1.0 + rate);
+		cout << "Bank advance: $" << advance << endl;
+		cout << "Finance advance: $" << advance * rate << endl;
+		Deposit(advance);
+		AcctABC::Withdraw(amt);
+	}
+	else
+	{
+		cout << "Credit limit exceeded, Transaction cancelled.\n";
+	}
+
+	Restore(f);  // restore original format
+}
+
+
+```
+
+```C++
+// 13.13 usebrass3.cpp -- polymorphic example
+// compile with brass.cpp
+#include <iostream>
+#include <string>
+#include "acctabc.h"
+const int CLIENTS = 4;
+
+int main()
+{
+	using std::cin;
+	using std::cout;
+	using std::endl;
+
+	AcctABC* p_clients[CLIENTS];
+	std::string temp;
+	long tempnum;
+	double tempbal;
+	char kind;
+
+	for (int i = 0; i < CLIENTS; i++)
+	{
+		cout << "Enter client's name: ";
+		getline(cin, temp);
+		cout << "Enter client's account number: ";
+		cin >> tempnum;
+		cout << "Enter opening balance:$";
+		cin >> tempbal;
+		cout << "Enter 1 for Brass Account or "
+			<< "2 for BrassPlus Account: ";
+
+		while (cin >> kind && (kind != '1' && kind != '2'))
+		{
+			cout << "Enter either 1 or 2: ";
+		}
+
+		if (kind == '1')
+		{
+			p_clients[i] = new Brass(temp, tempnum, tempbal);
+		}
+		else
+		{
+			double tmax, trate;
+
+			cout << "Enter the overdraft limit: $";
+			cin >> tmax;
+
+			cout << "Enter the interest rate "
+				<< "as a decimal fraction: ";
+			cin >> trate;
+
+			p_clients[i] = new BrassPlus(temp, tempnum, tempbal, tmax, trate);
+		}
+
+		while (cin.get() != '\n')
+		{
+			continue;
+		}
+	}
+	cout << endl;
+
+	for (int i = 0; i < CLIENTS; i++)
+	{
+		p_clients[i]->ViewAcct();
+		cout << endl;
+	}
+
+	for (int i = 0; i < CLIENTS; i++)
+	{
+		delete p_clients[i];  // free memory
+	}
+
+	cout << "Done\n";
+	return 0;
+}
+```
+
+### 13.6.2 ABC理念
+- 设计ABC之前，首先应开发一个模型——指出编程问题所需的类以及它们之间的相互关系。
+- 一种学院派思想认为，如果要设计类继承层次，则只能将那些不会被用作基类的类设计为具体的类。这种方法更清晰，复杂程度更低。
+- **可以将ABC看作是一种必须实施的接口。ABC要求具体派生类覆盖其纯虚函数——迫使派生类遵循ABC设置的接口原则。这种模型在基于组件的编程模式中很常见，在这种情况下，使用ABC使得组件设计人员能够制定“接口约定”，这样确保了从ABC派生的所有组件都至少支持ABC指定的功能**
+
+## 13.7 继承和动态内存分配
+
+- 如果基类使用动态内存分配，并重新定义复制和赋值构造函数，这将怎样影响派生类的实现呢？
+```C++
+
+```
+```C++
+
+```
 
 ```C++
 
 ```
+
+```C++
+
+```
+
+```C++
+
+```
+
 
 
 
