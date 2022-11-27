@@ -7,8 +7,8 @@
 - 不要将指针的类型设置为EditAnywhere，否则在蓝图中会很难操作
 
 ### 2.入门项目
-#### 2.1 [ UE4C++快速上手_实战篇_上](https://www.bilibili.com/video/BV1BV411C7SH)
-#### 2.2 [Unreal入门第二季 密室逃脱（Unreal基本知识学习）](https://www.bilibili.com/video/BV1rt411e79C)
+#### 2.1 [ UE4C++快速上手_实战篇_上](https://www.bilibili.com/video/BV1BV411C7SH)（卡住了）
+#### 2.2 [Unreal入门第二季 密室逃脱（Unreal基本知识学习）](https://www.bilibili.com/video/BV1rt411e79C)（视频太久，内容又过于简单）
 
 ### 3.基础巩固
 #### 3.1 [UE4 C++ 入门（无参考项目）](https://www.bilibili.com/video/BV1RE411d7J8)
