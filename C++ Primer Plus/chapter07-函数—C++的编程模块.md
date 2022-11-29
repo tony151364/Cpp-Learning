@@ -902,9 +902,12 @@ void subdivide(char ar[], int low, int high, int level)
 - 函数名就是地址。也就是说，如果think()是一个函数，则think就是该函数的地址
 #### 2.声明函数指针
 - 声明指向某种数据类型的指针时，必须指定指针指向的类型。同样，声明指向函数的指针是，也必须指定指针指向的函数类型。
+- 说白了，就是需要声明：**返回值** + **参数列表**
+
 ```C++
 double pam(int)  // prototype
 
+// 没括号返回的就是double类型的指针
 double (*pf)(int);  // pf points to a function that takes
 		    // ont int argument and that returns type double
 pf = pam;   // pf now points to the pam() function
@@ -920,7 +923,7 @@ double (*pf)(int);
 pf = pam;
 double x = pam(4);  // call pam() using the function name
 double y = (*pf)(5);  // call pam() using the function name
-double y = pf(5);  // C++也允许使用想使用函数名那样使用pf
+double y = pf(5);  // C++也允许像使用函数名那样使用pf
 ```
 - 虽然第一种格式不太好看，但是它给出了强有力的提示——代码正在使用函数指针
 #### 历史与逻辑
