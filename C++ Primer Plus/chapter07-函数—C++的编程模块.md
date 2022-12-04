@@ -1,6 +1,5 @@
 ### 难点
-- [ ] 函数指针
-- [ ] 函数指针数组
+- [ ] [函数指针、函数指针数组](https://www.bilibili.com/video/BV1Yv411t7qe/?p=69)
 
 ## 开头
 - C++自带了一个包含函数的大型库（标准ANSI库加上多个C++类），但真正的编程乐趣在于编写自己的函数
@@ -1007,18 +1006,25 @@ double x = *pa[0](av, 3);
 double y = *(*pb[1])（av, 3）;
 
 // 指向指针的指针，也可用单值对其进行初始化。
-auto pc = &pa;  // C++11 automatic type dedution
+auto pc = &pa;  // const double *(*(*pa)[3]) (const double*, int) pc = &pa;
 
-const double *(*(*pd)[3])(const double *, int ) = &pa;  // ???
+const double *(*(*pd)[3])(const double *, int ) = &pa;  // 指向pa的指针
 *pd[3]  // an array of 3 pointers（包含3个指针的数组）
 (*pd)[3]  // a pointer to an array of 3 elements（一个指向数组的指针，这数组有3个元素）
-// 要调用函数，需要认识这样一点：既然pd指向数组，那么 *pd 就是数组，而 (*pd)[i] 是数组中的元素，即函数指针。因此，较简单的函数调用是 (*pd)[i](av, 3) 是返回的指针指向的值。也可以使用第二章使用指针调用的语法：使用(*(*pd)[i](av, 3)来调用函数，而*(*(*pd)[i](av, 3)是指向的double值
+
+// (*pa[2])(av, 3) == f3(av, 3); 第三个元素的指针
+// *pa[2](av, 3) == *f3(av, 3);  第三个元素的值 （括号的结合性优于*）
 ```
-- [ ] 这一部分也没听太懂，越来越懵了。
+```
+要调用函数，需要认识这样一点：既然pd指向数组，那么 *pd 就是数组，而 (*pd)[i] 是数组中的元素，即函数指针。
+因此，较简单的函数调用是 (*pd)[i](av, 3) 是返回的指针指向的值。也可以使用第二种指针调用的语法：
+使用(*(*pd)[i](av, 3))来调用函数，而*(*(*pd)[i](av, 3)是指向的double值
+```
+- [x] 这一部分也没听太懂，越来越懵了。
 
 #### 注意pa与&pa的差别
 - pa是数组名，表示地址。大多数情况下pa是数组第一个元素的地址，即&pa[0]。因此，它是单个元素的地址
-- &pa是真个数组（3个元素）的地址。
+- &pa是整个数组（3个元素）的地址。
 - 从数字上说，pa与&pa值相同。但他们类型不同
 	- 差别1：pa+1为数组中下一个元素，而&pa + 1为pa后面一个12字节内存块的地址（假定3个元素，每个4字节）
 	- 差别2：要得到一个元素的值，对pa解除引用1次，而&pa需要2次。``` **&pa == *pa == pa[0] ```
@@ -1095,8 +1101,13 @@ const double* f3(const double ar[], int n)
 
 ```
 - 指向函数的指针并不少见。实际上，类的虚方法实现通常都采用了这种技术（参见第13章）。所幸的是，这些细节由编译器处理。
-- auto有一个潜在缺点。自动类型推断确保变量的类型与赋给它的初值的类型一致，但您提供的初值的类型可能不对：``` auto pc = *pa;  // oops! used *pa instead of &pa``` ...也没懂???
-- [ ] 真TM头疼，难理解
+#### 感谢auto
+- auto有一个潜在缺点。自动类型推断确保变量的类型与赋给它的初值的类型一致，但您提供的初值的类型可能不对：
+```C++
+ auto pc = *pa;  // oops! used *pa instead of &pa
+```
+- 上述声明导致pc的类型与\*pa一致，在程序7.19中，后面使用它是假定其类型与&pa相同，将会导致编译错误
+- [x] 真TM头疼，难理解
 
 ### 7.10.4 使用typedef进行简化
 - typedef能够让你创建类型的别名。减少输入量，让您编写代码时不容易犯错，让程序更容易理解。
@@ -1110,6 +1121,7 @@ p_fun p1 = f1;  // p1 points to the f1() function
 p_fun pa[3] = {f1, f2, f3};  // 包含3个元素的函数指针数组
 p_fun (*pd)[3] = &pa;  /// 指向上面这个函数指针数组
 ```
+- 跟引用有点像，都是起了个别名，只不过引用是对变量起别名，typedef是对声明变量的类型起别名
 
 ## 7.11 总结
 - 定义、原型、调用
@@ -1118,9 +1130,10 @@ p_fun (*pd)[3] = &pa;  /// 指向上面这个函数指针数组
 - C++函数通过使用拷贝，保护了原始数据的完整性
 
 ## 7.12 复习题
-
+- [ ] 12
 ```C++
-// 1.声明原型、进行编写、最后调用
+// 1.声明原型、进行编写(定义函数）、最后调用
+
 // 2.	
 a. void igor(void);
 b. float tofu(int);
@@ -1129,18 +1142,24 @@ d. long summation(long[], int);
 e. double doctor(const char*);
 f. void ofcourse(boss);
 g. char* plot(map*);
+
 // 3.	
 void func1(int arr[], int ArSize, int n)
 {
 	for (int i = 0; i < ArSize; i++)
 		arr[i] = n;
 }
+
 // 4.
-void func2(int* first, int* end, int n)
+void func2(int* begin, int* end, int n)
 {
-	while (first < end)
-		*first = *end = n;
+	for (; begin < end; ++first, --end)
+		*begin = *end = n;
+		
+	for(int *pt = begin; pt != end; ++pt)
+		*pt = n;
 }
+
 // 5.
 double func3(const double arr[], int ArSize)
 {
@@ -1151,25 +1170,33 @@ double func3(const double arr[], int ArSize)
 	return max;
 }
 // 6. 因为对于基本类型，函数会复制一份进行使用，函数调用结束后就会将复制的这一份删除，不会影响原始的数值
-// 7. 1)string 2)char数组 3)字符串常量
+
+// 7. 1)string 2)char数组 3)字符串常量 X
+char str[] = "Hello world"; // 1)字符数组
+"Hello world";  // 2）字符串常量
+char *pt = "Hello world"; // 3）指向字符串首字符地址的字符指针
+
 // 8.
 int replace(char* str, char c1, char c2)
 {
 	int count = 0;
 	
-	while (*str != '\0')
+	while (*str != '\0') // while (*str)
 	{
 		if (*str == c1)
 		{
 			*str = c2;
 			count++;
 		}
+		
 		str++;
 	}
 
 	return count;
 }
-// 9. "pizza"是个字符串常量，含义是其首地址，*"pizza"就是首个字符的值，即'p'
+
+// 9. "pizza"是个字符串常量，含义是其首地址即字符'p'的地址，*"pizza"就是首个字符的值，即'p'
+
 // 10. 
 struct GLITZ
 {
@@ -1179,9 +1206,14 @@ void fun4(GLITZ glitz);  // 按值传递
 void fun5(GLITZ*);  // 按地址传递
 // 按值传递：函数会复制一份，不会对原始数据产生影响，但若结构较大，会占用较多内存。
 // 按地址传递：可以直接对原始数据进行操作，节省内存，但容易破坏原始数据。
+
 // 11.
-int judge(const char* );
-// 12.
+int judge(const char* ); X
+int judge(int (*pa)(const char*)); √
+```
+- 12
+```C++
+// 错误，未考虑整型数组
 struct applicant {
 	char name[30];
 	int credit_ratings[3];
@@ -1197,13 +1229,71 @@ void show2(applicant *app)  // 按地址传递
 	std::cout << app->name << std::endl;
 	std::cout << app->credit_ratings << std::endl;
 }
-// 13.
+```
+
+```C++
+#include<iostream>
+
+struct applicant {
+	char name[30];
+	int credit_ratings[3];
+};
+
+void show(applicant app)  // 按值传递
+{
+	std::cout << app.name << std::endl;
+
+	for (int i = 0; i < 3; i++)
+	{
+		std::cout << app.credit_ratings[i] << std::endl;
+	}
+}
+
+void show(applicant* app)  // 按地址传递
+{
+	std::cout << app->name << std::endl;
+
+	for (int i = 0; i < 3; i++)
+	{
+		std::cout << app->credit_ratings[i] << std::endl;
+	}
+	
+}
+
+int main()
+{
+	applicant app =
+	{
+		"a apple",
+		{1, 2, 3}
+	};
+
+	show(app);
+	show(&app);
+}
+```
+
+- 13
+```C++
+// 错误
 typedef void (*p1_fun)(applicant);
 p1_fun p1 = f1;
 typedef const char* (*p2_fun)(const applicant, const applicant);
 p2_fun p2 = f2;
 void (*ap[5])(applicant);
 const char* (*(*p2)[10])(const applicant, const applicant);
+```
+
+```C++
+// 正确
+typedef void (*p1_fun)(applicant*);
+typedef const char* (*p2_fun)(const applicant*, const applicant*);
+
+p1_fun p1 = f1;  // auto p1 = f1;
+p2_fun p2 = f2;  // auto p2 = f2;
+
+p1_fun ap[5];
+p2_fun (*pa)[10]; // const char* (*(*pa)[10])(const applicant, const applicant);
 ```
 
 ## 7.13 编程练习
@@ -1234,6 +1324,23 @@ double harmonic_average(double x, double y)
 	return 2.0 * x * y / (x + y);
 }
 ```
+```C++
+int main()
+{
+	using namespace std;
+	double x, y;
+	
+	cout << "Please input two numbers, untill one of them is zero: ";
+	cin >> x >> y;
+	
+	whille (x != 0 && y != 0)
+	{
+		cout << "result: " << harmonic_average(x, y) << endl;
+		cout << "Please input two numbers, untill one of them is zero: ";
+		cin >> x >> y;
+	}
+}
+```
 
 - 2
 ```C++
@@ -1247,7 +1354,7 @@ double average(const double*, int);
 int main()
 {
 	double grades[ArSize];
-	int size = input(grades);
+	int size = input(grades);  // fill_golf(grades);这个名字更清楚一点
 	show(grades, size);
 	cout << "Average: " << average(grades, size) << endl;
 	
@@ -1293,6 +1400,37 @@ double average(const double* arr, int size)
 }
 ```
 
+```C++
+int fill_golf(double* arr)
+{
+	cout << "input scores and press 'q' to quit: ";
+	int i = 0;
+	
+	for (; i < ArSize; i++)
+	{
+		cin >> temp;
+		
+		if (!cin)
+		{
+			cin.clear();
+			while(cin.get !='\n);
+			cout << "Invaild input, terminate." << endl;
+			break;
+		}
+		else if (temp < 0)
+		{
+			break;
+		}
+		else
+		{
+			arr[i] = temp;
+		}
+	}
+
+	return i;
+}
+```
+
 - 3
 ```C++
 #include <iostream>
@@ -1326,6 +1464,7 @@ void ShowMembers(box B)
 	cout << "length:" << B.length << endl;
 	cout << "volume:" << B.volume << endl;
 }
+
 void SetVolume(box& B)
 {
 	B.volume = B.height * B.width * B.length;
@@ -1354,7 +1493,7 @@ long double probability(unsigned numbers, unsigned picks)
 	unsigned p; // = unsigned int
 
 	for (n = numbers, p = picks; p > 0; n--, p--)
-		result = result * n / p;
+		result = result * (n / p);
 
 	return result;
 }
