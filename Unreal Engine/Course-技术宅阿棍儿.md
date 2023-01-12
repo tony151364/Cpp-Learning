@@ -1,4 +1,4 @@
-## 一、[UE4 C++ 入门（无参考项目）](https://www.bilibili.com/video/BV1RE411d7J8)
+## [UE4 C++ 入门（无参考项目）](https://www.bilibili.com/video/BV1RE411d7J8)
 
 ### P5 反射与垃圾回收
 - 反射：通过类名去获取类以及类里的属性方法等
@@ -78,7 +78,7 @@ void UMyObject::MyFunction()
 
 ### p18简单WASD移动
 
-### p19调整视角
+### p19镜头摇臂，自制移动组件
 
 
 
