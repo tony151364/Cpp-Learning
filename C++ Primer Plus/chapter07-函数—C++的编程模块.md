@@ -1501,7 +1501,6 @@ long double probability(unsigned numbers, unsigned picks)
 
 - 5
 ```C++
-#include "stdafx.h"
 #include <iostream>
 
 long double factorial(unsigned n);
@@ -1516,26 +1515,20 @@ int main()
 	cout << fixed;
 	cout.precision(0);
 
+	cout << "Enter  a factor: ";
+
 	while (cin >> n)
 	{
-		cout << "Enter  a factor: "
-		int n;
-		while(!(cin >> n))
-		{
-			cin.clear();
-			while(cin.get() != '\n')
-				continue;
-			cout << "Bad input, Please enter a number: ";
-		}
 		cout << n << "! = " << factorial(n) << "\n";
+		cout << "Enter  a factor: ";
 	}
 
-    return 0;
+	return 0;
 }
 
 long double factorial(unsigned n)
 {
-	if (n <= 0)
+	if (n <= 1)
 	{
 		return 1;
 	}
@@ -1549,7 +1542,6 @@ long double factorial(unsigned n)
 - 6
 ```C++
 // vect.cpp : Defines the entry point for the console application.
-//
 
 #include "stdafx.h"
 #include <iostream>
