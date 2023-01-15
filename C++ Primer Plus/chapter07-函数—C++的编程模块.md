@@ -1297,6 +1297,7 @@ p2_fun (*pa)[10]; // const char* (*(*pa)[10])(const applicant, const applicant);
 ```
 
 ## 7.13 编程练习
+- [ ] 第七题：为什么加了const begin依然可以自增
 - 1
 ```C++
 #include <iostream>
@@ -1632,22 +1633,25 @@ using namespace std;
 int main()
 {
 	double properties[Max];
-	double* arrEnd = fill_array(properties, properties + Max);
-	show_array(properties, arrEnd);
+	double* currentEnd = fill_array(properties, properties + Max);
+	show_array(properties, currentEnd);
 
-	if ((arrEnd - properties) > 0)
+	if ((currentEnd - properties) > 0)
 	{
-		cout << "Enter revaluation factor: ";
 		double factor;
+		cout << "Enter revaluation factor: ";
+
 		while (!(cin >> factor))  // bad input
 		{
 			cin.clear();
-			while (cin.get() != '\n')
-				continue;
+
+			while (cin.get() != '\n');
+
 			cout << "Bad input; Please enter a number: ";
 		}
-		revalue(factor, properties, arrEnd);
-		show_array(properties, arrEnd);
+
+		revalue(factor, properties, currentEnd);
+		show_array(properties, currentEnd);
 	}
 	cout << "Done.\n";
 	return 0;
@@ -1657,24 +1661,30 @@ double* fill_array(double* begin, const double* end)
 {
 	double temp;
 	int i;
-	for (int i = 0; begin != end; ++i, ++begin)
+
+	for (i = 0; (begin + i) != end; ++i)
 	{
 		cout << "Enter value #" << i + 1 << ": ";
 		cin >> temp;
+
 		if (!cin)
 		{
 			cin.clear();
-			while (cin.get() != '\n')
-				continue;
+
+			while (cin.get() != '\n');
+
 			cout << "Bad input; input process terminated.\n";
 			break;
 		}
 		else if (temp < 0)  // signal to terminate
+		{
 			break;
-		*begin = temp;
+		}
+
+		*(begin + i) = temp;
 	}
 
-	return begin;
+	return (begin + i);
 }
 
 void show_array(const double* begin, const double* end)
@@ -1689,10 +1699,13 @@ void show_array(const double* begin, const double* end)
 // multiplies each element of ar[] by r
 void revalue(double r, double* begin, const double* end)
 {
-	while (begin != end)
+	double* ptr = begin;
+
+	while (ptr != end)
 	{
-		*begin *= r;
-		++begin;
+		*ptr *= r;
+
+		++ptr;
 	}
 }
 ```
@@ -1848,11 +1861,33 @@ double add(double x, double y);
 double sub(double x, double y);
 double multiply(double x, double y);
 double divide(double x, double y);
-double claculate(double x, double y, double(*func)(double, double));
+double calculate(double x, double y, double(*func)(double, double));
 
 int main()
 {
+	using namespace std;
 
+	double x, y;
+
+	cout << "Enter tow numbers: ";
+	while (cin >> x >> y)
+	{
+		cout << "add: " << calculate(x, y, add) << endl;
+		cout << "sub: " << calculate(x, y, sub) << endl;
+		cout << "multiply: " << calculate(x, y, multiply) << endl;
+		cout << "divide: " << calculate(x, y, divide) << endl;
+		cout << "Enter tow numbers: ";
+	}
+
+	cout << endl;
+
+	double (*pf[4]) (double, double) = { add, sub, multiply, divide };
+
+	for (int i = 0; i < 4; i++)
+	{
+		cout << "result: " << calculate(4, 5, pf[i]) << endl;
+		cout << "result: " << calculate(4, 5, *(pf + i)) << endl;
+	}
 }
 
 double add(double x, double y)
@@ -1882,7 +1917,7 @@ double divide(double x, double y)
 	}
 }
 
-double claculate(double x, double y, double (*func)(double, double))
+double calculate(double x, double y, double (*func)(double, double))
 {
 	return func(x, y);
 }
