@@ -1567,6 +1567,9 @@ int main()
 	ReverseArray(dNums, nSize);
 	cout << "after reverse: " << endl;
 	ShowArray(dNums, nSize);
+	
+	cout << "after reverse: " << endl;
+	ShowArray(dNums+1, nSize-1);
 }
 
 void FillArray(double* dNums, int& nSize)
@@ -1620,19 +1623,19 @@ void ReverseArray(double* dNums, const int& nSize)
 
 const int Max = 5;
 
-double* fill_array(double ar[], int limit);
-void show_array(const double ar[], double* n);
-void revalue(double r, double ar[], double* n);
+double* fill_array(double* begin, const double* end);
+void show_array(const double* begin, const double* end);
+void revalue(double r, double* begin, const double* end);
 
 using namespace std;
 
 int main()
 {
 	double properties[Max];
-	double* size = fill_array(properties, Max);
-	show_array(properties, size);
+	double* arrEnd = fill_array(properties, properties + Max);
+	show_array(properties, arrEnd);
 
-	if (size > 0)
+	if ((arrEnd - properties) > 0)
 	{
 		cout << "Enter revaluation factor: ";
 		double factor;
@@ -1643,18 +1646,18 @@ int main()
 				continue;
 			cout << "Bad input; Please enter a number: ";
 		}
-		revalue(factor, properties, size);
-		show_array(properties, size);
+		revalue(factor, properties, arrEnd);
+		show_array(properties, arrEnd);
 	}
 	cout << "Done.\n";
 	return 0;
 }
 
-double* fill_array(double ar[], int limit)
+double* fill_array(double* begin, const double* end)
 {
 	double temp;
 	int i;
-	for (i = 0; i < limit; i++)
+	for (int i = 0; begin != end; ++i, ++begin)
 	{
 		cout << "Enter value #" << i + 1 << ": ";
 		cin >> temp;
@@ -1668,26 +1671,29 @@ double* fill_array(double ar[], int limit)
 		}
 		else if (temp < 0)  // signal to terminate
 			break;
-		ar[i] = temp;
+		*begin = temp;
 	}
 
-	return &ar[i-1];
+	return begin;
 }
 
-void show_array(const double ar[], double* n)
+void show_array(const double* begin, const double* end)
 {
-	for (int i = 0; (ar + i) <= n; ++i)
+	for (int i = 0; begin != end; ++i, ++begin)
 	{
 		cout << "Property #" << i + 1 << ": $";
-		cout << ar[i] << endl;
+		cout << *begin << endl;
 	}
 }
 
 // multiplies each element of ar[] by r
-void revalue(double r, double ar[], double* n)
+void revalue(double r, double* begin, const double* end)
 {
-	for (int i = 0; &ar[i] <= n; i++)
-		ar[i] *= r;
+	while (begin != end)
+	{
+		*begin *= r;
+		++begin;
+	}
 }
 ```
 
