@@ -356,5 +356,712 @@ int main()
 - 警告：应谨慎的使用隐式转换函数。通常，最好选择仅在被显式地调用时才会执行的成员函数。因为：**看视频！**
 
 ## [类继承](https://www.bilibili.com/video/BV1Qe4y1Y7jU)
-### 继承的基本概念
+
+### 123.继承的基本概念
+#### 使用继承的场景
+- 1）如果新创建的类与现有的类相似，只是多出若干成员变量或成员函数时，可以使用继承
+```C++
+#include <iostream>
+#include <cstring>
+
+using namespace std;
+
+class CAllComers  // 海选者报名类
+{
+public:
+ std::string m_name;
+ std::string m_tel;
+
+ CAllComers() { m_name = "某女"; m_tel = "不详"; }
+ void sing() { cout << "我是一只小小鸟。\n"; }
+ void setname(const string& name) { m_name = name; }
+ void sette(const string& tel) { m_tel = tel; }
+};
+
+class CGirl :public CAllComers
+{
+public:
+ int m_bh;  // 编号
+ CGirl() { m_bh = 8; }
+ void show() { cout << "编号：" << m_bh << "，姓名：" << m_name
+  << "，联系电话：" << m_tel << endl; }
+};
+
+int main()
+{
+ CGirl g;
+ g.setname("西施");
+ g.show();
+}
+```
+- 2）当需要创建多个类是，如果他们拥有很多相似的成员变量或成员函数，可以将这些类共同的成员提取出来，定义为基类，然后从基类继承
+
+```C++
+class Sort {  // 排序算法的基类
+ int m_data[30];  // 待排序的数组
+ void print();  // 显示排序后的结果
+};
+
+class BubbleSort :public Sort {  // 冒泡排序
+ void sort();
+};
+
+class SelectSort :public Sort {  // 选择排序
+ void sort();
+};
+
+class ShellSort :public Sort {  // 希尔排序
+ void sort();
+};
+
+```
+
+### 124.继承方式
+- 访问权限：public、protected（派生类中可以访问，main函数中不能访问，也就是派生类外部是不能访问的）、private
+- 继承方式：public、protected、private
+ - public 继承：基类的public和protected在派生中一样，private是不能访问
+ - protectd 继承：public的变量和方法变成protected，protected不变，private还是不能访问
+ - private 继承：public和protected都变成private，private还是不能访问
+```C++
+// private 继承演示
+#include <iostream>
+#include <cstring>
+
+using namespace std;
+
+class CAllComers  // 海选者报名类
+{
+public:
+ std::string m_name;
+ std::string m_tel;
+
+protected:
+ int m_a;
+
+private:
+ int m_b;
+
+public:
+ CAllComers() { m_name = "某女"; m_tel = "不详"; }
+ void sing() { cout << "我是一只小小鸟。\n"; }
+ void setname(const string& name) { m_name = name; }
+ void sette(const string& tel) { m_tel = tel; }
+};
+
+class CGirl :private CAllComers
+{
+public:
+ int m_bh;  // 编号
+ CGirl() { m_bh = 8; }
+ void show() {
+  setname("西施");  // 父类的非私有成员在在派生类中都可以访问
+  cout << "编号：" << m_bh << "，姓名：" << m_name
+   << "，联系电话：" << m_tel << m_a << endl; // m_b就不行
+ }
+};
+
+int main()
+{
+ CGirl g;
+ // g.setname("西施");  // 但是在外部不能访问
+ g.show();
+}
+```
+
+- 由于private和protected继承方式会改变基类成员在派生类中的访问权限，导致继承关系复杂，所以在实际开发中，一般用public
+ - 在派生类中，可以通过基类的公有成员函数间接访问基类的私有成员
+ - 使用using关键字可以改变基类成员在派生类中的访问权限
+ - 注意：using只能改变基类中public和protected成员的访问权限，不能改变private成员的访问权限，因为基类中的private成员在派生类中是不可见的，根本不能使用
+```C++
+// 例子
+class A {
+public:
+ int m_a = 10;
+public:
+ int m_b = 20;
+ void test () {}
+private:
+ int m_c = 30;
+};
+
+class B :public A
+{
+public:
+ using A::m_b;  // 把m_b的权限修改为公有的
+private:
+ using A::m_a;  // 把m_a的权限修改为私有的
+};
+
+int main()
+{
+ B b;
+ // b.m_a = 11;
+ b.m_b = 21;
+ // b.m_c = 31;
+
+ b.test();
+}
+```
+ 
+### 125.继承的对象模型
+- 1）创建派生类对象时，先调用基类的构造函数，再调用派生类的构造函数
+- 2）销毁派生类对象时，先调用派生类的析构函数，再调用基类的析构函数
+- 3）创建派生类对象时只会申请一次内存，派生类对象包含了基类对象的内存空间，this指针是同一个
+- 4）创建派生类对象时，先初始化基类对象，再初始化派生类对象
+- 5）在VS中，用cl.exe可以查看类的内存模型
+- 6）对派生类对象用sizeof得到的是积累所有成员的大小（包括私有成员）+ 派生类对象所有成员的大小
+- 7）在C++中，不同继承方式的访问权限只是语法上的处理。
+- 8）对派生类对象用memset()会清空基类成员
+- 9）用制作可以访问到基类中的私有成员（内存对齐）
+
+```C++
+#include <iostream>
+using namespace std;
+
+void* operator new(size_t size)  // 重载new运算符
+{
+ void* ptr = malloc(size);
+ cout << "申请到的内存地址是：" << ptr << "，大小是：" << size << endl;
+ return ptr;
+}
+
+void operator delete(void* ptr)
+{
+ if (ptr == 0) // 对空指针delete是安全的
+ {
+  return;
+ }
+
+ free(ptr);
+
+ cout << "释放了内存.\n";
+}
+
+class A {
+public:
+ int m_a = 10;
+protected:
+ int m_b = 20;
+private:
+ int m_c = 30;
+
+public:
+ A() 
+ {
+  cout << "A中的this指针是：" << this << endl;
+  cout << "A中m_a的地址是：" << &m_a << endl;
+  cout << "A中m_b的地址是：" << &m_b << endl;
+  cout << "A中m_c的地址是：" << &m_c << endl;
+ }
+
+ void func() { cout << "m_a=" << m_a << ", m_b=" << m_b << ", m_c=" << m_c << endl; }
+};
+
+class B :public A
+{
+public:
+ int m_d = 40;
+
+ B()
+ {
+  cout << "B中的this指针是：" << this << endl;
+  cout << "B中m_a的地址是：" << &m_a << endl;
+  cout << "B中m_b的地址是：" << &m_b << endl;
+  cout << "B中m_d的地址是：" << &m_d << endl;
+ }
+
+ void func1() { cout << "m_d=" << m_d << endl; }
+};
+
+int main()
+{
+ cout << "基类占用内存的大小是： " << sizeof(A) << endl;
+ cout << "派生类占用内存的大小是： " << sizeof(B) << endl;
+
+ B* p = new B;
+ p->func(); p->func1();
+
+ // memset()函数一般不用于类，可能会造成意外的结果，这是其中的一种情况
+ // memset(p, 0, sizeof(B));  // 把派生类全部成员的值清零
+ 
+ // 这种方法属于奇巧淫技，在实际开发中，不建议使用
+ *((int*)p + 2) = 31;  // m_c = 31
+
+ p->func(); p->func1();
+ delete p;
+}
+```
+
+### 126.如何构造基类
+派生类构造函数的要点如下：
+- 1）创建派生类对象时，程序首先调用基类的构造函数，然后再调用派生类 构造函数
+- 2）如果没有指定基类构造函数，将使用基类的默认构造函数
+- 3）**可以用初始化列表指明要使用的基类构造函数**
+- 4）基类构造函数赋值初始化被继承的数据成员；
+
+- 在类的继承中，有一个原则：基类的成员变量由基类的构造函数初始化。派生类新增的成员变量由派生类的构造函数初始化。有两个原因：（见视频）
+
+```C++
+#include <iostream>
+using namespace std;
+
+class A {  // 基类
+public:
+ int m_a;
+private:
+ int m_b;
+
+public:
+ A():m_a(0), m_b(0)  // 基类的默认构造函数。
+ {
+  cout << "调用了基类的默认构造函数A()。\n";
+ }
+
+ A(int a, int b) : m_a(a), m_b(b)  // 基类有两个参数的构造函数
+ {
+  cout << "调用了基类的构造函数A(int a, intb). \n";
+ }
+
+ A(const A& a) :m_a(a.m_a + 1), m_b(a.m_b + 1)  // 基类的拷贝构造函数
+ {
+  cout << "调用了基类的构造函数\n";
+ }
+
+ // 显示基类A全部的成员
+ void showA() { cout << "m_a=" << m_a << ", m_b" << m_b << endl; }
+};
+
+class B :public A
+{
+public:
+ int m_c;
+ B() : m_c(0), A()  // 派生类的默认构造函数，指明调用基类的默认构造函数
+ {
+  cout << "调用了派生类的构造函数B()。\n";
+ }
+
+ B(int a, int b, int c) : A(a, b), m_c(c)  // 指明基类的有两个参数的构造函数
+ {
+  cout << "调用了派生类的构造函数B(int a, int b, int c)。\n";
+ }
+
+ B(const A& a, int c) : A(a) , m_c(c) // 指明用基类的拷贝构造函数
+ {
+  cout << "调用了派生类的构造函数B(const A& a, int c)。\n";
+ }
+
+ // 显示派生类B全部的成员
+ void showB(){ cout << "m_c =" << m_c << endl << endl; }
+};
+
+int main()
+{
+ B b1;  // 将调用基类默认的构造函数
+ b1.showA();
+ b1.showB();
+
+ B b2(1, 2, 3);
+ b2.showA();
+ b2.showB();
+
+ A a(3, 4);
+
+ B b3(a, 3);
+ b3.showA();
+ b3.showB();
+
+ return 0;
+}
+```
+### 127.名字遮蔽与类作用域
+- 如果派生类中的成员（包括成员变量和成员函数）和基类中的成员重名，通过派生类对象或者在派生类的成员函数中使用该成员时，将使用派生类新增的成员，而不是基类的。
+- 注意：基类的成员函数和派生类的成员函数不会构成重载，如果派生类有同名函数，那么就会**遮蔽**基类中的所有同名函数。
+```C++
+#include <iostream>
+using namespace std;
+
+class A {  // 基类
+public:
+ int m_a = 30;
+ void func() { cout << "调用了A的func()函数。\n"; }
+ void func(int a) { cout << "调用了A的func()函数。\n"; }
+};
+
+class B :public A  // 派生类
+{
+public:
+ int m_a = 80;
+
+ void func() { cout << "调用了B的func()函数。\n"; }
+};
+
+int main()
+{
+ B b;
+ cout << "m_a = " << b.m_a << endl;
+ b.func();
+ // b.func(1); 基类的成员函数和派生类的成员函数不会构成重载
+
+ return 0;
+}
+```
+- 类是一种作用域，每个类都有自己的作用域，在这个作用域之内定义成员。
+- 在类的作用域之外，普通的成员只能通过对象（可以是对象本身，也可以是对象指针或对象引用）来访问，静态成员可以通过对象访问，也可以通过类访问。
+- 在成员名面前加类名和域解析符可以访问对象的成员。
+- 如果不存在继承关系，类名和域解析符可以省略不写。
+```C++
+#include <iostream>
+using namespace std;
+
+class A {  // 基类
+public:
+ int m_a = 30;
+ int m_b = 50;
+
+ void func() { cout << "调用了A的func()函数。\n"; }
+ void func(int a) { 
+  cout << "调用了A的func(int a)函数。\n"; 
+  A::m_a = m_a; 
+  this->m_a = a;
+ }
+};
+
+int main()
+{
+ A a;
+ cout << "m_a的值是：" << a.A::m_a << endl;
+ a.A::func();
+ a.A::func(1);
+
+ return 0;
+}
+```
+- 当存在继承关系时，基类的作用域嵌套派生类的作用域中。如果成员在派生类的作用域已经找到，就不会在基类作用域中继续查找；如果没有找到，则继续在基类作用域中查找。
+- 如果在成员的前面加上类名和域解析符，就可以直接使用该作用域的成员
+```C++
+#include <iostream>
+using namespace std;
+
+class A {  // 基类
+public:
+ int m_a = 10;
+ void func() { cout << "调用了A的func()函数。\n"; }
+};
+
+class B:public A{  // 子类
+public:
+ int m_a = 20;
+ void func() { cout << "调用了B的func()函数。\n"; }
+};
+
+class C:public B {  // 孙类
+public:
+ int m_a = 30;
+ void func() { cout << "调用了C的func()函数。\n"; }
+};
+
+int main()
+{
+ C c;
+ cout << "C::m_a的值是：" << c.C::m_a << endl;
+ cout << "B::m_a的值是：" << c.B::m_a << endl;
+ cout << "A::m_a的值是：" << c.A::m_a << endl;
+ cout << "A::m_a的值是：" << c.B::A::m_a << endl;
+
+ c.C::func();
+ c.B::func();
+ c.A::func();
+ c.B::A::func();
+ return 0;
+}
+```
+
+### 128.继承的特殊关系
+派生类和基类之间一些特殊关系：
+- 1）如果继承方式是公有的，派生类对象可以使用基类成员
+- 2）可以把派生类对象赋值给基类对象（包括私有成员），但是，会舍弃非基类的成员（多态）
+```C++
+#include <iostream>
+using namespace std;
+
+class A {  // 基类
+public:
+ int m_a = 0;
+private:
+ int m_b = 0;
+public:
+ void show() { cout << "A::show(), m_a=" << m_a << ", m_b =" << m_b << endl; }
+ void setb(int b) { m_b = b; }
+};
+
+class B:public A{  // 子类
+public:
+ int m_c = 0;
+ // 显示派生类B全部的成员
+
+ void show() { cout << "B::show(), m_a = " << m_a << ", m_c = " << m_c << endl; }
+};
+
+int main()
+{
+ A a;
+ B b;
+
+ b.m_a = 10;
+ b.setb(20);
+ b.m_c = 30;
+
+ a.show();
+ a = b; // B私有成员也会复制到A中；(回忆：类的赋值调用的是赋值函数，如果类中没有重载赋值函数，编译器就会提供一个默认赋值函数）
+ b.show();
+
+ return 0;
+}
+``` 
+- 3）基类指针可以在不进行显式转换情况下指向派生类对象
+- 4）基类引用可以在不进行显示转换的情况下引用派生类对象（回忆：引用的本质是指针常量的伪装，也是指针）
+```C++
+#include <iostream>
+using namespace std;
+
+class A {  // 基类
+public:
+ int m_a = 0;
+private:
+ int m_b = 0;
+public:
+ void show() { cout << "A::show(), m_a=" << m_a << ", m_b =" << m_b << endl; }
+ void setb(int b) { m_b = b; }
+};
+
+class B:public A{  // 子类
+public:
+ int m_c = 0;
+ // 显示派生类B全部的成员
+
+ void show() { cout << "B::show(), m_a = " << m_a << ", m_c = " << m_c << endl; }
+};
+
+int main()
+{
+ // C++ 中数据类型觉得了操纵方法
+ B b;
+ A* a = &b;
+
+ b.m_a = 10;
+ b.setb(20); // 设置成员m_b的值
+ b.m_c = 30;
+ b.show();
+
+ a->m_a = 101;
+ a->setb(201);
+ a->show();
+
+ return 0;
+}
+```
+
+注意：
+- 1）基类指针或引用只能调用基类的方法，不能调用派生类的方法。
+- 2）可以用派生类构造基类
+- 3）如果函数的形参是基类，实参可以用派生类。（回忆：在程序中，用派生类对象赋值给基类对象，本质上是调用基类的赋值函数）
+- 4）C++要求指针和引用类型与赋给的类型匹配，这一规则对继承来说是例外。但是，这种例外只是单向的，不可以将基类对象和指针赋给派生类引用和指针（没有价值，没有讨论的必要）
+
+### 129.多继承与虚继承
+- 在实际开发中很少用多继承，而虚继承又是为了解决多继承的问题才出现的，应用场景更少
+```C++
+#include <iostream>
+using namespace std;
+class A1 // 基类1
+{
+public:
+ int m_a = 10;
+};
+
+class A2
+{
+public:
+ int m_a = 20;
+};
+
+class B :public A1, public A2
+{
+public:
+ int m_a = 30;
+};
+
+int main()
+{
+ B b;
+ // 如果基类和派生类重名，在成员面前加类名和域名解析符就行了
+ cout << "m_a的值是： " << b.m_a << "，m_b的值是：" << b.A1::m_a << "，m_c的值是：" << b.A2::m_a;
+}
+```
+#### 菱形继承
+```C++
+#include <iostream>
+using namespace std;
+class A
+{
+public:
+ int m_a = 10;
+};
+
+class B:public A {};
+
+class C :public A {};
+
+class D :public B, public C{};
+
+int main()
+{
+ D d;
+ 
+ d.B::m_a = 30;
+ d.C::m_a = 80;
+
+ cout << "B::m_a的地址是： " << &d.B::m_a << "，值是：" << d.B::m_a << endl;
+ cout << "B::m_a的地址是： " << &d.C::m_a << "，值是：" << d.C::m_a << endl;
+}
+```
+- 菱形继承存在两个问题：数据冗余和名称的二义性
+
+```C++
+// 加上virtual 关键字，数据冗余和名称的二义性的问题都解决了
+#include <iostream>
+using namespace std;
+class A
+{
+public:
+	int m_a = 10;
+};
+
+class B :virtual public A {};
+
+class C :virtual public A {};
+
+class D :public B, public C {};
+
+int main()
+{
+	D d;
+
+	/*d.B::m_a = 30;
+	d.C::m_a = 80;*/
+
+	d.m_a = 80;
+	cout << "B::m_a的地址是： " << &d.B::m_a << "，值是：" << d.B::m_a << endl;
+	cout << "B::m_a的地址是： " << &d.C::m_a << "，值是：" << d.C::m_a << endl;
+}
+```
+- 有了多继承，就有了菱形继承，有了菱形继承就有虚继承，增加了复杂性
+- 不提倡使用多继承，只有在比较简单和不出现二义性的情况时才使用多继承，能用单一继承解决的问题就不要使用多继承。
+- 正是因为多继承复杂，程序编写、调试和维护都变得困难，后来一些面向对象的语言都不支持多继承
+
+### 131.多态的基本概念
+- 基类指针表现出了多种形式，这种现象称为多态
+```C++
+#include <iostream>
+using namespace std;
+
+class CAllComers
+{
+public:
+	int m_bh = 0;
+	virtual void show() { cout << "CAllComers::show(): 我是" << m_bh << "号。 " << endl; }
+};
+
+class CGirl :public CAllComers
+{
+public:
+	int m_age = 0;  
+	void show() { cout << "CGirl::show(): 我是" << m_bh << "号，" << m_age << "岁。" << endl; }
+};
+int main()
+{
+	CAllComers a; a.m_bh = 3;
+	CGirl g; g.m_bh = 8; g.m_age = 23;
+
+	CAllComers* p;
+	p = &a; p->show();
+	p = &g; p->show();
+
+	// 基类引用也可以使用多态
+	CAllComers& ra = a; ra.show();
+	CAllComers& rg = g; rg.show();
+	return 0;
+}
+```
+**注意：**
+- 1）只需要在基类的函数声明中加上virtual关键字，函数定义时不能加
+- 2）在派生类中重定义虚函数时，函数特征要相同
+- 3）当在基类中定义了虚函数时，如果在派生类没有重定义该函数，那么将使用基类的虚函数。
+- 4）在派生类中重定义了虚函数的情况下，如果想使用基类的虚函数，可以加类名和域解析符
+- 5）如果要在派生类中重新定义基类的函数，则将它设置为虚函数；否则，否则不要设置为虚函数，有两种好处：
+	- 首先：普通函数效率更高，后面再介绍
+	- 其次：如果没有声明为虚函数，是想告诉别人不要重新定义该函数
+
+### 132.多态的应用场景
+- 基类实现基本功能。派生类重定义虚函数，扩展功能、提升性能或者实现个性化功能。
+- 多态用C语言实现该怎么实现
+
+### 133.多态的对象模型
+- 如果类中没有虚函数，编译的时候。编译器直接把成员函数的地址链接到二进制文件中。如果类中有虚函数，编译器不会把虚函数的地址链接到二进制文件中。在有虚函数的类中，多了一个隐身的成员：虚函数指针。
+	- 程序在运行中，如果创建了对象。除了给对象的成员分配内存，还会创建一个虚函数表，用虚函数指针指向虚函数表。
+	- 在程序中，如果调用的是普通成员函数，程序的二进制代码中有普通函数的地址，直接执行函数就行了。如果调用的是虚函数，要先查找虚函数表，得到函数的地址，再执行函数。
+	- 调用普通成员函数的效率比调用虚函数的效率更高，所以说，如果不考虑多态，不要把普通成员函数设置为虚函数
+	- 如果基类中有虚函数，派生类会从基类中多继承一个虚函数指针和虚函数表。C++这样设计的目的，是为了让基类和派生类保持相同的内存模型。
+	- 在程序运行过程中，如果创建了派生类对象。在虚函数表中，会用派生类成员函数的地址取代基类成员函数的地址
+	- 在程序中，如果用基类指针指向派生类对象，用基类指针调用虚函数的时候，还是按照基类的方法调用函数
+
+### 134.如何析构派生类
+- C++规定：派生类的析构函数在执行完后，会自动执行基类的析构函数
+
+```C++
+#include <iostream>
+using namespace std;
+
+class AA
+{
+public:
+	AA() { cout << "调用了基类的构造函数AA()。\n"; }
+	virtual void func() { cout << "调用了基类的func()。\n"; }
+	virtual ~AA() { cout << "调用了基类的析构函数~AA()。\n"; }
+};
+
+class BB:public AA
+{
+public:
+	BB() { cout << "调用了派生类的构造函数BB()。\n"; }
+	virtual void func() { cout << "调用了派生类的func()。\n"; }
+	~BB() { cout << "调用了派生类的析构函数~BB()。\n"; }
+};
+
+int main()
+{
+	//BB* b = new BB;
+	//// 每次主动调用派生类的析构函数，都会调用一次基类的析构函数
+	//b->~BB();  // 因为C++规定：派生类的析构函数在执行完后，会自动执行基类的析构函数
+	//delete b;
+
+	AA* a = new BB;  // 把基类析构函数设置为虚函数，子类就会自动调用了，这很多态
+	delete a;
+}
+```
+- 之前提到过，如果要在在派生类中重定义基类的虚函数，它们的函数特征必须相同，但是基类和派生类的析构函数不可能相同，其实C++编译器会对它们做特殊的处理
+- 不能继承的函数：
+	- 构造函数
+	- 析构函数
+	- 赋值运算符函数
+	- 友元函数 
+- 2）析构函数可以手工调用，如果对象中有堆内存，析构函数以下代码是必要的：
+```C++
+delete ptr;
+ptr = nullptr;
+
+// 只进行delete而不把指针置为空，这想法不对，因为析构函数可能被主动调用。因为可能会导致野指针崩溃。
+// 所以在析构函数中，释放堆区内存之后，也应该把指针指向空
+```
+- 5）对于基类，即使它不需要析构函数，也应该提供一个空虚析构函数。目的是为了让派生类有机会重写析构函数
+
 
