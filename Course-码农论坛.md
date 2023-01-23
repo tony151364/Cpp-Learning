@@ -1064,4 +1064,153 @@ ptr = nullptr;
 ```
 - 5）对于基类，即使它不需要析构函数，也应该提供一个空虚析构函数。目的是为了让派生类有机会重写析构函数
 
+### 135.纯虚函数和抽象类
+- 纯虚函数是一种特殊的虚函数，在某些情况下，基类中不能对虚函数给出有意义的实现，把它声明为纯虚函数。
+- 基类中的虚函数一般用于实现缺省的、通用的功能。如果不需要缺省和通用的功能，就把基类的虚函数设置为纯虚函数。 
+- 纯虚函数只有函数名、参数和返回值类型，没有函数体，具体的实现留给派生类去做。
+- 语法：``` virtual 返回值类型 函数名 (参数列表)=0; ```
+- 纯虚函数在基类中为派生类保留一个函数的名字，以便派生类对它进行重定义。如果在基类中没有保留函数名字，则无法支持多态性。
+- 含有纯虚函数的类被称为抽象类，不能实例化对象，可以创建指针和引用。
 
+```C++
+#include <iostream>
+using namespace std;
+
+class AA
+{
+public:
+	AA() { cout << "调用了基类的构造函数AA()。\n"; }
+	virtual void func() = 0;  // { cout << "调用了基类的func()。\n"; }
+	virtual ~AA() = 0 { cout << "调用了基类的析构函数~AA()。\n"; }
+};
+
+class BB :public AA
+{
+public:
+	BB() { cout << "调用了派生类的构造函数BB()。\n"; }
+	virtual void func() { cout << "调用了派生类的func()。\n"; }
+	~BB() { cout << "调用了派生类的析构函数~BB()。\n"; }
+};
+
+int main()
+{
+	BB b;  // 派生类只有在实现了基类纯虚函数的情况下才能实例化
+
+	AA* p = &b;
+	p->func();
+
+	AA& r = b;
+	r.func();
+}
+```
+- 派生类必须重定义抽象类中的纯虚函数，否则也属于抽象类
+- 基类中的纯虚析构函数也需要实现
+```
+小技巧：
+有时候，想使一个类成为抽象类，但刚好没有任何纯虚函数，怎么办？方法很简单，在想要成为抽象的类中声明一个纯虚析构函数。
+```
+
+### 136.运行阶段类型识别 dynamic_cast
+- **运行阶段类型识别（RTTI, RunTime Type Identification）** 为程序在运行阶段确定对象的类型，只适用于包函数虚函数的类。
+- 基类指针可以指向派生类对象，如何知道基类指针指向的是那种派生类对象呢？（想调用派生类中的非虚函数）
+- dynamic_cast运算符是用基类的指针来生成派生类的指针，它不能回答“指针指向的是什么类的对象”，但能回答“是否可以安全的将对象的地址赋给特定类型的指针”的问题。
+- 如果转换成功，*dyanmic_cast* 返回对象的地址，如果失败，返回 *nullptr*
+
+```C++
+// 基类：Hero
+// 派生类：XS、HX、LB
+
+XS* pxs = (XS*)ptr;  // C风格强制转换的方法，程序员必须保证目标类型正确。如果基类指针指向的是HX，那么这行代码就会出问题。
+
+XS* pxs = dynamic_cast<XS*>(ptr);  // C++的方式
+```
+- 注意：
+	- 1）*dyanmic_cast* 只适用于包含虚函数的类。（**为多态而生**）
+	- 2）*dyanmic_cast* 可以将派生类指针转换为基类指针，这种画蛇添足的做法没有意义。
+	- 3）*dyanmic_cast* 可以用于引用，但是，没有与空指针对应的引用值，如果转换请求不正确，会出现*bad_cast*异常
+
+### 137.typeid运算符和type_info类
+- *typeid*运算符用于获取数据类型的信息：
+	- 语法一：*typeid*(数据类型)
+	- 语法二：*typeid*(变量名和表达式);
+- *typeid*运算符返回*type_info*类（在头文件中<typeinfo>中定义）的对象的引用。
+- *type_info*类的实现随编译器而异，但至少有*name()*成员函数，该函数返回一个字符串，通常是类名。
+- *type_info*重载了 == 和 != 运算符，用于对类型进行比较
+	
+```C++
+#include <iostream>
+// #include <string>
+using namespace std;
+
+class AA
+{
+public:
+	AA() {}
+};
+
+int main()
+{
+	// typeid用于C++内置数据类型
+	int ii = 3;
+	int* pii = &ii;
+	int& rii = ii;
+
+	cout << "type(int) = " << typeid(int).name() << endl; // int
+	cout << "type(ii) = " << typeid(ii).name() << endl;  // int
+
+	cout << "type(int*) = " << typeid(int*).name() << endl; // int * __ptr64
+	cout << "type(pii) = " << typeid(pii).name() << endl;  // int * __ptr64
+
+	cout << "type(int&) = " << typeid(int&).name() << endl; // int
+	cout << "type(rii) = " << typeid(rii).name() << endl << endl;  // int
+
+	// typeid用于自定义的数据类型
+	AA aa;
+	AA* paa = &aa;
+	AA& raa = aa;
+
+	cout << "typeid(AA) = " << typeid(AA).name() << endl;  // class AA
+	cout << "typeid(aa) = " << typeid(aa).name() << endl;  // class AA
+
+	cout << "typeid(AA* ) = " << typeid(AA*).name() << endl;  // class AA * __ptr64
+	cout << "typeid(paa) = " << typeid(paa).name() << endl;  // class AA * __ptr64
+
+	cout << "typeid(AA&) = " << typeid(AA&).name() << endl;  // class AA
+	cout << "typeid(raa) = " << typeid(raa).name() << endl << endl;  // class AA
+
+	// type_info 重载了 == 和 != 运算符，用于对类型进行比较
+	if (typeid(AA) == typeid(aa))
+	{
+		cout << "It's OK_aa !" << endl;
+	}
+
+	if (typeid(AA) == typeid(*paa))
+	{
+		cout << "It's OK_*paa !" << endl;
+	}
+
+	if (typeid(AA) == typeid(raa))
+	{
+		cout << "It's OK_raa !" << endl;
+	}
+
+	if (typeid(AA*) == typeid(paa))
+	{
+		cout << "It's OK_paa !" << endl;
+	}
+}
+```
+- 注意：
+	- 1）*type_info*的构造函数是*private*属性，也没有拷贝构造函数，所以不能直接实例化，只能由编译器在内部实例化。
+	- 2）不建议用*name()*成员函数返回的字符串作为判断数据类型的依据。（编译器可能会转换类型名）
+	- 3）*typeid()*运算符可以用于多态的场景，在运行阶段识别对象的数据类型。
+	- 4）假设有表达式*typeid(\*ptr)*，当*ptr*是空指针时，且ptr是多态的类型，将引发*bad_typede*异常
+```C++
+if (typeid(XS) == typeid(*ptr))
+{
+	XS* pxs == (XS*) ptr;
+	pxs->show();
+}
+```
+	
+	
