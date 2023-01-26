@@ -1180,8 +1180,13 @@ decltype(x + y) xpy = x + y;
 - 对于``` decltype(expression) var ``` ,为确定类型，编译器必须遍历一个核对表。核对表的简化版如下：
 	- 第一步：如果expression是一个没有用括号括起的标识符，则var的类型与该标识符的类型相同，包括const等限定符
 	- 第二步：如果expression是一个函数调用，则var的类型与函数的返回类型相同
-	- 第三步：如果expression是一个左值，则var为指向其类型的引用。（不太懂）
+	- 第三步：如果expression是一个左值，则var为指向其类型的引用。（不太懂）简单来说，两个括号括起来就变成了引用
 	- 第四步：如果前面的条件都不满足，则var的类型与expression的类型相同
+```C++
+double xx = 4.4;
+dectype ((xx)) r2 = xx;  // r2 is double &
+dectype(xx) w = xx;  // w is double
+```
 - [ ] 如果需要多次声明，可结合使用typedef和decltype
 ```C++
 template<class T1, class T2>
@@ -1223,12 +1228,14 @@ auto ft(T1 x, T2 y) -> decltype(x + y)
 
 ## 8.7 复习题
 - 1.短小而简洁的函数，不包含循环等复杂运算。因为内联函数本质还是代码的替换。
+	- 只有一行代码的小型、非递归函数适合作为内联函数
 - 2
 ```C++
 // a.
 void song(const char * name, int times = 1);
-// b???
+// b. 函数定义不需要做修改，提供默认值只在原型里边进行。
 // c.不能吧，分配和释放感觉都有问题，要是提供了，又传进来一个，那么原来的就找不到了。但是覆盖了。（不懂）
+//	 可以设置，但是要保留times的默认值：void song(const char * name = "O, My Papa", int times = 1);
 ```
 - 3
 ```C++
@@ -1292,7 +1299,7 @@ const std::array<std::string, Seasons> Snames =
 { "Spring", "Summer", "Fall", "Winter" };
 
 void fill(std::array<double, Seasons>& pa);
-void show(std::array<double, Seasons>& da);
+void show(const std::array<double, Seasons>& da);
 
 int main()
 {
@@ -1312,7 +1319,7 @@ void fill(std::array<double, Seasons>& pa)
 	}
 }
 
-void show(std::array<double, Seasons>& da)
+void show(const std::array<double, Seasons>& da)
 {
 	using namespace std;
 	double total = 0.0;
@@ -1325,11 +1332,11 @@ void show(std::array<double, Seasons>& da)
 	cout << "Total Expenses: $" << total << endl;
 }
 ```
-- 6
+- 6.a
 ```C++
 #include <iostream>
-// a.
-double mass(double density, double volume)
+// a.这个其实可以用默认参数来实现，函数重载也可
+double mass(double density, double volume = 1)
 {
 	return density * volume;  // m = ρv
 }
@@ -1338,7 +1345,7 @@ double mass(double density)
 	return density * 1;
 }
 
-// b.
+// b.参数位置如果换一下的话可以用默认参数
 void repeat(int n, char* a)
 {
 	for (int i = 0; i < n; i++)
@@ -1350,69 +1357,75 @@ void repeat(char* a)
 		std::cout << a << std::endl;
 }
 
-// c.
+// c.这必须用重载了，类型都不一样。用个模板也行
 int average(int x, int y)
 {
-	int z = (int)(x + y) / 2;
+	int z = int((x + y) / 2;
 	return z;
 }
 
-int average(double x, double y)
+double average(double x, double y)
 {
 	return (x + y) / 2;
 }
 
-// d.
+// d.只能重载 X
+// 答案说不能实现，因为两个函数的特征标相同。如果是用单双引号区别的话应该也是可以的
+// 我自己试了下可以，如果参数和返回值都是指针肯定不行。
+// 总之还是有点迷惑。
+#include<iostream>
+
 char mangle(char ch)
 {
-	return ch;
+	std::cout << "ch\n";
+	return 'I';
 }
-char* mangle(char* ch)
-{
-	return ch;
-}
-						    
-```						    
-- 7.
-```C++
-template<class T>
-T max(T x, T y)
-{
-    return (x > y) ? x : y;
-}
-```
-- 8. 
-```C++
-#include <iostream>
-struct box
-{
-    char maker[40];
-    float height;
-    float width;
-    float length;
-    float volume;
-};
 
-template<class T>
-T max(T x, T y);
+const char* mangle(const char* ch)
+{
+	std::cout << "ch*\n";
+	return ch;
+}
 
 int main()
 {
-    box box1, box2;
-
-    box1.volume = 33.4f;
-    box2.volume = 33.4f;
-    std::cout << max(box1.volume, box1.volume);
-}
-
+	std::cout << mangle('A') << std::endl;
+	std::cout << mangle("Are you Ok?") << std::endl;
+}			    
+```						    
+- 7.a
+```C++
 template<class T>
 T max(T x, T y)
 {
     return (x > y) ? x : y;
 }
 ```
-- 9. 看了视频再写
+- 8 .a
 
+```C++
+// 错误：题目要求的是具体化模板，这结构体传进来是没法比较的
+template<class T>
+T max(T x, T y)
+{
+    return (x > y) ? x : y;
+}
+	
+// 正确：
+tamplate<> box max(box b1, box b2)
+{
+	return (b1.volume > y.volume) ? b1 : b2; // 注意返回的是box
+}
+```
+- 9 .看了视频再写
+```C++
+v1 -> float
+v2 -> float&
+v3 -> float&  // 注意!!!!
+v4 -> int
+v5 -> double  // 注意！！！ 因为2.0是double
+```
+	
 ## 8.8 编程练习
 - 1
 ```C++
