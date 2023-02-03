@@ -814,7 +814,7 @@ Worker* pw1 = (Singer *) &ed;  // the Worker in Singer
 ```
 - C++引入多重继承的同时，引入了一种新技术——虚基类（virtual base class），使MI成为可能
 
-#### 1.虚继承
+#### 1.虚基类
 - 虚基类使得从多个类（它们的基类相同）派生出的对象只继承一个基类对象。例如，通过在类声明中使用关键字virtual，可以使Worker被用作Singer和Waiter的虚基类（virtual 和 public的次序无关紧要
 ```C++
 class Singer : virtual public Worker {...};
@@ -823,6 +823,9 @@ class Waiter : public virtual  Worker {...};
 // 然后，可以将SingingWaiter类定义为：
 class SingingWaiter: public Singer, public 
 ```
+- 现在，SingingWaiter对象只包含Worker对象的一个副本。从本质上说，它们共享一个Worker对象。因为SingingWaiter现在只包含了一个Worker对象，所以可以使用多态。
+		
+#### 2.新的构造规则
 
 
 
