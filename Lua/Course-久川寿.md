@@ -206,9 +206,9 @@ _G = {
         "helloworld" = function() print("hello,world!")
     }
 }
-```lua
+
 pkg.helloworld()
-```
+
 */
 
 int main()
