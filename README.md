@@ -2,6 +2,7 @@
 - 1.作者本人：https://gongjianbo1992.blog.csdn.net/article/details/123465756
 - 2.CSDN：https://blog.csdn.net/qq_40162965/article/details/112374406
 - 3.Qt，C++开发炫酷圆形扇形菜单面板：https://blog.csdn.net/wastelandboy/article/details/123492815
+- 为什么while比for好？
 
 TODO:
 - [ ] 软件工程导论
