@@ -1547,8 +1547,8 @@ struct stringy
 };
 
 void set(stringy& s1, char* s2);
-void show(const char* s1, int times = 1);
-void show(const stringy& s1, int times = 1);
+void show(const char* s1, int n = 1);
+void show(const stringy& s1, int n = 1);
 
 //prototypes for set(), show(), and show() go here
 int main()
@@ -1577,17 +1577,18 @@ void set(stringy& s1, char* s2)
 
 	strcpy_s(s1.str, nlen + 1, s2);
 	s1.ct = nlen;
+	// delete[] s1.str;
 }
 
-void show(const char* s1, int times)
+void show(const char* s1, int n)
 {
-	while (times--)
+	for (int i = 0; i < n; i++)
 	{
 		cout << s1 << endl;
 	}
 }
 
-void show(const stringy& s1, int times)
+void show(const stringy& s1, int n)
 {
 	while (times--)
 	{
@@ -1635,20 +1636,33 @@ T Max5(const T* Arr)
 - 6
 ```C++
 #include<iostream>
-template <typename, T>
+#include<string>
+
+template <typename T>
 T maxn(const T* a, int n);
+
+template<> 
+std::string maxn<std::string>(std::string str[], int n);
 
 int main()
 {
-	template char maxn<char>(char*, int n);
 	int nA[] = { 1, 2, 3, 4, 5, 6 };
-	double dB[] = { 14.5, 23.3, 3.5, 6.4 };
 
-	maxn(nA, 6);
-	maxn(nB, 4);
+	const char* str[5] = {
+		"I have a dream that one day this nation will rise up and live out the true meaning of its creed: 'We hold these truths to be self-evident, that all men are created equal.'",
+		"Darkness cannot drive out darkness: only light can do that. Hate cannot drive out hate: only love can do that.",
+		"If you want to go fast, go alone. If you want to go far, go together.",
+		"The future belongs to those who believe in the beauty of their dreams.",
+		"Believe you can and you're halfway there."
+	};
+
+	int maxInt = maxn(nA, 6);
+	std::string maxStr = maxn(str, 5);
+
+	std::cout << "The longest string is: " << maxStr << std::endl;
 }
 
-template <typename, T>
+template <typename T>
 T maxn(const T* a, int n)
 {
 	T temp = a[0];
@@ -1662,6 +1676,23 @@ T maxn(const T* a, int n)
 	}
 
 	return temp;
+
+}
+
+template<> 
+std::string maxn<std::string>(std::string str[], int n)
+{
+	int nMaxIndex = 0;
+
+	for (int i = 1; i < n; i++)
+	{
+		if (str[i].size() > str[nMaxIndex].size())
+		{
+			nMaxIndex = i;
+		}
+	}
+
+	return str[nMaxIndex];
 }
 ```
 
