@@ -1702,10 +1702,10 @@ std::string maxn<std::string>(std::string str[], int n)
 #include <iostream>
 
 template <typename T>  // template A
-void ShowArray(T arr[], int n);
+void SumArray(T arr[], int n);
 
 template <typename T>  // template B
-void ShowArray(T* arr[], int n);
+void SumArray(T* arr[], int n);
 
 struct debts
 {
@@ -1733,16 +1733,16 @@ int main()
 
 	cout << "Listing Mr.E's counts of things:\n";
 	// things is an array of int
-	ShowArray(things, 6);  // use template A
+	SumArray(things, 6);  // use template A
 
 	cout << "Listing Mr.E's debts:\n";
 	// pd is an array of pointers to double
-	ShowArray(pd, 3);  // use template B (more specialized)
+	SumArray(pd, 3);  // use template B (more specialized)
 	return 0;
 }
 
 template <typename T>
-void ShowArray(T arr[], int n)
+void SumArray(T arr[], int n)
 {
 	using namespace std;
 	cout << "template A\n";
@@ -1753,12 +1753,12 @@ void ShowArray(T arr[], int n)
 	{
 		sum += arr[i];
 	}
-	
+
 	cout << "sum: " << sum << endl;
 }
 
 template <typename T>
-void ShowArray(T* arr[], int n)
+void SumArray(T* arr[], int n)
 {
 	using namespace std;
 	cout << "template B\n";
