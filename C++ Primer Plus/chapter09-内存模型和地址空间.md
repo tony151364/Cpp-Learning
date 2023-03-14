@@ -265,14 +265,13 @@ extern int fleas;
 - 如果在函数中声明了一个与外部变量同名的变量，结果将如何呢？这种声明被视为一个自动变量的定义，当程序执行自动变量所属的函数时，该变量将位于作用域内。
 
 ```C++
-// 9.5 autoscp.cpp -- illustrating scope of automatic variables compile with support.cpp
+// 9.5 external.cpp -- illustrating scope of automatic variables compile with support.cpp
 #include <iostream>
-#include "support.cpp"
-using namespace std;
-double warming = 0.3;  // warming defined
+#include "support.h"
 
-void update(double dt);
-void local();
+using namespace std;
+
+double warming = 0.3;
 
 int main()  // uses global variable
 {
@@ -284,16 +283,29 @@ int main()  // uses global variable
 	return 0;
 }
 ```
+```C++
+// 9.6.5 support.h 
+#pragma once
+
+#ifndef _SUPPORT_H_
+#define _SUPPORT_H_
+
+extern double warming;
+
+void update(double dt);
+void local(void);
+
+#endif
+
+```
 
 ```C++
 // 9.6 support.cpp -- use external variable compile with external.cpp
+
+#include "support.h"
 #include <iostream>
-extern double warming;  // use warming from another file
 
-void update(double dt);
-void local();
-
-using std::cout;
+using namespace std;
 
 void update(double dt)  // modifies global variable
 {
@@ -329,7 +341,7 @@ const char* const months[12] =
 ### 9.2.5 静态持续性、内部链接性
 
 - **注意**： 在多个文件程序中，可以在一个文件（且只能在一个文件）中定义一个外部声明。使用该变量的其他文件必须使用关键字extern声明它
-- 可使用外部变量再多文件程序的不同部分共享数据；可使用链接性为内部的静态变量在同一个文件中的多个函数之间共享数据（名称空间提供了另外一种共享数据的方法）。另外，如果将作用域为整个文件的变量设置为静态的，就不必担心其名称与其他文件中的作用域为整个文件的变量发生冲突。
+- 可使用外部变量在多文件程序的不同部分共享数据；可使用链接性为内部的静态变量在同一个文件中的多个函数之间共享数据（名称空间提供了另外一种共享数据的方法）。另外，如果将作用域为整个文件的变量设置为静态的，就不必担心其名称与其他文件中的作用域为整个文件的变量发生冲突。
 ```C++
 // 9.7 twofile1.cpp -- variables with external and internal linkage
 #include <iostream>
@@ -592,8 +604,9 @@ int main()
 		pd2[i] = pd1[i] = 1000 + 20.0 * i;
 	}
 
-	cout << "Memory address:\n" << " heap: " << pd1
-		<< " static: " << (void*)buffer << endl;
+	cout << "Memory address:\n" 
+		<< " heap: " << pd1
+		<< " stack: " << (void*)buffer << endl;
 	cout << "<Memory contents:\n";
 	for (i = 0; i < N; i++)
 	{
