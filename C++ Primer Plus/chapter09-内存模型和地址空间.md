@@ -844,51 +844,50 @@ namespace debts
 // 在名称空间中声明的函数名的作用域为整个名称空间，因此定义和声明必须位于同一个名称空间中。
 namespace pers
 {
-    using std::cout;
-    using std::cin;
+	using std::cout;
+	using std::cin;
 
-    void getPerson(Person& rp)
-    {
-        cout << "Enter first name: ";
-        cin >> rp.fname;
-        cout << "Enter last name: ";
-        cin >> rp.lname;
-    }
+	void getPerson(Person& rp)
+	{
+		cout << "Enter first name: ";
+		cin >> rp.fname;
+		cout << "Enter last name: ";
+		cin >> rp.lname;
+	}
 
-    void showPerson(const Person& rp)
-    {
-        cout << rp.lname << ", " << rp.fname;
-    }
+	void showPerson(const Person& rp)
+	{
+		cout << rp.lname << ", " << rp.fname;
+	}
 }
 
 namespace debts
 {
-    void getDebt(Debt& rd)
-    {
-        getPerson(rd.name);
-        std::cout << "Enter debt: ";
-        std::cin >> rd.amount;
-    }
+	void getDebt(Debt& rd)
+	{
+		getPerson(rd.name);
+		std::cout << "Enter debt: ";
+		std::cin >> rd.amount;
+	}
 
-    void showDebt(const Debt& rd)
-    {
-        showPerson(rd.name);
-        std::cout << ": $" << rd.amount << std::endl;
-    }
+	void showDebt(const Debt& rd)
+	{
+		showPerson(rd.name);
+		std::cout << ": $" << rd.amount << std::endl;
+	}
 
 	double sumDebts(const Debt ar[], int n)
 	{
-        double total = 0;
-        for (int i = 0; i < n; ++i)
-        {
-            total += ar[i].amount;
-        }
+		double total = 0;
 
-        return total;
+		for (int i = 0; i < n; ++i)
+		{
+			total += ar[i].amount;
+		}
+
+		return total;
 	}
 }
-
-
 ```
 
 ```C++
@@ -956,3 +955,19 @@ void another(void)
 - auto、extern
 
 ## 9.5 复习题
+- 1
+```C++
+// a. 自动存储持续性
+// b.静态存储持续性，外部链接性
+// c.静态存储持续性，内部链接性
+// d.静态存储持续性、内部链接性
+```
+- 2.using声明只导入单个变量，与内部有冲突时会报错。using编译指令全部导入，还可能被内部同名变量隐藏，容易出错
+- 3.加个std::就行了
+- 4
+```C++
+using std::cout;
+using std::cin;
+using std::endl;
+```
+- 5
