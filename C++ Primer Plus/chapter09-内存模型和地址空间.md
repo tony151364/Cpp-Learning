@@ -1028,3 +1028,79 @@ int main()
 ```
 
 ## 9.6 编程练习
+```C++
+#pragma once
+
+const int Len = 40;
+
+struct golf
+{
+	char fullname[Len];
+	int handicap;
+};
+
+void setgolf(golf& g, const char* name, int hc);
+
+int setgolf(golf& g);
+
+void handicap(golf& g, int hc);
+
+void showgolf(const golf& g);
+```
+
+```C++
+#include "golf.h"
+#include <iostream>
+// #include <cstring>
+
+void setgolf(golf& g, const char* name, int hc)
+{
+	strcpy_s(g.fullname, Len, name);
+	g.handicap = hc;
+}
+
+int setgolf(golf& g)
+{
+
+	std::cout << "Enter fulll name:";
+	std::cin.getline(g.fullname, Len);
+	
+	if (0 == strcmp(g.fullname, ""))
+	{
+		return 0;
+	}
+
+	std::cout << "Enter Handicap:";
+	std::cin >> g.handicap;
+	std::cin.get();
+	return 1;
+}
+
+void handicap(golf& g, int hc)
+{
+	g.handicap = hc;
+}
+
+void showgolf(const golf& g)
+{
+	std::cout << "fullname: " << g.fullname << std::endl;
+	std::cout << "Handicap: " << g.handicap << std::endl;
+}
+```
+
+```C++
+#include "golf.h"
+#include <iostream>
+
+int main()
+{
+	golf g;
+
+	while (0 != setgolf(g))
+	{
+		std::cout << "The results are as follows: \n" << std::endl;
+		showgolf(g);
+	}
+	return 0;
+}
+```
