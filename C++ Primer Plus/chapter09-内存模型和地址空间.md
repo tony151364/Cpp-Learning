@@ -1028,6 +1028,7 @@ int main()
 ```
 
 ## 9.6 编程练习
+- 1
 ```C++
 #pragma once
 
@@ -1103,4 +1104,51 @@ int main()
 	}
 	return 0;
 }
+```
+- 2
+```C++
+// 9.9-plus static.cpp -- using a static local variable
+#include <iostream>
+#include <string>
+
+void strcount(const std::string& str);
+
+int main()
+{
+	using namespace std;
+
+	std::string input;
+	char next;
+
+	cout << "Enter a line:\n";
+	while (getline(cin, input) && !input.empty())  // 在while条件中判断是否为空行
+	{
+		strcount(input);
+
+		cout << "Enter next line (empty line to quit):\n";
+	}
+	cout << "Bye\n";
+	return 0;
+}
+
+void strcount(const std::string& str)
+{
+	using namespace std;
+	static int total = 0;
+
+	cout << "\"" << str << "\" contains ";
+
+	total += (int)str.size();
+	cout << str.size() << " characters\n";
+	cout << total << " characters total\n";
+}
+```
+
+- 3
+```C++
+
+```
+- 4
+```C++
+
 ```
