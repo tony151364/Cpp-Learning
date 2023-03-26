@@ -1146,9 +1146,177 @@ void strcount(const std::string& str)
 
 - 3
 ```C++
+// 9.9-plus static.cpp -- using a static local variable
+#include <iostream>
+#include <cstring>
+#include <new>
 
+using namespace std;
+
+struct chaff
+{
+	char dross[20];
+	int slag;
+};
+
+void show(const chaff& pd);
+
+const  int BUF = 512;
+char bufffer[BUF];
+
+int main()
+{
+	char dross[20];
+	int slag;
+
+	chaff* pd1 = new chaff[2];
+	chaff* pd2 = new(bufffer) chaff[2];
+
+	for (int i = 0; i < 2; i++)
+	{
+		cout << "#" << i + 1 << ": " << endl;
+		cout << "Enter the dross: ";
+		cin.getline(dross, 20);
+		cout << "Enter the slag: ";
+		cin >> slag;
+		cin.get();
+
+		strcpy_s(pd1[i].dross, dross);
+		strcpy_s(pd2[i].dross, dross);
+
+		pd1[i].slag = pd2[i].slag = slag;
+	}
+
+	for (int i = 0; i < 2; i++)
+	{
+		show(pd1[i]);
+		show(pd2[i]);
+	}
+
+	delete[] pd1;
+	return 0;
+}
+
+void show(const chaff& pd)
+{
+	cout << "The dross is: " << pd.dross << endl;
+	cout << "The slag is: " << pd.slag << endl;
+}
 ```
 - 4
 ```C++
+#pragma once
 
+#ifndef _P4_H_
+#define _P4_H_
+
+#include <iostream>
+
+namespace SALES
+{
+	const int QUARTERS = 4;
+	struct Sales
+	{
+		double sales[QUARTERS];
+		double average;
+		double max;
+		double min;
+	};
+
+	void setSales(Sales& s, const double ar[], int n);
+	void setSales(Sales& s);
+	void showSales(const Sales& s);
+}
+#endif  // _P4_H_
+```
+```C++
+#include "p4.h"
+
+void SALES::setSales(Sales& s, const double ar[], int n)
+{
+	int i;
+	double total = 0.0;
+	s.max = s.min = ar[0];
+
+	for (i = 0; (i < n) && (i < QUARTERS); i++)
+	{
+		s.sales[i] = ar[i];
+		s.max = (s.max < ar[i]) ? ar[i] : s.max;
+		s.min = (s.min > ar[i]) ? ar[i] : s.min;
+
+		total += ar[i];
+	}
+
+	s.average = total / i;
+
+	if (n < 4)
+	{
+		for (int k = n; k < QUARTERS; k++)
+		{
+			s.sales[k] = 0;
+		}
+	}
+}
+
+void SALES::setSales(Sales& s)
+{
+	int i = 0;
+
+	std::cout << "Enter 4 sales quarters: " << std::endl;
+
+	for (int i = 0; i < QUARTERS; i++)
+	{
+		std::cin >> s.sales[i];
+		s.average += s.sales[i];
+
+		if (i == 0)
+		{
+			s.max = s.min = s.sales[i];
+		}
+
+		if (s.sales[i] > s.max)
+		{
+			s.max = s.sales[i];
+		}
+
+		if (s.sales[i] < s.min)
+		{
+			s.min = s.sales[i];
+		}
+	}
+
+	s.average /= i;
+}
+
+void SALES::showSales(const Sales& s)
+{
+	std::cout << "Sales of 4 quarters: " << std::endl;
+
+	for (int i = 0; i < QUARTERS; i++)
+	{
+		std::cout << s.sales[i] << std::endl;
+	}
+
+	std::cout << "Average = " << s.average << std::endl;
+	std::cout << "Max = " << s.max << std::endl;
+	std::cout << "Min = " << s.min << std::endl;
+}
+
+```
+```C++
+#include "p4.h"
+using namespace SALES;
+
+int main()
+{
+	double ar[4] = { 11.1, 22.2, 33.3,44.4 };
+	Sales sl;
+
+	setSales(sl, ar, 3);
+	showSales(sl);
+
+	setSales(sl);
+	showSales(sl);
+	return 0;
+}
 ```
