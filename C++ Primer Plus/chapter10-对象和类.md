@@ -897,6 +897,352 @@ int main()
 }
 ```
 
+## 10.9 复习题
+1. 类包含了数据以及对数据的操纵方法，类的特征是：抽象、封装、继承、多态
+2. 抽象有点不太知道。封装和数据隐藏是通过函数，或者说成员函数来实现。get和set方法这些
+3. 对象是类的实例化。一个类可以有多个对象，一个对象只属于一个类
+4. 函数是对数据的操纵。内部可以直接访问数据和函数
+5. 代码如下：
+```C++
+class BankAccount
+{
+public:
+	enum{Len = 20};
+	BankAccount(const char* name, const char* id, double initbal);
+	void Display();
+	bool Deposit(double money);
+	bool Withdraw(double money);
 
+private:
+	char holderName[Len];
+	char accountID[Len];
+	double balance;
+};
+```
+6. 构造函数在创建时被调用，析构函数在对象删除时调用。父类构造函数先于子类调用，子类析构函数先于父类调用。
+7. 代码如下
+```C++
+BankAccount::BankAccount(const char* name, const char* id, double initBal) : balance(initBal)
+{
+	strncpy_s(holderName, name, strlen(holderName));
 
+	strncpy_s(accountID, id, strlen(accountID));
+}
+```
+8. 当在类中没有写构造函数是，编译器自动创建默认构造函数。好处就是做一些默认的初始化工作
+9. 代码如下：
+```C++
 
+```
+10. this是当前对象所在地址，\*this是 当前这个对象
+
+## 10.10 编程练习
+1. 代码如下:
+```C++
+class BankAccount
+{
+public:
+	enum{Len = 20};
+	BankAccount(const char* name, const char* id, double initbal);
+	void Display();
+	bool Deposit(double money);
+	bool Withdraw(double money);
+
+private:
+	char holderName[Len];
+	char accountID[Len];
+	double balance;
+};
+```
+```C++
+#include "account.h"
+#include <iostream>
+#include <cstring>
+
+BankAccount::BankAccount(const char* name, const char* id, double initBal) : balance(initBal)
+{
+	strncpy_s(holderName, name, strlen(holderName));
+
+	strncpy_s(accountID, id, strlen(accountID));
+}
+
+void BankAccount::Display()
+{
+	std::cout << "Holder Name: " << holderName << std::endl;
+	std::cout << "Account Number: " << accountID << std::endl;
+	std::cout << "Balance: " << balance << std::endl;
+}
+
+bool BankAccount::Deposit(double money)
+{
+	if (money > 0.0)
+	{
+		balance += money;
+		return true;
+	}
+
+	return false;
+}
+
+bool BankAccount::Withdraw(double money)
+{
+	if (money <= 0.0)
+	{
+		return false;
+	}
+	else if (money > balance)
+	{
+		std::cout << "Insufficient balance!" << std::endl;
+		return false;
+	}
+	else
+	{
+		balance -= money;
+		return true;
+	}
+}
+
+int main() {
+	BankAccount account{ "John Doe", "1234567890", 1000 };
+	account.Display();
+	account.Deposit(500);
+	account.Display();
+	account.Withdraw(200);
+	account.Display();
+	account.Withdraw(2000);
+
+	return 0;
+}
+```
+2. 代码如下：
+```C++
+// person.h
+#include <iostream>
+
+using std::string;
+using std::cout;
+using std::endl;
+
+class Person
+{
+public:
+	Person() { lname = ""; fname[0] = '\0'; }
+	Person(const string& ln, const char* fn = "Heyyou");
+	void Show() const;
+	void FormalShow() const;
+
+private:
+	static const int LIMIT = 25;
+	string lname;
+	char fname[LIMIT];
+};
+```
+```C++
+#include "person.h"
+
+Person::Person(const string& ln, const char* fn) : lname(ln)
+{
+	strncpy_s(fname, fn, LIMIT);
+}
+
+void Person::Show() const
+{
+	cout << "Name: " << fname << " " << lname << endl;
+}
+
+void Person::FormalShow() const
+{
+	cout << "Name: " << lname << " " << fname << endl;
+}
+
+int main()
+{
+	Person one;
+	Person two("Smythecraft");
+	Person three("Dimwiddy", "Sam");
+	one.Show();
+	one.FormalShow();
+	two.Show();
+	two.FormalShow();
+	three.Show();
+	three.FormalShow();
+	return 0;
+}
+```
+3. 代码如下：
+```C++
+// golf.h
+class golf
+{
+public:
+	golf();
+	golf(const char* name, int hc = 0);
+	
+	void handicap(int hc);
+	void showgolf();
+
+private:
+	static const int Len = 40;
+	char m_fullname[Len];
+	int m_handicap;
+};
+```
+```C++
+// golf.cpp
+#include "golf.h"
+#include <iostream>
+
+golf::golf()
+{
+	std::cout << "Enter fulll name:";
+	std::cin.getline(m_fullname, Len);
+
+	if (0 == strcmp(m_fullname, ""))
+	{
+		return;
+	}
+
+	std::cout << "Enter Handicap:";
+	std::cin >> m_handicap;
+	std::cin.get();
+}
+
+golf::golf(const char* name, int hc): m_handicap(hc)
+{
+	strcpy_s(m_fullname, Len, name);
+}
+
+void golf::handicap(int hc)
+{
+	m_handicap = hc;
+}
+
+void golf::showgolf()
+{
+	std::cout << "fullname: " << m_fullname << std::endl;
+	std::cout << "Handicap: " << m_handicap << std::endl;
+}
+
+int main()
+{
+	golf g;
+
+	std::cout << "The results are as follows:" << std::endl;
+	g.showgolf();
+	return 0;
+}
+```
+4. 代码如下：
+```C++
+// sales.h
+#ifndef _SALES_H_
+#define _SALES_H_
+
+#include <iostream>
+
+class Sales
+{
+public:
+	Sales();
+	Sales(const double ar[], int n);
+	void Show();
+
+private:
+	static const int QUARTERS = 4;
+	double sales[QUARTERS];
+	double average;
+	double max;
+	double min;
+};
+#endif  // _SALES_H_
+```
+```C++
+// sales.cpp
+#include "sales.h"
+
+Sales::Sales(const double ar[], int n)
+{
+	int i;
+	double total = 0.0;
+	max = min = ar[0];
+
+	for (i = 0; (i < n) && (i < QUARTERS); i++)
+	{
+		sales[i] = ar[i];
+		max = (max < ar[i]) ? ar[i] : max;
+		min = (min > ar[i]) ? ar[i] : min;
+
+		total += ar[i];
+	}
+
+	average = total / i;
+
+	if (n < 4)
+	{
+		for (int k = n; k < QUARTERS; k++)
+		{
+			sales[k] = 0;
+		}
+	}
+}
+
+Sales::Sales()
+{
+	int i = 0;
+
+	std::cout << "Enter 4 sales quarters: " << std::endl;
+
+	for (int i = 0; i < QUARTERS; i++)
+	{
+		std::cin >> sales[i];
+		average += sales[i];
+
+		if (i == 0)
+		{
+			max = min = sales[i];
+		}
+
+		if (sales[i] > max)
+		{
+			max = sales[i];
+		}
+
+		if (sales[i] < min)
+		{
+			min = sales[i];
+		}
+	}
+
+	average /= i;
+}
+
+void Sales::Show()
+{
+	std::cout << "Sales of 4 quarters: " << std::endl;
+
+	for (int i = 0; i < QUARTERS; i++)
+	{
+		std::cout << sales[i] << std::endl;
+	}
+
+	std::cout << "Average = " << average << std::endl;
+	std::cout << "Max = " << max << std::endl;
+	std::cout << "Min = " << min << std::endl;
+}
+```
+5. 代码如下：
+```C++
+
+```
+6. 代码如下：
+```C++
+
+```
+7. 代码如下：
+```C++
+
+```
+7. 代码如下：
+```C++
+
+```
