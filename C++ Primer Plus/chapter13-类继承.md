@@ -1014,12 +1014,347 @@ int main()
 ## 13.7 继承和动态内存分配
 
 - 如果基类使用动态内存分配，并重新定义复制和赋值构造函数，这将怎样影响派生类的实现呢？
+- 这个问题取决于派生类的属性
+
+```C++
+// Base Class Using DMA
+class baseDMA
+{
+private:
+	char* label;
+	int rating;
+	
+public:
+	baseDMA(const char* l = "null", int r = 0);
+	baseDMA(const baseDMA& rs);
+	virtual ~baseDMA();
+	baseDMA& operator=(const baseDMA& rs);
+...	
+}
+```
+
+### 13.7.1 第一种清况：派生类不使用new
+- baseDMA派生出lackDMA，后者不使用new，也没啥特殊设计。name不需要为其写专门的显示析构函数、复制构造函数和赋值运算符。
+
+```C++
+// derived class without DMA
+class lacksDMA :public baseDMA
+{
+private:
+	char color[40];
+public:
+...
+}
+```
+
+- 1. 析构函数：编译器可以自动生成默认的。派生类的默认构造函数执行后会调用基类析构函数。
+- 2. 复制构造函数：
+	- [ ] 默认复制构造函数执行成员复制，这对于动态内存分配来说是不合适的，但对于新的lacksDMA成员来说是合适的。
+	- lacksDMA之间复制的时候，是基于基类baseDMA的，所以父类的复制构造函数也能完成对应的赋值
+- 3. 赋值：对于赋值来说，也是如此。类的默认构造赋值运算将自动使用基类的赋值运算符来对基类组件进行赋值。因此默认复制构造函数也是合适的
+
+- 派生类对象的这些属性也适用于本身是对象的类成员
+- [ ] 第12章的string
+
+### 13.7.2 第二种情况：派生类使用new
+```C++
+// 假设派生类使用了new
+// derived class with DMA 
+class hasDMA :public baseDMA
+{
+private:
+	char* style;  // use new in constructors
+public:
+...
+};
+```
+
+- 在这种情况下，必须为派生类定义显式析构函数、复制构造函数和赋值运算符。
+- 1. 析构函数：派生类的析构释放派生类定义的，基类析构释放基类定义的。都要有
+```C++
+baseDMA::~baseDMA()  // takes case of baseDMA stuff
+{
+	delete [] label;
+}
+
+hasDMA::~hasDMA()  // takes case of hasDMA stuff
+{
+	delete [] style;
+}
+```
+- 2. 复制构造函数：派生类独有的属性进行复制，就不能再用父类的赋值构造函数
+	没有参数类型为hasDMA引用的baseDMA构造函数，也不需要这样的构造函数。因为复制构造函数baseDMA有一个baseDMA引用参数，而基类引用可以指向派生类型。因此，baseDMA复制构造函数将使用hasDMA参数的baseDMA部分来构造新对象的baseDMA部分。
+```C++
+baseDMA::baseDMA(const baseDMA& rs)
+{
+	label = new char[std::strlen(rs.label) + 1];
+	std::strcpy(label, rs.label);
+	rating = rs.rating;
+}
+```
+	- hasDMA复制构造函数只能访问hasDMA的数据，因此它必须调用baseDMA复制构造函数来处理共享的baseDMA数据：
+```C++
+hasDMA::hasDMA(const hasDMA& hs)
+		:baseDMA(hs)
+{
+	style = new char[std::strlen(hs.style) + 1];
+	std::strcpy(style, hs.style);
+}
+```
+- 3. 接下来来看赋值运算符
+```C++
+baseDMA& baseDMA::operator=(const baseDMA& rs)
+{
+	if (this == &rs)
+		return *this;
+	delete [] label;
+	label = new char[std::strlen(rs.label) + 1];
+	std::strcpy(label, rs.label);
+	rating = rs.rating;
+	return *this;
+}
+```
+- 由于hasDMA也使用动态内存分配，所有它也需要一个显式赋值运算符。派生类的显式赋值运算符必须负责所有继承的baseDMA基类对象的赋值，可以通过显式调用基类赋值运算符来完成这项工作，如下所示：
+```C++
+hasDMA& hasDMA::operator=(const hasDMA& hs)
+{
+	if (this == &hs)
+		return *this;
+	baseDMA::operator=(hs);  // copy base portion
+	delete [] style;  // prepare for new style
+	style = new char[std::strlen(hs.style) + 1];
+	std::strcpy(style, hs.style);
+	return *this;
+}
+```
+
+- 下述语句看起来有点奇怪：
+```C++
+baseDMA::operator=(hs);  // copy base portion
+```
+- 但通过使用函数表示法，而不是运算符表示法，可以使用作用域解析运算符。实际上，该语句的含义如下：
+```C++
+	*this = hs;  // use baseDMA::operator=()
+```
+- [ ]总之，基类和派生类都采用动态内存分配...
+
+### 13.7.3 使用动态内存分配和友元的继承示例
+
+```C++
+// 13.14 dma.h -- inheritance and dynamic memory allocation
+#ifndef DMA_H_
+#define DMA_H_
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <iostream>
+
+// Base Class Using DMA
+class baseDMA
+{
+private:
+	char* label;
+	int rating;
+
+public:
+	baseDMA(const char* l = "null", int r = 0);
+	baseDMA(const baseDMA& rs);
+	virtual ~baseDMA();
+	baseDMA& operator=(const baseDMA& rs);
+	friend std::ostream& operator<<(std::ostream& os, 
+		const baseDMA& rs);
+};
+
+// derived class without DMA
+class lacksDMA :public baseDMA
+{
+private:
+	enum { COL_LEN = 40 };
+	char color[COL_LEN];
+public:
+	lacksDMA(const char* c = "blank", const char* l = "null",
+		int r = 0);
+	lacksDMA(const char* c, const baseDMA& rs);
+	friend std::ostream& operator<<(std::ostream& os,
+		const lacksDMA& rs);
+};
+
+// derived class with DMA 
+class hasDMA :public baseDMA
+{
+private:
+	char* style;  // use new in constructors
+public:
+	hasDMA(const char* s = "none", const char* l = "null",
+		int r = 0);
+	hasDMA(const char* s, const baseDMA& rs);
+	hasDMA(const hasDMA& hs);
+	~hasDMA();
+	hasDMA& operator=(const hasDMA& hs);
+	friend std::ostream & operator<<(std::ostream& os,
+		const hasDMA& hs);
+};
+
+#endif  // DMA_H_
+```
+
+```C++
+// 13.15 dma.cpp --dma class methods
+
+#include "dma.h"
+#include <cstring>
+
+// baseDMA methods
+baseDMA::baseDMA(const char* l, int r)
+{
+	label = new char[std::strlen(l) + 1];
+	std::strcpy(label, l);
+	rating = r;
+}
+
+baseDMA::baseDMA(const baseDMA& rs)
+{
+	label = new char[std::strlen(rs.label) + 1];
+	std::strcpy(label, rs.label);
+	rating = rs.rating;
+}
+
+baseDMA::~baseDMA()  // takes case of baseDMA stuff
+{
+	delete[] label;
+}
+
+baseDMA& baseDMA::operator=(const baseDMA& rs)
+{
+	if (this == &rs)
+		return *this;
+	delete[] label;
+	label = new char[std::strlen(rs.label) + 1];
+	std::strcpy(label, rs.label);
+	rating = rs.rating;
+	return *this;
+}
+
+std::ostream& operator<<(std::ostream& os, const baseDMA& rs)
+{
+	os << "Label: " << rs.label << std::endl;
+	os << "Rating: " << rs.rating << std::endl;
+	return os;
+}
+
+// lacksDMA methods
+lacksDMA::lacksDMA(const char* c, const char* l, int r)
+	: baseDMA(l, r)
+{
+	std::strncpy(color, c, 39);
+	color[39] = '\0';
+}
+
+lacksDMA::lacksDMA(const char* c, const baseDMA& rs)
+{
+	std::strncpy(color, c, COL_LEN - 1);
+	color[COL_LEN - 1] = '\0';
+}
+
+std::ostream& operator<<(std::ostream& os, const lacksDMA& ls)
+{
+	os << (const baseDMA &)ls;
+	os << "Color: " << ls.color << std::endl;
+	return os;
+}
+
+// hasDMA methods
+hasDMA::hasDMA(const char* s, const char* l, int r)
+	: baseDMA(l, r)
+{
+	style = new char[std::strlen(s) + 1];
+	std::strcpy(style, s);
+}
+
+hasDMA::hasDMA(const char* s, const baseDMA& rs)
+	: baseDMA(rs)
+{
+	style = new char[std::strlen(s) + 1];
+	std::strcpy(style, s);
+}
+
+hasDMA::hasDMA(const hasDMA& hs)
+	:baseDMA(hs)  // invoke base class copy constructor
+{
+	style = new char[std::strlen(hs.style) + 1];
+	std::strcpy(style, hs.style);
+}
+
+hasDMA::~hasDMA()  // takes case of hasDMA stuff
+{
+	delete[] style;
+}
+
+hasDMA& hasDMA::operator=(const hasDMA& hs)
+{
+	if (this == &hs)
+		return *this;
+	baseDMA::operator=(hs);  // copy base portion
+	delete[] style;  // prepare for new style
+	style = new char[std::strlen(hs.style) + 1];
+	std::strcpy(style, hs.style);
+	return *this;
+}
+
+std::ostream & operator<<(std::ostream& os, const hasDMA& hs)
+{
+	os << (const baseDMA &)hs;
+	os << "Style: " << hs.style << std::endl;
+	return os;
+}
+```
+- [] What?
+
+```C++
+// 13.16 usedma.cpp -- inheritance, friends, and DMA
+// compile with dma.cpp
+#include <iostream>
+#include "dma.h"
+
+int main()
+{
+	using std::cout;
+	using std::endl;
+
+	baseDMA shirt("Portabelly", 8);
+	lacksDMA balloon("red", "Blimpo", 4);
+	hasDMA map("Mercator", "Buffalo Keys", 5);
+
+	cout << "Display baseDMA Object:\n";
+	cout << shirt << endl;
+	cout << "Display lacksDMA Object:\n";
+	cout << balloon << endl;
+	cout << "Display hasDMA Object:\n";
+	cout << map << endl;
+	
+	lacksDMA balloon2(balloon);
+	cout << "Result of lackDMA copy:\n";
+	cout << balloon2 << endl;
+
+	hasDMA map2;
+	map2 = map;
+	cout << "Result of hasDMA assignment:\n";
+	cout << map2 << endl;
+	return 0;
+}
+```
+
+## 13.8 类设计回顾
+
+### 13.8.1 编译器生成的成员函数
+
+#### 1.默认构造函数
+- 默认构造函数要么没有参数，要么所有的参数都要默认值。
+- 自动生成的默认构造函数的另一项功能是：**调用基类的默认构造函数以及调用本身是对象的成员所属类的默认构造函数**
+- 另外，如果派生类构造函数的成员初始化列表中没有显示调用基类构造函数，则编译器将使用基类的默认构造函数来构造派生类对象的基类部分。
+在这种情况下，如果基类没有构造函数，将导致编译阶段报错。
 ```C++
 
 ```
-```C++
-
-```
 
 ```C++
 
@@ -1032,6 +1367,12 @@ int main()
 ```C++
 
 ```
+
+
+
+
+
+
 
 
 
