@@ -5,7 +5,7 @@
 ### 11.1 运算符重载
 - 要重载运算符，需使用被称为运算符函数的特殊函数形式。运算符的函数格式如下
 ```C++
-operatorop(argument-list)
+operator op(argument-list)
 ```
 ## 11.2 计算时间：一个运算符重载的示例
 ```C++
@@ -119,52 +119,6 @@ int main()
 ```
 ## 11.1.1 添加加法运算符
 ```C++
-// 11.4 usetime1.cpp -- using the second draft of the Time class
-// compile usetime1.cpp and mytime1.cpp together
-#include <iostream>
-#include "mytime1.h"
-
-int main()
-{
-	using std::cout;
-	using std::endl;
-
-	Time planning;
-	Time coding(2, 40);
-	Time fixing(5, 55);
-	Time total;
-
-	cout << "planning time = ";
-	planning.Show();
-	cout << endl;
-
-	cout << "coding time = ";
-	coding.Show();
-	cout << endl;
-
-	cout << "fixing time = ";
-	fixing.Show();
-	cout << endl;
-
-	total = coding + fixing;
-	cout << "coding + fixing = ";
-	total.Show();
-	cout << endl;
-
-	Time morefixing(3, 28);
-	cout << "more fixing time = ";
-	morefixing.Show();
-	cout << endl;
-	total = morefixing.operator+(total);
-	cout << "morefixing.operator+(total) = ";
-	total.Show();
-	cout << endl;
-
-	return 0;
-}
-```
-
-```C++
 // 11.5 mytime1.h -- Time class before operator overloading
 #ifndef MYTIME1_H_
 #define MYTIME1_H_
@@ -236,8 +190,124 @@ void Time::Show() const
 	std::cout << hours << " hours, " << minutes << " minutes";
 }
 ```
+```C++
+// 11.4 usetime1.cpp -- using the second draft of the Time class
+// compile usetime1.cpp and mytime1.cpp together
+#include <iostream>
+#include "mytime1.h"
+
+int main()
+{
+	using std::cout;
+	using std::endl;
+
+	Time planning;
+	Time coding(2, 40);
+	Time fixing(5, 55);
+	Time total;
+
+	cout << "planning time = ";
+	planning.Show();
+	cout << endl;
+
+	cout << "coding time = ";
+	coding.Show();
+	cout << endl;
+
+	cout << "fixing time = ";
+	fixing.Show();
+	cout << endl;
+
+	total = coding + fixing;
+	cout << "coding + fixing = ";
+	total.Show();
+	cout << endl;
+
+	Time morefixing(3, 28);
+	cout << "more fixing time = ";
+	morefixing.Show();
+	cout << endl;
+	total = morefixing.operator+(total);
+	cout << "morefixing.operator+(total) = ";
+	total.Show();
+	cout << endl;
+
+	return 0;
+}
+```
 
 ### 11.2.2 重载限制
+1. 用非成员函数进行重载
+```C++
+#include <iostream>
+using namespace std;
+
+class Num
+{
+public:
+	int n;
+public:
+	Num();
+	Num(int m);
+	Num operator+(const Num& t) const;
+	void Show() const;
+};
+
+Num::Num()
+{
+	n = 0;
+}
+
+Num::Num(int m)
+{
+	n = m;
+}
+
+Num Num::operator+(const Num& t) const
+{
+	Num temp;
+	temp = n + t.n;
+
+	return temp;
+}
+
+void Num::Show() const
+{
+	cout << "n = " << n << endl;
+}
+
+// 非成员函数实现运算符重载
+Num operator-(const Num &m, const Num& l)
+{
+	Num temp;
+	temp.n = m.n - l.n;
+	return temp;
+}
+
+int main()
+{
+	Num a(10);
+	a.Show();
+	
+	Num b(20);
+	b.Show();
+
+	Num c;
+	c = a + b;
+	c.Show();
+
+	c = a - b;
+	c.Show();
+}
+```
+- 在类的定义中，如果没有对赋值运算符重载，当代码中出现将整数或者浮点数赋值给对象时，程序会调用与赋值语句右侧类型相关的构造函数
+```C++
+Num a;
+a = 10; // a(10)
+```
+2. 为什么这四个运算符只能用成员函数进行重载
+- 当非成员函数和构造函数都可以实现成员运算符的重载（如非成员重载赋值和构造函数），编译器编译时就会报错，不知道如何选择了。而其他的一些运算符，如+、-、都不会调用程序的构造函数。所以这四个运算符只能用成员函数进行重载。
+
 ### 11.2.3 其他重载运算符
 ```C++
 // 11.6 mytime2.h -- Time class before operator overloading
@@ -367,7 +437,7 @@ int main()
 	diff.Show();
 	cout << endl;
 
-	adjusted = total * 1.5;  // use operator+()
+	adjusted = total * 1.5;  // use operator*()
 	cout << "adjusted work time = ";
 	adjusted.Show();
 	cout << endl;
@@ -381,6 +451,7 @@ int main()
 	- 友元类
 	- 友元成员函数
 - 大多数运算符都可以通过成员或非成员函数来重载
+- 友元可以访问类的私有成员
 
 ### 11.3.1 创建友元
 - 第一步：在函数原型前加关键字friend
