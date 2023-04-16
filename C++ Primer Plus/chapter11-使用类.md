@@ -603,7 +603,8 @@ Time operator+(const Time& t) const;  // member version
 
 firend Time operator+(const Time& t1, const Time & t2);
 ```
-- 具体用哪个版本，根据具体情况而定
+- 必须只使用其中的一个格式，否则将会产生二义性，编译器将不能识别。
+- 具体用哪个版本，根据具体情况而定。本章后面的“转换和友元”一节将更深入讨论这种情形。
 
 ## 11.5 再谈重载：一个矢量类
 - 另外设计这个类时将使得用户修改了矢量的一种表示后，对象将自动更新另一种表示。使对象有这种智能，是C++类的另一个优点
@@ -655,8 +656,7 @@ namespace VECTOR
 
 		// fiends
 		friend Vector operator*(double n, const Vector& a);
-		friend std::ostream&
-			operator << (std::ostream& os, const Vector& v);
+		friend std::ostream& operator<<(std::ostream& os, const Vector& v);
 	};
 }
 #endif
