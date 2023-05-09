@@ -638,7 +638,7 @@ namespace VECTOR
 
 	public:
 		Vector();
-		Vector(double n1, double n2, Mode from = RECT);
+		Vector(double n1, double n2, Mode form = RECT);
 		void reset(double n1, double n2, Mode form = RECT);
 		~Vector();
 		double xval() const { return x; }  // report x value
@@ -711,7 +711,7 @@ namespace VECTOR
 		mode = RECT;
 	}
 
-	// construct vector from rectangular coordinates if form is r
+	// construct vector form rectangular coordinates if form is r
 	// (the default) or else from polar coordinates if form is p
 	Vector::Vector(double n1, double n2, Mode form)
 	{
