@@ -1254,6 +1254,138 @@ int main()
 5. 代码如下：
 ```C++
 
+#ifndef STACK_H_
+#define STACK_H__
+#include <iostream>
+struct customer
+{
+	char fullname[35];
+	double payment;
+};
+typedef customer Item;
+
+class Stack
+{
+private:
+	enum { MAX = 10 };
+	Item items[MAX];
+	int top;
+public:
+	Stack();
+	bool isempty() const;
+	bool isfull() const;
+	bool push(const Item& item);
+	bool pop(Item& item);
+};
+#endif
+```
+
+```C++
+// 10.11 stack.cpp -- Stack member functions
+#include "stack.h"
+Stack::Stack()  // Crate an empty stack
+{
+	top = 0;
+}
+
+bool Stack::isempty() const
+{
+	return top == 0;
+}
+
+bool Stack::isfull() const
+{
+	return top == MAX;
+}
+bool Stack::push(const Item& item)
+{
+	if (top < MAX)
+	{
+		items[top++] = item;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool Stack::pop(Item& item)
+{
+	if (top > 0)
+	{
+		item = items[--top];
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+```
+
+```C++
+// 10.12 stacker.cpp -- testing the Stack class
+#include <iostream>
+#include <cctype>
+#include "stack.h"
+int main()
+{
+	using namespace std;
+	Stack st;  // create an empty stack
+	char ch;
+	Item po;
+	double tot_payment = 0;
+
+	cout << "Please enter A to add a purchese order,\n"
+		<< "P to process a PO, or Q to quit.\n";
+	while (cin >> ch && toupper(ch) != 'Q')
+	{
+		while (cin.get() != '\n')
+		{
+			continue;
+		}
+		if (!isalpha(ch))
+		{
+			cout << '\a';
+			continue;
+		}
+		switch (ch)
+		{
+		case 'A':
+		case 'a':cout << "Enter a customer's name:  ";
+			cin.getline(po.fullname, 35);
+			cout << "Enter the customer's payment: ";
+			cin >> po.payment;
+
+			if (st.isfull())
+			{
+				cout << "stack already full\n";
+			}
+			else
+			{
+				st.push(po);
+			}
+			break;
+		case 'P':
+		case 'p':
+			if (st.isempty())
+				cout << "stack already empty\n";
+			else
+			{
+				st.pop(po);
+				cout << "PO # " << po.fullname << ": " << po.payment << "$ popped\n";
+				tot_payment += po.payment;
+				cout << "Now the total of payment is: " << tot_payment << '$' << endl;
+			}
+			break;
+		}
+		cout << "Please enter A to add a purchase order, \n"
+			<< "P to process a Po, or Q to qiut.\n";
+	}
+	cout << "Bye\n";
+	return 0;
+}
 ```
 6. 代码如下：
 ```C++
