@@ -1134,101 +1134,122 @@ int main()
 ```
 4. 代码如下：
 ```C++
-// sales.h
 #ifndef _SALES_H_
 #define _SALES_H_
 
-#include <iostream>
-
-class Sales
+namespace SALES
 {
-public:
-	Sales();
-	Sales(const double ar[], int n);
-	void Show();
+    class Sales
+    {
+    private:
+        static const int QUARTERS = 4;
+        double sales[QUARTERS];
+        double average;
+        double max;
+        double min;
 
-private:
-	static const int QUARTERS = 4;
-	double sales[QUARTERS];
-	double average;
-	double max;
-	double min;
-};
-#endif  // _SALES_H_
+    public:
+        Sales(const double ar[], int n);
+        Sales();
+        void showSales() const;
+    };
+} // namespace SALES
+
+#endif // _SALES_H_
 ```
+
 ```C++
-// sales.cpp
+#include <iostream>
 #include "sales.h"
 
-Sales::Sales(const double ar[], int n)
+namespace SALES
 {
-	int i;
-	double total = 0.0;
-	max = min = ar[0];
+    Sales::Sales(const double ar[], int n)
+    {
+        int i;
+        double total = 0.0;
+        max = min = ar[0];
 
-	for (i = 0; (i < n) && (i < QUARTERS); i++)
-	{
-		sales[i] = ar[i];
-		max = (max < ar[i]) ? ar[i] : max;
-		min = (min > ar[i]) ? ar[i] : min;
+        for (i = 0; (i < n) && (i < QUARTERS); i++)
+        {
+            sales[i] = ar[i];
+            max = (max < ar[i]) ? ar[i] : max;
+            min = (min > ar[i]) ? ar[i] : min;
 
-		total += ar[i];
-	}
+            total += ar[i];
+        }
 
-	average = total / i;
+        average = total / i;
 
-	if (n < 4)
-	{
-		for (int k = n; k < QUARTERS; k++)
-		{
-			sales[k] = 0;
-		}
-	}
+        if (n < QUARTERS)
+        {
+            for (int k = n; k < QUARTERS; k++)
+            {
+                sales[k] = 0;
+            }
+        }
+    }
+
+    Sales::Sales()
+    {
+        std::cout << "Enter 4 sales quarters: " << std::endl;
+
+        for (int i = 0; i < QUARTERS; i++)
+        {
+            std::cin >> sales[i];
+            average += sales[i];
+
+            if (i == 0)
+            {
+                max = min = sales[i];
+            }
+
+            if (sales[i] > max)
+            {
+                max = sales[i];
+            }
+
+            if (sales[i] < min)
+            {
+                min = sales[i];
+            }
+        }
+
+        average /= QUARTERS;
+    }
+
+    void Sales::showSales() const
+    {
+        std::cout << "Sales of 4 quarters: " << std::endl;
+
+        for (int i = 0; i < QUARTERS; i++)
+        {
+            std::cout << sales[i] << std::endl;
+        }
+
+        std::cout << "Average = " << average << std::endl;
+        std::cout << "Max = " << max << std::endl;
+        std::cout << "Min = " << min << std::endl;
+    }
+} // namespace SALES
+
+#include "sales.h"
+using namespace SALES;
+```
+```C++
+int main()
+{
+    double ar[4] = {11.1, 22.2, 33.3, 44.4};
+    Sales sl(ar, 3);
+    sl.showSales();
+
+    Sales s;
+    s.setSales();
+    s.showSales();
+
+    return 0;
 }
 
-Sales::Sales()
-{
-	int i = 0;
-
-	std::cout << "Enter 4 sales quarters: " << std::endl;
-
-	for (int i = 0; i < QUARTERS; i++)
-	{
-		std::cin >> sales[i];
-		average += sales[i];
-
-		if (i == 0)
-		{
-			max = min = sales[i];
-		}
-
-		if (sales[i] > max)
-		{
-			max = sales[i];
-		}
-
-		if (sales[i] < min)
-		{
-			min = sales[i];
-		}
-	}
-
-	average /= i;
-}
-
-void Sales::Show()
-{
-	std::cout << "Sales of 4 quarters: " << std::endl;
-
-	for (int i = 0; i < QUARTERS; i++)
-	{
-		std::cout << sales[i] << std::endl;
-	}
-
-	std::cout << "Average = " << average << std::endl;
-	std::cout << "Max = " << max << std::endl;
-	std::cout << "Min = " << min << std::endl;
-}
 ```
 5. 代码如下：
 ```C++
