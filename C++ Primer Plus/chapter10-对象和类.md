@@ -1389,13 +1389,221 @@ int main()
 ```
 6. 代码如下：
 ```C++
+#ifndef _MOVE_H_
+#define _MOVE_H_
 
+#include <iostream>
+
+class Move
+{
+public:
+	Move(double a = 0, double b = 0) : x(a), y(b) {};
+	void showmove() const;
+	Move add(const Move& m) const;
+	void reset(double a = 0, double b = 0);
+private:
+	double x;
+	double y;
+};
+#endif  // _MOVE_H_
 ```
+
+```C++
+#include "move.h"
+
+void Move::showmove() const
+{
+    std::cout << "x = " << x << ", y = " << y << std::endl;
+}
+
+Move Move::add(const Move& m) const
+{
+    return Move(x + m.x, y + m.y);
+}
+
+void Move::reset(double a, double b)
+{
+    x = a;
+    y = b;
+}
+
+int main()
+{
+	Move m1(3, 4);
+	Move m2(1.5, 2.5);
+
+	m1.showmove(); // Output: x: 3, y: 4
+	m2.showmove(); // Output: x: 1.5, y: 2.5
+
+	Move m3 = m1.add(m2);
+	m3.showmove(); // Output: x: 4.5, y: 6.5
+
+	m1.reset();
+	m1.showmove(); // Output: x: 0, y: 0
+
+	return 0;
+}
+```
+
 7. 代码如下：
 ```C++
 
+#ifndef _PLORG_H_
+#define _PLORG_H_
+
+class Plorg
+{
+public:
+	Plorg(const char* name = "Plorga", int ci = 50);
+	void setCI(int ci);
+	void report();
+	
+private:
+	static const int NAME_SIZE = 20;
+	char plorgName[NAME_SIZE];
+	int plorgCI;
+};
+
+#endif  // _PLORG_H_
 ```
+```C++
+#include "plorg.h"
+#include <iostream>
+#include <cstring>
+
+Plorg::Plorg(const char* name, int ci)
+{
+	strcpy_s(plorgName, NAME_SIZE-1, name);
+	plorgName[NAME_SIZE - 1] = '\0';
+	plorgCI = ci;
+}
+
+void Plorg::setCI(int ci)
+{
+	plorgCI = ci;
+}
+
+void Plorg::report()
+{
+	std::cout << "Plorg Name: " << plorgName << std::endl;
+	std::cout << "Plorg CI: " << plorgCI << std::endl;
+}
+
+int main()
+{
+	Plorg p1; // 使用默认名称和满意指数创建Plorg对象
+	Plorg p2("Tony", 75); // 使用自定义名称和满意指数创建Plorg对象
+
+	p1.report(); // 输出默认创建的Plorg对象的名称和满意指数
+	p2.report(); // 输出自定义创建的Plorg对象的名称和满意指数
+
+	p1.setCI(60); // 修改满意指数
+	p1.report(); // 输出修改后的满意指数
+}
+```
+
 8. 代码如下：
 ```C++
+#ifndef _LIST_H_
+#define _LIST_H_
 
+typedef int Item;
+
+class List
+{
+public:
+	List();
+	void AddItem(const Item& value);
+	bool IsEmpty();
+	bool IsFull();
+	Item getValue(int index);
+	void visit(void (*pf)(Item&));
+
+private:
+	static const int MAX = 10;
+	int m_curSize;
+	Item m_item[MAX];
+};
+
+#endif // _LIST_H_
+
+```
+
+```C++
+#include "list.h"
+
+List::List()
+{
+	m_curSize = 0;
+}
+
+void List::AddItem(const Item& value)
+{
+	if (IsFull())
+	{
+		return;
+	}
+
+	m_item[m_curSize] = value;
+	m_curSize++;
+}
+
+bool List::IsEmpty()
+{
+	return 0 == m_curSize;
+}
+
+bool List::IsFull()
+{
+	return MAX == m_curSize;
+}
+
+Item List::getValue(int index)
+{
+	if (index < 0 || index > MAX)
+	{
+		return Item();
+	}
+
+	return m_item[index];
+}
+
+void List::visit(void(*pf)(Item&))
+{
+	for (int i = 0; i < m_curSize; i++)
+	{
+		pf(m_item[i]);
+	}
+}
+
+```
+
+```C++
+#include <iostream>
+#include "list.h"
+
+void printItem(Item& item)
+{
+	std::cout << item << " ";
+}
+
+int main()
+{
+	List myList;
+
+	std::cout << "Is list empty? " << (myList.IsEmpty() ? "Yes" : "No") << std::endl;
+
+	myList.AddItem(10);
+	myList.AddItem(20);
+	myList.AddItem(30);
+
+	std::cout << "Is list empty? " << (myList.IsEmpty() ? "Yes" : "No") << std::endl;
+	std::cout << "Is list full? " << (myList.IsFull() ? "Yes" : "No") << std::endl;
+
+	std::cout << "Items in the list: ";
+	myList.visit(printItem);  // 牛啊！！！
+	std::cout << std::endl;
+
+	return 0;
+}
 ```
