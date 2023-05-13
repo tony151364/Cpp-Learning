@@ -1205,118 +1205,120 @@ void show(const chaff& pd)
 ```
 - 4
 ```C++
-#pragma once
+#ifndef SALES_H_
+#define SALES_H_
 
-#ifndef _P4_H_
-#define _P4_H_
+namespace SALES
+{
+    const int QUARTERS = 4;
+    
+    struct Sales
+    {
+        double sales[QUARTERS];
+        double average;
+        double max;
+        double min;
+    };
 
+    void setSales(Sales &s, const double ar[], int n);
+    void setSales(Sales &s);
+    void showSales(const Sales &s);
+}
+
+#endif // SALES_H_
+```
+```C++
+#include "sales.h"
 #include <iostream>
 
 namespace SALES
 {
-	const int QUARTERS = 4;
-	struct Sales
-	{
-		double sales[QUARTERS];
-		double average;
-		double max;
-		double min;
-	};
+    void setSales(Sales &s, const double ar[], int n)
+    {
+        int i;
+        double total = 0.0;
+        s.max = s.min = ar[0];
 
-	void setSales(Sales& s, const double ar[], int n);
-	void setSales(Sales& s);
-	void showSales(const Sales& s);
-}
-#endif  // _P4_H_
-```
-```C++
-#include "p4.h"
+        for (i = 0; (i < n) && (i < QUARTERS); i++)
+        {
+            s.sales[i] = ar[i];
+            s.max = (s.max < ar[i]) ? ar[i] : s.max;
+            s.min = (s.min > ar[i]) ? ar[i] : s.min;
 
-void SALES::setSales(Sales& s, const double ar[], int n)
-{
-	int i;
-	double total = 0.0;
-	s.max = s.min = ar[0];
+            total += ar[i];
+        }
 
-	for (i = 0; (i < n) && (i < QUARTERS); i++)
-	{
-		s.sales[i] = ar[i];
-		s.max = (s.max < ar[i]) ? ar[i] : s.max;
-		s.min = (s.min > ar[i]) ? ar[i] : s.min;
+        s.average = total / i;
 
-		total += ar[i];
-	}
+        if (n < QUARTERS)
+        {
+            for (int k = n; k < QUARTERS; k++)
+            {
+                s.sales[k] = 0;
+            }
+        }
+    }
 
-	s.average = total / i;
+    void setSales(Sales &s)
+    {
+        std::cout << "Enter sales for " << QUARTERS << " quarters: " << std::endl;
 
-	if (n < 4)
-	{
-		for (int k = n; k < QUARTERS; k++)
-		{
-			s.sales[k] = 0;
-		}
-	}
-}
+        for (int i = 0; i < QUARTERS; i++)
+        {
+            std::cin >> s.sales[i];
+        }
 
-void SALES::setSales(Sales& s)
-{
-	int i = 0;
+        double total = s.sales[0];
+        s.max = s.min = s.sales[0];
 
-	std::cout << "Enter 4 sales quarters: " << std::endl;
+        for (int i = 1; i < QUARTERS; i++)
+        {
+            total += s.sales[i];
 
-	for (int i = 0; i < QUARTERS; i++)
-	{
-		std::cin >> s.sales[i];
-		s.average += s.sales[i];
+            if (s.sales[i] > s.max)
+            {
+                s.max = s.sales[i];
+            }
 
-		if (i == 0)
-		{
-			s.max = s.min = s.sales[i];
-		}
+            if (s.sales[i] < s.min)
+            {
+                s.min = s.sales[i];
+            }
+        }
 
-		if (s.sales[i] > s.max)
-		{
-			s.max = s.sales[i];
-		}
+        s.average = total / QUARTERS;
+    }
 
-		if (s.sales[i] < s.min)
-		{
-			s.min = s.sales[i];
-		}
-	}
-
-	s.average /= i;
-}
-
-void SALES::showSales(const Sales& s)
-{
-	std::cout << "Sales of 4 quarters: " << std::endl;
-
-	for (int i = 0; i < QUARTERS; i++)
-	{
-		std::cout << s.sales[i] << std::endl;
-	}
-
-	std::cout << "Average = " << s.average << std::endl;
-	std::cout << "Max = " << s.max << std::endl;
-	std::cout << "Min = " << s.min << std::endl;
+    void showSales(const Sales &s)
+    {
+        std::cout << "Sales for " << QUARTERS << " quarters: " << std::endl;
+        for (int i = 0; i < QUARTERS; i++)
+        {
+            std::cout << "Quarter " << i + 1 << ": " << s.sales[i] << std::endl;
+        }
+        std::cout << "Average: " << s.average << std::endl;
+        std::cout << "Max: " << s.max << std::endl;
+        std::cout << "Min: " << s.min << std::endl;
+    }
 }
 
 ```
 ```C++
-#include "p4.h"
-using namespace SALES;
+#include "sales.h"
 
 int main()
 {
-	double ar[4] = { 11.1, 22.2, 33.3,44.4 };
-	Sales sl;
-
-	setSales(sl, ar, 3);
-	showSales(sl);
-
-	setSales(sl);
-	showSales(sl);
-	return 0;
+    using namespace SALES;
+    
+    Sales s1, s2;
+    
+    double ar[] = { 100.0, 200.0, 300.0, 400.0 };
+    setSales(s1, ar, 4);
+    showSales(s1);
+    
+    setSales(s2);
+    showSales(s2);
+    
+    return 0;
 }
 ```
