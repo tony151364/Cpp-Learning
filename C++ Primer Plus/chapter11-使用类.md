@@ -911,7 +911,7 @@ int side = 3.33;  // double value 3.33 convered to type int 3
 
 
 ```C++
-// 11.6 stonewt.h -- definition for the Stonewt class 
+// 11.16 stonewt.h -- definition for the Stonewt class 
 #ifndef STONEWT_H_
 #define STONEWT_H_
 class Stonewt
@@ -1040,6 +1040,114 @@ void display(const Stonewt& st, int n)
 	}
 }
 ```
+### 11.6.1 转换函数
+```C++
+// 11.19 stonewt1.h -- revised definition for the Stonewt class 
+#ifndef STONEWT_H_
+#define STONEWT_H_
+class Stonewt
+{
+private:
+	enum { Lbs_per_stn = 14 };
+	int stone;
+	double pds_left;
+	double pounds;
+public:
+	Stonewt(double lbs);
+	Stonewt(int stn, double lbs);
+	Stonewt();
+	~Stonewt();
+	void show_lbs() const;
+	void show_stn() const;
+
+	// conversion function
+	operator int() const;
+	operator double() const;
+};
+#endif
+```
+
+```C++
+// 11.20 stonewt.cpp -- Stonewt class methods + conversion functions
+#include <iostream>
+using std::cout;
+#include "stonewt1.h"
+
+Stonewt::Stonewt(double lbs)
+{
+	stone = int(lbs) / Lbs_per_stn;  // integer division
+	pds_left = int(lbs) % Lbs_per_stn + lbs - int(lbs);
+	pounds = lbs;
+}
+
+Stonewt::Stonewt(int stn, double lbs)
+{
+	stone = stn;
+	pds_left = lbs;
+	pounds = stn * Lbs_per_stn + lbs;
+}
+
+Stonewt::Stonewt()
+{
+	stone = pounds = pds_left = 0;
+}
+
+Stonewt::~Stonewt()  // destructor
+{
+
+}
+
+void Stonewt::show_stn() const
+{
+	cout << stone << " stone, " << pds_left << " pounds\n";
+}
+
+// show weight in pounds
+void Stonewt::show_lbs() const
+{
+	cout << pounds << " pounds\n";
+}
+
+Stonewt::operator int() const
+{
+	return int(pounds + 0.5);
+}
+
+Stonewt::operator double() const
+{
+	return pounds;
+}
+```
+
+```C++
+// 11.21 stone.cpp -- user-defined conversions function
+// compile with stonewt1.cpp
+#include <iostream>
+#include "stonewt1.h"
+
+int main()
+{
+	using std::cout;
+
+	Stonewt poppins(9, 2.8);
+	double p_wt = poppins;
+
+	cout << "Convert to double => ";
+	cout << "Poppins: " << p_wt << " pounds.\n";
+	cout << "Convert to int => ";
+	cout << "Poppins: " << int(poppins) << " pounds.\n";
+	return 0;
+}
+```
+- 声明explicit关闭掉运算符的转换。有了这些声明后，需要强制转换时将调用这些运算符。
+```C++
+ explicit operator int() const;
+ explicit operator double() const;
+```
+
+- 总之C++提供下面的类型转换
+	- int等类型赋给Stonewt对象是调用类的构造函数完成转换，添加explicit可以防止隐式类型转换
+	- 对象转换成**其他类型(除了基本数据类型，其他类的类型也可以）** 时使用**转换函数**，添加explicit可以防止隐式类型转换
 
 ### 11.6.2 转换函数和友元函数
 - 在讨论Time类时指出过，可以使用成员函数或友元函数来重载加法。
