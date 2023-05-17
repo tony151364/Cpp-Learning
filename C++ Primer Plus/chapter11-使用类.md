@@ -1210,8 +1210,23 @@ Stonewt Stonewt::operator*(double n) const
 	return Stonewt(tempStone, temp_pds_left);
 }
 ```
-- 2 友元函数不属于类的成员函数，但是与成员函数有相同的访问权限。友元函数在声明时需要添加friend关键字，且声明在该类中。成员函数则是类内部的函数。
-- 3 不一定。对于公有属性可以直接访问，对于私有属性可以用类内部提供的get和set方法访问。
+```C++
+// 课后题答案
+Stonewt operator*(double mult) const;
+
+Stonewt Stonewt::operator*(double mult) const
+{
+	return Stonewt(mult * pounds);
+}
+// 服啦，半天原来这么简单，不用做一堆复杂的转换。直接用第一个就好了。当时也是犯困状态不好。
+```
+- 2 
+	- 我的答案： 友元函数不属于类的成员函数，但是与成员函数有相同的访问权限。友元函数在声明时需要添加friend关键字，且声明在该类中。成员函数则是类内部的函数。
+	- 课后答案：成员函数是类定义的一部分，通过特定的对象来调用。成员函数可以隐式访问调用对象的成员，而无需使用成员运算符。友元函数不是类的组成部分，因此被称为直接函数调用。**友元函数不能隐式访问类成员，而必须将成员运算符用于作为参数传递的对象。**
+- 3 
+	- 我的答案：不一定。对于公有属性可以直接访问，对于私有属性可以用类内部提供的get和set方法访问。
+	- 课后答案：要访问私有成员，它必须是友元，但要访问公有成员，可以不是友元。
+	- chatgtp的回答：
 - 4
 ```C++
 friend Stonewt operator*(double n, const Stonewt& stone);
@@ -1221,15 +1236,44 @@ Stonewt operator*(double n, const Stonewt& stone)
 	return stone * n;
 }
 ```
-- 5 p387页
-	- = ：赋值运算符
-	- ()：函数调用运算符
-	- \[]：下标运算符
-	- ->：只用访问类成员的运算符 
-- 6
+```C++
+// 课后答案
+friend Stonewt operator*(double mult, const Stonewt& s);
+
+Stonewt operator*(double mult, const Stonewt& s)
+{
+	return Stonewt(mult * s.pounds);
+}
+```
+- 5 
+	- 我的答案：p387页 （错了，这几个是只能用成员函数重载，而不是不能重载）
+		- = ：赋值运算符
+		- ()：函数调用运算符
+		- \[]：下标运算符
+		- ->：只用访问类成员的运算符 
+	- 课后答案：下面的5个运算符不能重载。（因为它们的重载会导致语义混乱、歧义和不一致性）
+		- sizeof
+		- .
+		- *
+		- ::
+		- ?
+- 6 
+	- 我的答案：忘记了
+	- 课后答案：这些运算符必须使用成员函数定义
 - 7
 ```C++
+operator double() const;
 
+Vector::operator double() const
+{
+	return sqrt(x * x + y * y);
+}
+```
+```C++
+// 课后答案
+// prototype and inline definition
+operator double() {return mag;}
+// 服啦，我没发现这个属性
 ```
 
 ## 11.9 编程练习
