@@ -1198,10 +1198,69 @@ total = jennySt + bennySt;  // member function
 total = operator+(jennySt, bennySt);  // friend function
 ```
 
+## 11.8 复习题
+- 1
+```C++
+Stonewt operator*(double value) const;
 
+Stonewt Stonewt::operator*(double n) const
+{
+	int tempStone = n * stone + int(n * pds_left) / Lbs_per_stn;
+	int temp_pds_left = int(n * pds_left) % Lbs_per_stn + n * pds_left - int(n * pds_left);
+	return Stonewt(tempStone, temp_pds_left);
+}
+```
+- 2 友元函数不属于类的成员函数，但是与成员函数有相同的访问权限。友元函数在声明时需要添加friend关键字，且声明在该类中。成员函数则是类内部的函数。
+- 3 不一定。对于公有属性可以直接访问，对于私有属性可以用类内部提供的get和set方法访问。
+- 4
+```C++
+friend Stonewt operator*(double n, const Stonewt& stone);
 
+Stonewt operator*(double n, const Stonewt& stone)
+{
+	return stone * n;
+}
+```
+- 5 p387页
+	- = ：赋值运算符
+	- ()：函数调用运算符
+	- \[]：下标运算符
+	- ->：只用访问类成员的运算符 
+- 6
+- 7
+```C++
 
+```
 
+## 11.9 编程练习
+- 1
+```C++
+
+```
+```C++
+
+```
+- 2
+```C++
+
+```
+```C++
+
+```
+- 3
+```C++
+
+```
+```C++
+
+```
+- 4
+```C++
+
+```
+```C++
+
+```
 
 
 
