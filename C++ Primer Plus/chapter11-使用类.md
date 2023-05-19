@@ -610,7 +610,7 @@ firend Time operator+(const Time& t1, const Time & t2);
 - 另外设计这个类时将使得用户修改了矢量的一种表示后，对象将自动更新另一种表示。使对象有这种智能，是C++类的另一个优点
 ```C++
 #pragma once
-// 11.3 vector.h -- Vector class with << , mode state
+// 11.13 vector.h -- Vector class with << , mode state
 #ifndef VECTOR_H_
 #define VECTOR_H_
 
@@ -663,7 +663,7 @@ namespace VECTOR
 ```
 
 ```C++
-// 11.4 vector.cpp -- methods for the Vector class
+// 11.14 vector.cpp -- methods for the Vector class
 #include <cmath>
 #include "vect.h"  // include <iostream>
 using std::sqrt;
@@ -846,7 +846,7 @@ namespace VECTOR
 
 ### 11.5.4 使用Vector类来模拟随机漫步
 ```C++
-// 11.5 randwalk.cpp -- using the Vector class
+// 11.15 randwalk.cpp -- using the Vector class
 #include <iostream>
 #include <cstdlib>  // rand(), srand() prototypes
 #include <ctime>  // time() prototype
@@ -1279,36 +1279,680 @@ operator double() {return mag;}
 ## 11.9 编程练习
 - 1
 ```C++
+// 11.p01 randwalk.cpp -- save to file
+#include <iostream>
+#include <cstdlib>  // rand(), srand() prototypes
+#include <ctime>
+#include <fstream>
+#include "vect.h"
+int main()
+{
+	using namespace std;
+	using VECTOR::Vector;
+	srand(time(0));  // time(0) 函数返回当前的时间，通常为从某一个日期开始的秒数
+	double direction;
+	Vector step;
+	Vector result(0.0, 0.0);
+	unsigned long steps = 0;
+	double target;
+	double dstept;
+
+	int index;
+	ofstream outFile;
+	outFile.open("randwalk.txt"); 
+	
+	if (!outFile.is_open())
+	{
+		cout << "Could not open the file " << endl;
+		cout << "Program terminating.\n";
+		exit(EXIT_FAILURE);  // EXIT_FAILURE:用于同操作系统通信的参数值
+	}
+
+	cout << "Enter target distance (q to qiut): ";
+	while (cin >> target)
+	{
+		index = 0;
+
+		cout << "Enter step length: ";
+		if (!(cin >> dstept))
+			break;
+
+		outFile << "Target Distance: " << target << ", Step Size: " << dstept << endl;
+		outFile << index++ << ": " << result << endl;
+
+		while (result.magval() < target)
+		{
+			direction = rand() % 360;
+			step.reset(dstept, direction, Vector::POL);
+			result = result + step;
+			steps++;
+
+			outFile << index++ << ": " << result << endl;
+		}
+
+		outFile << "After " << steps << "steps, the subject "
+			"has the following location:\n";
+		outFile << result << endl;
+
+		result.polar_mode();
+		outFile << "or\n" << result << endl;
+		outFile << "Average outward distance per step = "
+			<< result.magval() / steps << endl << endl;
+
+		steps = 0;
+		result.reset(0.0, 0.0);
+		cout << "Enter target distance (q to quit): ";
+	}
+	cout << "Bye!\n";
+	cin.clear();
+	while (cin.get() != '\n')
+		continue;
+
+	outFile.close();
+	return 0;
+}
+```
+```
+// randwalk.txt
+Target Distance: 100, Step Size: 20
+0: (x, y) = (0, 0)
+1: (x, y) = (10, -17.3205)
+2: (x, y) = (6.87131, 2.43326)
+3: (x, y) = (26.3587, 6.93228)
+4: (x, y) = (42.9395, -4.25158)
+5: (x, y) = (62.3454, 0.58686)
+6: (x, y) = (81.9779, -3.22932)
+7: (x, y) = (101.203, 2.28343)
+After 7steps, the subject has the following location:
+(x, y) = (101.203, 2.28343)
+or
+(m, a) = (101.229, 1.29253)
+Average outward distance per step = 14.4613
 
 ```
-```C++
 
-```
 - 2
 ```C++
+#pragma once
+// 11.13 vector.h -- Vector class with << , mode state
+#ifndef VECTOR_H_
+#define VECTOR_H_
 
+#include <iostream>
+
+namespace VECTOR
+{
+	class Vector
+	{
+	public:
+		enum Mode { RECT, POL };  // RECT for rectangular, POL for Polar modes
+
+	private:
+		double x;
+		double y;
+		Mode mode;  // RECT or POL
+
+	private:
+		void set_x(double mag, double ang);
+		void set_y(double mag, double ang);
+
+	public:
+		Vector();
+		Vector(double n1, double n2, Mode form = RECT);
+		void reset(double n1, double n2, Mode form = RECT);
+		~Vector();
+		double xval() const { return x; }  // report x value
+		double yval() const { return y; }
+		double magval() const;
+		double angval() const;
+		void polar_mode();
+		void rect_mode();
+
+		// operator overloading
+		Vector operator+ (const Vector& b) const;
+		Vector operator- (const Vector& b) const;
+		Vector operator- () const;
+		Vector operator* (double n) const;
+
+		// fiends
+		friend Vector operator*(double n, const Vector& a);
+		friend std::ostream& operator<<(std::ostream& os, const Vector& v);
+	};
+}
+#endif
 ```
 ```C++
+// 11.14 vector.cpp -- methods for the Vector class
+#include <cmath>
+#include "vect.h"  // include <iostream>
+using std::sqrt;
+using std::sin;
+using std::cos;
+using std::atan;
+using std::atan2;
+using std::cout;
 
+namespace VECTOR
+{
+	// compute degrees in one radian
+	const double Rad_to_deg = 45.0 / atan(1.0);
+	// should be about 57.234523452
+
+	// private methods
+	// calculates magnitude from x and y
+	void Vector::set_x(double mag, double ang)
+	{
+		x = mag * cos(ang);
+	}
+
+	void Vector::set_y(double mag, double ang)
+	{
+		y = mag * sin(ang);
+	}
+
+	// public methods
+	Vector::Vector()   // defualt construcot
+	{
+		x = y = 0.0;
+		mode = RECT;
+	}
+
+	// construct vector form rectangular coordinates if form is r
+	// (the default) or else from polar coordinates if form is p
+	Vector::Vector(double n1, double n2, Mode form)
+	{
+		mode = form;
+		if (form == RECT)
+		{
+			x = n1;
+			y = n2;
+
+		}
+		else if (form == POL)
+		{
+			double mag = n1;
+			double ang = n2 / Rad_to_deg;
+			set_x(mag, ang);
+			set_y(mag, ang);
+		}
+		else
+		{
+			cout << "Incorrect 3rd argument: to Vecor() -- ";
+			cout << "vector set to 0\n";
+			x = y = 0.0;
+			mode = RECT;
+		}
+
+	}
+
+	// reset vector from recangluar coodinate if 
+	// RECT 
+	// form is POL
+	void Vector::reset(double n1, double n2, Mode form)
+	{
+		mode = form;
+		if (form == RECT)
+		{
+			x = n1;
+			y = n2;
+		}
+		else if (form == POL)
+		{
+			double mag = n1;
+			double ang = n2 / Rad_to_deg;
+			set_x(mag, ang);
+			set_y(mag, ang);
+		}
+		else
+		{
+			cout << "Incorrect 3rd argument to Vector() -- ";
+			cout << "vector set to 0\n";
+			x = y = 0.0;
+			mode = RECT;
+		}
+	}
+
+	Vector::~Vector()  // destructor
+	{
+
+	}
+
+	double Vector::magval() const
+	{
+		return sqrt(x * x + y * y);
+	}
+
+	double Vector::angval() const
+	{
+		if (x == 0.0 && y == 0.0)
+			return 0.0;
+		else
+			return atan2(y, x);;
+	}
+
+	void Vector::polar_mode()  // set to polar mode
+	{
+		mode = POL;
+	}
+
+	void Vector::rect_mode()  // set to rectangular mode
+	{
+		mode = RECT;
+	}
+
+	// operator overloading
+	// add two Vectors
+	Vector Vector::operator+(const Vector& b) const
+	{
+		return Vector(x + b.x, y + b.y);
+	}
+
+	// substract Vector b from a
+	Vector Vector::operator-(const Vector& b) const
+	{
+		return Vector(x - b.x, y - b.y);
+	}
+
+	// reverse sign of Vector
+	Vector Vector::operator-() const
+	{
+		return Vector(-x, -y);
+	}
+
+	Vector Vector::operator*(double n) const
+	{
+		return Vector(n * x, n * y);
+	}
+
+	// friend methods
+	// multiply n by Vector a
+	Vector operator*(double n, const Vector& a)
+	{
+		return a * n;
+	}
+
+	std::ostream& operator << (std::ostream& os, const Vector& v)
+	{
+		if (v.mode == Vector::RECT)
+			os << "(x, y) = (" << v.x << ", " << v.y << ")";
+		else if (v.mode == Vector::POL)
+		{
+			os << "(m, a) = (" << v.magval() << ", "
+				<< v.angval() * Rad_to_deg << ")";
+		}
+		else
+			os << "Vector object mode is invalid";
+		return os;
+	}
+}  // end namespace VECTOR
 ```
 - 3
 ```C++
+// 11.15 randwalk.cpp -- using the Vector class
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include "vect.h"
+int main()
+{
+	using namespace std;
+	using VECTOR::Vector;
+	srand(time(0));
+	double direction;
+	Vector step;
+	Vector result(0.0, 0.0);
+	unsigned long steps = 0;
+	double target;
+	double dstept;
 
-```
-```C++
+	int N;
+	unsigned long maxStep, minStep, sumStep;
+	maxStep = minStep = sumStep = 0;
 
+	cout << "Enter target distance (q to qiut): ";
+	while (cin >> target)
+	{
+		cout << "Enter step length: ";
+		if (!(cin >> dstept))
+			break;
+
+		cout << "Enter N times: ";
+		if (!(cin >> N))
+			break;
+
+		for (int i = 0; i < N; i++)
+		{
+			while (result.magval() < target)
+			{
+				direction = rand() % 360;
+				step.reset(dstept, direction, Vector::POL);
+				result = result + step;
+				steps++;
+			}
+
+			cout << "After " << steps << "steps, the subject "
+				"has the following location:\n";
+			cout << result << endl;
+
+			result.polar_mode();
+			cout << "or\n" << result << endl;
+			cout << "Average outward distance per step = "
+				<< result.magval() / steps << endl;
+
+			if (i == 0)
+			{
+				maxStep = minStep = sumStep = steps;
+			}
+			else
+			{
+				maxStep = (steps > maxStep) ? steps : maxStep;
+				minStep = (steps < minStep) ? steps : minStep;
+				sumStep += steps;
+			}
+
+			steps = 0;
+			result.reset(0.0, 0.0);
+		}
+
+		cout << "max step: " << maxStep << endl;
+		cout << "min step: " << minStep << endl;
+		cout << "average step: " << (sumStep / N) << endl;
+
+		cout << "Enter target distance (q to quit): ";
+	}
+
+	cout << "Bye!\n";
+	cin.clear();
+	while (cin.get() != '\n')
+		continue;
+	return 0;
+}
 ```
+
 - 4
 ```C++
+// 11.10 mytime3.h -- Time class with friends
+#ifndef MYTIME3_H_
+#define MYTIME3_H_
+#include <iostream>
+
+class Time
+{
+private:
+	int hours;
+	int minutes;
+public:
+	Time();
+	Time(int h, int m = 0);
+	void AddMin(int m);
+	void AddHr(int h);
+	void Reset(int h = 0, int m = 0);
+
+	friend Time operator*(const Time& t, double n);
+	friend Time operator*(double m, const Time& t) { return t * m; }
+	friend Time operator+(const Time& t1, const Time& t2);
+	friend Time operator-(const Time& t1, const Time& t2);
+
+	friend std::ostream& operator<<(std::ostream& os, const Time& t);
+};
+#endif
+```
+```C++
+// 11.11 mytime2.cpp -- implementing Time methods
+#include "mytime3.h"
+
+Time::Time()
+{
+	hours = minutes = 0;
+}
+
+Time::Time(int h, int m)
+{
+	hours = h;
+	minutes = m;
+}
+
+void Time::AddMin(int m)
+{
+	minutes += m;
+	hours += minutes / 60;
+	minutes %= 60;
+}
+
+void Time::AddHr(int h)
+{
+	hours += h;
+}
+
+void Time::Reset(int h, int m)
+{
+	hours = h;
+	minutes = m;
+}
+
+Time operator* (const Time& t, double mult)
+{
+	Time result;
+	long totalminutes = t.hours * mult * 60 + t.minutes * mult;
+	result.minutes = totalminutes % 60;
+	result.hours = totalminutes / 60;
+	return result;
+}
+
+Time operator+(const Time& t1, const Time& t2)
+{
+	Time sum;
+	sum.minutes = t1.minutes + t2.minutes;
+	sum.hours = t1.hours + t2.hours + sum.minutes / 60;
+	sum.minutes %= 60;
+	return sum;
+}
+
+Time operator-(const Time& t1, const Time& t2)
+{
+	Time diff;
+	int tot1, tot2;
+
+	tot1 = t1.minutes + 60 * t1.hours;
+	tot2 = t2.minutes + 60 * t2.hours;
+	diff.minutes = (tot1 - tot2) % 60;
+	diff.hours = (tot1 - tot2) / 60;
+	return diff;
+}
+
+std::ostream& operator<<(std::ostream& os, const Time& t)
+{
+	os << t.hours << " hours, " << t.minutes << " minutes";
+	return os;
+}
+```
+
+- 5
+```C++
 
 ```
 ```C++
 
 ```
+```C++
 
+```
+- 6
+```C++
+// 11.16 stonewt.h -- definition for the Stonewt class 
+#ifndef STONEWT_H_
+#define STONEWT_H_
+class Stonewt
+{
+private:
+	enum { Lbs_per_stn = 14 };
+	int stone;
+	double pds_left;
+	double pounds;
+public:
+	Stonewt(double lbs);
+	Stonewt(int stn, double lbs);
+	Stonewt();
+	~Stonewt();
+	void show_lbs() const;
+	void show_stn() const;
 
+	bool operator > (const Stonewt& stn) const;
+	bool operator >= (const Stonewt& stn) const;
+	bool operator < (const Stonewt& stn) const;
+	bool operator <= (const Stonewt& stn) const;
+	bool operator == (const Stonewt& stn) const;
+	bool operator != (const Stonewt& stn) const;
 
+	operator int() const;
+	operator double() const;
 
+	friend std::ostream& operator<<(std::ostream& os, const Stonewt& stn);
+};
+#endif
+```
+```C++
+// 11.17 stonewt.cpp -- Stonewt methods
+#include <iostream>
+using std::cout;
+#include "stonewt.h"
 
+Stonewt::Stonewt(double lbs)
+{
+	stone = int(lbs) / Lbs_per_stn;  // integer division
+	pds_left = int(lbs) % Lbs_per_stn + lbs - int(lbs);
+	pounds = lbs;
+}
 
+Stonewt::Stonewt(int stn, double lbs)
+{
+	stone = stn;
+	pds_left = lbs;
+	pounds = stn * Lbs_per_stn + lbs;
+}
 
+Stonewt::Stonewt()
+{
+	stone = pounds = pds_left = 0;
+}
+
+Stonewt::~Stonewt()  // destructor
+{
+
+}
+
+void Stonewt::show_stn() const
+{
+	cout << stone << " stone, " << pds_left << " pounds\n";
+}
+
+// show weight in pounds
+void Stonewt::show_lbs() const
+{
+	cout << pounds << " pounds\n";
+}
+
+bool Stonewt::operator>(const Stonewt& stn) const
+{
+	return (pounds > stn.pounds);
+}
+
+bool Stonewt::operator>=(const Stonewt& stn) const
+{
+	return (pounds >= stn.pounds);
+}
+
+bool Stonewt::operator<(const Stonewt& stn) const
+{
+	return (pounds < stn.pounds);
+}
+
+bool Stonewt::operator<=(const Stonewt& stn) const
+{
+	return (pounds <= stn.pounds);
+}
+
+bool Stonewt::operator==(const Stonewt& stn) const
+{
+	return (pounds == stn.pounds);
+}
+
+bool Stonewt::operator!=(const Stonewt& stn) const
+{
+	return (pounds != stn.pounds);
+}
+
+Stonewt::operator int() const
+{
+	return int(pounds + 0.5);
+}
+
+Stonewt::operator double() const
+{
+	return pounds;
+}
+
+std::ostream& operator<<(std::ostream& os, const Stonewt& stn)
+{
+	os << stn.pounds;
+	return os;
+}
+
+```
+```C++
+// 11.18 stone.cpp -- user-defined conversions
+// compile with stonewt.cpp
+#include <iostream>
+#include "stonewt.h"
+
+int main()
+{
+	using namespace std;
+
+	Stonewt compareStn(11.0);
+	Stonewt stns[6] = { 11.0, 13.0, 15.0 };
+
+	cout << "Enter 3 pounds of number: ";
+	for (int i = 3; i < 6; i++)
+	{
+		double tempStn;
+		cin >> tempStn;
+		stns[i] = tempStn;
+	}
+
+	int count = (stns[1] >= compareStn) ? 1 : 0;
+	Stonewt maxPounds, minPounds;
+	maxPounds = minPounds = stns[1];
+
+	for (int i = 1; i < 6; i++)
+	{
+		if (stns[i] < minPounds)
+		{
+			minPounds = stns[i];
+		}
+		else if (stns[i] > maxPounds)
+		{
+			maxPounds = stns[i];
+		}
+
+		if (stns[i] >= compareStn)
+		{
+			count++;
+		}
+	}
+
+	cout << "max pounds: " << maxPounds << endl;
+	cout << "min pounds: " << minPounds << endl;
+	cout << "pounds than 11: " << count << endl;
+}
+```
+- 7
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
