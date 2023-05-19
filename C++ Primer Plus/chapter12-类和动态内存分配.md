@@ -19,13 +19,12 @@ public:
 	StringBad();  // default constructor
 	~StringBad();  // destructor
 // friend function
-	friend std::ostream& operator << (std::ostream& os,
-		const StringBad& st);
+	friend std::ostream& operator << (std::ostream& os, const StringBad& st);
 };
 
 #endif  // STRINGBAD_H_
 ```
-- 改类使用char指针来表示姓名。这意味着类声明没有为字符串本身分配存储空间，而是在构造函数中使用new来为字符串分配空间。这避免了在类声明中预先定义字符串的长度。
+- 该类使用char指针来表示姓名。这意味着类声明没有为字符串本身分配存储空间，而是在构造函数中使用new来为字符串分配空间。这避免了在类声明中预先定义字符串的长度。
 - num_strings成员作为静态存储类有一个特点：无论创建了多少对象，程序都只创建一个静态类变量副本。假设创建了10个StringBad对象，将有10个str成员和10个len成员，但只有一个共享的num_strings成员+
 
 ```C++
@@ -168,7 +167,7 @@ Klunk kar(10);  // clearly matches Klunt (int n)
 Klunk bus;  // could match either constructor
 ```
 
-####2.复制构造函数
+#### 2.复制构造函数
 - 复制构造函数用于将一个对象复制到新创建的对象中。也就是说，它用于初始化过程中（包括按值传递参数）而不是常规的赋值过程
 ```C++
 // 类的赋值构造函数原型通常如下
@@ -179,6 +178,7 @@ StringBad(const StringBad& );
 - 对于赋值构造函数需要知道两点
     - 何时调用
     - 有何功能
+ 
 #### 3.何时调用赋值构造函数
 - 新建一个对象并将其初始化为同类对象时，赋值构造函数都将被调用。
 ```C++
@@ -375,11 +375,174 @@ String & String::operator=(const char * s)
 
 - [ ] 构造函数难道不能直接用 = 吗，如果你重载了，构造函数是不是就不用std::strcpy()
 - [ ] \[]的重载，是不是有点多余
-- [ ] 为啥CINLIM就可以在类声明中进行初始化？
+- [x] 为啥CINLIM就可以在类声明中进行初始化？ 答：加了const的是可以的
+```C++
+#pragma once
+// 12.4 string1.h  -- fixed and augmented string class defination
+#include <iostream>
+#ifndef STRNG1_H_
+#define STRNG1_H_
+using std::istream;
+using std::ostream;
+
+class String
+{
+private:
+	char* str;  // pointer to string
+	int len;  // length of string
+	static int num_strings;  // number of objects
+	static const int CINLIM = 80;  // cin input limit
+public:
+	String(const char* s);	// constructor
+	String();				// default constructor
+	String(const String&);  // copy constructor
+	~String();				// destructor
+
+	int length() const { return len; }
+
+	// overloaded operator methods
+	String& operator=(const String&);
+	String& operator=(const char*);
+	char& operator[](int i);
+	const char& operator[](int i) const;
+
+	// overloaded operatpr friends
 
 
+	friend std::ostream& operator << (std::ostream& os, const String& st);
+};
 
+#endif  // STRNG1_H_
+```
 
+```C++
+
+```
+
+```C++
+
+```
+## 12.3 在构造函数中使用new时应注意的事项
+- 用new初始化对象的指针成员时必须特别小心
+	- 如果在构造函数使用new来初始化指针成员，则应在析构函数中delete。
+	- new和delete相互兼容。new对应于delete，new[]对应于delete[] 
+	- 如果有多个构造函数，则必须以相同的方式使用new，要么都带中括号，要么都不带。因为只有一个析构函数，所有的构造函数都必须与它兼容。然而可以在一个构造函数中使用new初始化指针，而在另一个构造函数中将指针初始化为空（0或C++11中的nullptr），这是因为delete（无论是带中括号还是不带中括号）都可以用与空指针。
+
+- NULL、0还是nullptr：
+	- C程序员通常使用NULL（在很多头文件中，NULL是一个被定义为0的字符常量）
+	- C++程序员以前喜欢使用0，C++11后多使用nullptr
+
+- 应定义一个复制构造函数，通过深度复制将一个对象初始化为另一个对象。例如：
+```C++
+String::String(const String& st)
+{
+	num_string++;
+	len = st.len;
+	str = new char[len + 1];
+	std::strcpy(str, st.str);  // copy string to new location
+}
+```
+
+- 应对定义一个复制运算符，通过深度复制将一个对象复制给另一个对象
+```C++
+String& String::operator=(const String& st)
+{
+	if (this == &st)
+		return *this;
+		
+	delete[] str;
+	len = st.len;
+	str = new char[len + 1];
+	std::strcpy(str, st.str);
+	return *this;
+}
+```
+- 小结：
+	- 拷贝构造函数：将自己拷贝给别人。自己 -> 别人
+	- 复制构造函数：别人复制给自己。  别人 -> 自己
+
+### 12.3.1 应该和不应该
+- 对不是使用new初始化的指针使用delete是，结果将是不确定的，并可能有害
+```C++
+String::String()
+{
+	static conat char* s = "C++";
+	len = std::strlen(s);
+	str = new char[len + 1];
+	std::strcpy(str, s);
+}
+```
+
+### 12.3.2 包含类成员的类的逐成员复制
+- 在一些复杂的情况下，需要显示调用String和string的复制构造函数和赋值运算符，这将在第13章介绍。
+
+## 12.4 有关返回对象的说明
+- 可以返回指向对象的引用、指向对象的const引用或const对象
+- 现在介绍最后一种
+
+### 12.4.1 返回执行const对象的引用
+- 其实当函数的一个参数可以作为返回值时用这种比较好。比如返回两个对象最大的那个。下面两种实现都是可行的：
+```C++
+// version 1
+Vector Max(const Vector& v1, const Vector& v2)
+{
+	if (v1.magval() > v2.magval())
+		return v1;
+	else
+		return v2;
+}
+
+// version 2
+const Vector& Max(const Vector& v1, const Vector& v2)
+{
+	if (v1.magval() > v2.magval())
+		return v1;
+	else
+		return v2;
+}
+```
+- 这里有三点需要说明：
+	- 首先，返回对象将调用复制构造函数，而返回引用不会。因此第二个版本所做的工作更少，效率更高。
+	- 其次，引用指向的对象应该在调用函数执行时存在。
+	- 第三，v1和v2都被声明为const引用，因此返回类型必须为const，这样才匹配。
+
+### 12.4.2 返回指向非const对象的引用
+- 两种常见的返回非const对象情形是：
+	- 重载赋值运算符。（这样做可以提高效率）
+	- 重载与cout一起使用的<<运算符。（必须这样做，可能cout需要做一些非const的事情） 
+
+### 12.4.3 返回对象
+```C++
+Vector Vector::operator+(const Vector& b) const
+{
+	return Vector(x + b.x, y + b.y);
+}
+```
+- 在这种情况下，存在调用复制构造函数来创建被返回的对象的开销，然而这是无法避免的。
+- 返回语句引发的对复制构造函数的饮食调用创建一个调用程序能够访问的对象。
+
+### 12.4.4 返回const对象
+```C++
+net = force1 + force2;  							// 1: three Vector objects
+force1 + force2 = net;  							// 2: dyslectic programing
+cout << (force1+ force2 = net).magval() << endl;	// 3.demented programing
+```
+- 提出三个问题：为什么这样编写？这些语句为何可行？这些语句有什么功能？
+	- 第一：程序员通常很有创造力，但这可能导致错误
+	- 第二：这种代码之所以可行，是因为复制构造函数将创建一个临时对象来表示返回值。（force1 + force2 的结果为一个临时对象可以被赋值）
+	- 第三：临时对象用完就被丢弃了（5555~）
+	- 如果你担心这样的事情发生，一个简单的方法是：将返回类型声明为const Vector。这样语句2,3就非法了。
+- 小结：
+	- 总之如果方法或者函数要返回局部对象，则应返回对象，而不是指向对象的引用。调用什么复制构造函数.....
+	- 如果方法或者函数要返回一个没有公有构造函数的类（如ostream）对象，它必须返回一个指向这种对象的引用。
+	- 最后有些方法可以返回对象，也可以返回引用。一般首选引用，效率更好
+
+## 12.5 使用指向对象的指针
+程序清单中还使用一个指针来追踪新对象
+```C++
+String* favorite = new String(sayings(choice));
+```
+这里指针favorite指向new创建的未被命名对象。这种特殊的语法意味着使用对象saying[choice]来初始化新的String对象，这将调用复制构造函数。因为复制构造函数（const String&）的参数类型与初始化值（saying[choice]）匹配。
 
 
 
