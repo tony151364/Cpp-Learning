@@ -378,6 +378,7 @@ String & String::operator=(const char * s)
 - [x] 为啥CINLIM就可以在类声明中进行初始化？ 答：加了const的是可以的
 ```C++
 #pragma once
+#pragma once
 // 12.4 string1.h  -- fixed and augmented string class defination
 #include <iostream>
 #ifndef STRNG1_H_
@@ -392,33 +393,160 @@ private:
 	int len;  // length of string
 	static int num_strings;  // number of objects
 	static const int CINLIM = 80;  // cin input limit
+
 public:
+	// constructors and other methods
 	String(const char* s);	// constructor
 	String();				// default constructor
 	String(const String&);  // copy constructor
 	~String();				// destructor
-
 	int length() const { return len; }
 
 	// overloaded operator methods
-	String& operator=(const String&);
-	String& operator=(const char*);
+	String& operator=(const String& st);
+	String& operator=(const char* s);
 	char& operator[](int i);
 	const char& operator[](int i) const;
 
 	// overloaded operatpr friends
+	friend bool operator<(const String& st1, const String& st2);
+	friend bool operator>(const String& st1, const String& st2);
+	friend bool operator==(const String& st1, const String& st2);
+	friend ostream& operator<<(ostream& os, const String& st);
+	friend istream& operator>>(istream& is, String& st);
 
-
-	friend std::ostream& operator << (std::ostream& os, const String& st);
+	// static function
+	static int HowMany();
 };
 
 #endif  // STRNG1_H_
 ```
 
 ```C++
+// 12.2 string1.cpp -- String class methods
+#include <cstring>						// string.h for some
+#include "string1.h"					// includes <iostream>
+using std::cout;
 
+// initializing static class member
+int String::num_strings = 0;
+
+// static method
+int String::HowMany()
+{
+	return num_strings;
+}
+
+// class methods
+String::String(const char* s)			// construct String from C string
+{
+	len = std::strlen(s);				// set size
+	str = new char[len + 1];			// allot storage
+	std::strcpy(str, s);				// initialize pointer
+	num_strings++;						// set object count
+}
+
+String::String()
+{
+	len = 4;
+	str = new char[4];
+	std::strcpy(str, "C++");			// default string
+	num_strings++;
+}
+
+String::String(const String& st)
+{
+	num_strings++;
+	len = st.len;
+	str = new char[len + 1];
+	std::strcpy(str, st.str);
+}
+
+String::~String()						// necessary destructor
+{
+	--num_strings;
+	delete[] str;
+}
+
+// overloaded operator methods
+String& String::operator=(const String& st)			// assign a String to a String
+{
+	if (this == &st)
+	{
+		return *this;
+	}
+
+	delete[] str;
+	len = st.len;
+	str = new char[len + 1];
+	std::strcpy(str, st.str);
+	return *this;
+}
+
+// assign a C string to a String
+String& String::operator=(const char* s)			
+{
+	delete[] str;
+	len = std::strlen(s);
+	str = new char[len + 1];
+	std::strcpy(str, s);
+	return *this;
+}
+
+// read-write char access for non-const String
+char& String::operator[](int i)
+{
+	return str[i];
+}
+
+// read-only char access for const string
+const char& String::operator[](int i) const
+{
+	return str[i];
+}
+
+bool operator<(const String& st1, const String& st2)
+{
+	return (std::strcmp(st1.str, st2.str) < 0);
+}
+
+bool operator>(const String& st1, const String& st2)
+{
+	return st2 < st1;
+}
+
+bool operator==(const String& st1, const String& st2)
+{
+	return (std::strcmp(st1.str, st2.str) == 0);
+}
+
+// simple String output
+ostream& operator<<(ostream& os, const String& st)
+{
+	os << st.str;
+	return os;
+}
+
+// quick and dirty String input（快速而简单的字符串输入）
+// "Dirty" 在这里指的是简单、不完美但有效的方法，没有过多的细节或精确性。它通常用于表示快速解决问题的临时或不太优雅的方法。
+istream& operator>>(istream& is, String& st)
+{
+	char temp[String::CINLIM];
+
+	is.get(temp, String::CINLIM);
+
+	if (is)
+	{
+		st = temp;
+	}
+	
+	while (is && is.get() != '\n')
+		continue;
+
+	return is;
+}
 ```
-
+- 重载>>运算符提供了一种将键盘输入和读入到String对象中的简单方法。它嘉定输入的字符数不多于String::CINLIM的字符数，并丢弃多余的字符。在if条件下，由于某种原因（如到达文件尾或get(char*, int)读取的是一个空行）导致输入失败，istream对象的值将置为false。
 ```C++
 
 ```
