@@ -1767,15 +1767,141 @@ std::ostream& operator<<(std::ostream& os, const Time& t)
 }
 ```
 
-- 5
+- 5.这题懒得写了，让ChatGPT写的。我把它写的枚举类改成了枚举。他使用了偷懒的方法，没有在构造函数里面添加mode的参数，这样的好处是代码比较简单。否则，就要像向量那个代码一样在构造函数里面做判断，就有点麻烦了，这也是为啥我不想写。函数实现里面的枚举类名没去掉，不过也不影响运行。
 ```C++
+#ifndef STONEWT_H_
+#define STONEWT_H_
+
+#include <iostream>
+
+class Stonewt
+{
+public:
+	enum Mode { STONE, INT_POUNDS, FLOAT_POUNDS };
+
+private:
+	Mode mode;
+	static const int Lbs_per_stn = 14;
+	int stone;
+	double pds_left;
+	double pounds;
+
+public:
+	
+	Stonewt(double lbs);
+	Stonewt(int stn, double lbs);
+	Stonewt();
+	~Stonewt();
+
+	void setMode(Mode mode);
+	friend std::ostream& operator<<(std::ostream& os, const Stonewt& wt);
+
+	Stonewt operator+(const Stonewt& wt) const;
+	Stonewt operator-(const Stonewt& wt) const;
+	Stonewt operator*(double factor) const;
+};
+
+#endif  // STONEWT_H_
 
 ```
 ```C++
+#include <iostream>
+#include "stonewt1.h"
+Stonewt::Stonewt(double lbs)
+{
+	mode = Mode::FLOAT_POUNDS;
+	stone = int(lbs) / Lbs_per_stn;  // integer division
+	pds_left = int(lbs) % Lbs_per_stn + lbs - int(lbs);
+	pounds = lbs;
+}
 
+Stonewt::Stonewt(int stn, double lbs)
+{
+	mode = Mode::STONE;
+	stone = stn;
+	pds_left = lbs;
+	pounds = stn * Lbs_per_stn + lbs;
+}
+
+Stonewt::Stonewt()
+{
+	mode = Mode::FLOAT_POUNDS;
+	stone = pounds = pds_left = 0;
+}
+
+Stonewt::~Stonewt()
+{
+
+}
+
+void Stonewt::setMode(Mode mode)
+{
+	this->mode = mode;
+}
+
+std::ostream& operator<<(std::ostream& os, const Stonewt& wt)
+{
+	if (wt.mode == Stonewt::Mode::STONE)
+		os << wt.stone << " stone, " << wt.pds_left << " pounds";
+	else if (wt.mode == Stonewt::Mode::INT_POUNDS)
+		os << int(wt.pounds) << " pounds";
+	else if (wt.mode == Stonewt::Mode::FLOAT_POUNDS)
+		os << wt.pounds << " pounds";
+
+	return os;
+}
+
+Stonewt Stonewt::operator+(const Stonewt& wt) const
+{
+	double total_pounds = pounds + wt.pounds;
+	return Stonewt(total_pounds);
+}
+
+Stonewt Stonewt::operator-(const Stonewt& wt) const
+{
+	double diff_pounds = pounds - wt.pounds;
+	return Stonewt(diff_pounds);
+}
+
+Stonewt Stonewt::operator*(double factor) const
+{
+	double mult_pounds = pounds * factor;
+	return Stonewt(mult_pounds);
+}
 ```
 ```C++
+#include <iostream>
+#include "stonewt1.h"
 
+using std::cout;
+
+int main()
+{
+	Stonewt incognito = 275;  // uses constructor to initialize
+	Stonewt wolfe(285.7);  // same as Stonewt wolfe = 285.7;
+	Stonewt taft(21, 8);
+
+	std::cout << "The celebrity weighed " << incognito << std::endl;
+	std::cout << "The detective weighed " << wolfe << std::endl;
+	std::cout << "The President weighed " << taft << std::endl;
+
+	incognito.setMode(Stonewt::STONE);
+	taft.setMode(Stonewt::INT_POUNDS);
+
+	std::cout << "After setting mode, the celebrity weighed " << incognito << std::endl;
+	std::cout << "After setting mode, the President weighed " << taft << std::endl;
+
+	Stonewt sum = incognito + wolfe;
+	std::cout << "The sum of the celebrity and detective is " << sum << std::endl;
+
+	Stonewt diff = incognito - wolfe;
+	std::cout << "The difference between the celebrity and detective is " << diff << std::endl;
+
+	Stonewt product = taft * 2.5;
+	std::cout << "The product of the President and 2.5 is " << product << std::endl;
+
+	return 0;
+}
 ```
 - 6
 ```C++
@@ -1920,9 +2046,9 @@ int main()
 		stns[i] = tempStn;
 	}
 
-	int count = (stns[1] >= compareStn) ? 1 : 0;
+	int count = (stns[0] >= compareStn) ? 1 : 0;
 	Stonewt maxPounds, minPounds;
-	maxPounds = minPounds = stns[1];
+	maxPounds = minPounds = stns[0];
 
 	for (int i = 1; i < 6; i++)
 	{
@@ -1941,18 +2067,113 @@ int main()
 		}
 	}
 
-	cout << "max pounds: " << maxPounds << endl;
-	cout << "min pounds: " << minPounds << endl;
+	cout << "max pounds: "; << maxPounds << endl;
+	cout << "min pounds: "; << minPounds << endl;
 	cout << "pounds than 11: " << count << endl;
+	
+	/* chat-gtp写的
+	std::cout << "Minimum weight: ";
+    	min.show_stn();
+
+    	std::cout << "Maximum weight: ";
+    	max.show_stn();
+
+    	std::cout << "Number of weights greater than or equal to 11 stone: " << count << std::endl;
+    	return 0;
+	*/
 }
 ```
-- 7
+- 7.第一次ChatGPT没把最后一个数乘写成友元，纠错之后就可以正常运行了
 ```C++
+#include <iostream>
+using namespace std;
 
-```
-```C++
+class complex
+{
+private:
+    double real;
+    double imaginary;
 
-```
-```C++
+public:
+    complex(double r = 0, double i = 0) : real(r), imaginary(i) {}
 
+    friend ostream& operator<<(ostream& os, const complex& c);
+    friend istream& operator>>(istream& is, complex& c);
+
+    complex operator~() const;
+    complex operator+(const complex& c) const;
+    complex operator-(const complex& c) const;
+    complex operator*(const complex& c) const;
+    complex operator*(double x) const;
+    friend complex operator*(double x, const complex& c);
+};
+
+ostream& operator<<(ostream& os, const complex& c)
+{
+    os << "(" << c.real << "," << c.imaginary << "i)";
+    return os;
+}
+
+istream& operator>>(istream& is, complex& c)
+{
+    cout << "real: ";
+    is >> c.real;
+    cout << "imaginary: ";
+    is >> c.imaginary;
+    return is;
+}
+
+complex complex::operator~() const
+{
+    return complex(real, -imaginary);
+}
+
+complex complex::operator+(const complex& c) const
+{
+    return complex(real + c.real, imaginary + c.imaginary);
+}
+
+complex complex::operator-(const complex& c) const
+{
+    return complex(real - c.real, imaginary - c.imaginary);
+}
+
+complex complex::operator*(const complex& c) const
+{
+    double real_part = real * c.real - imaginary * c.imaginary;
+    double imaginary_part = real * c.imaginary + imaginary * c.real;
+    return complex(real_part, imaginary_part);
+}
+
+complex complex::operator*(double x) const
+{
+    return complex(real * x, imaginary * x);
+}
+
+complex operator*(double x, const complex& c)
+{
+    return complex(x * c.real, x * c.imaginary);
+}
+
+int main()
+{
+    complex a(3.0, 4.0);
+    complex c;
+
+    cout << "Enter a complex number (q to quit):\n";
+    while (cin >> c)
+    {
+        cout << "c is " << c << '\n';
+        cout << "complex conjugate is " << ~c << '\n';
+        cout << "a is " << a << '\n';
+        cout << "a + c is " << a + c << '\n';
+        cout << "a - c is " << a - c << '\n';
+        cout << "a * c is " << a * c << '\n';
+        cout << "2 * c is " << 2 * c << '\n';
+        cout << "Enter a complex number (q to quit):\n";
+    }
+
+    cout << "Done!\n";
+    return 0;
+}
 ```
