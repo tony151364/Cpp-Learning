@@ -547,9 +547,92 @@ istream& operator>>(istream& is, String& st)
 }
 ```
 - 重载>>运算符提供了一种将键盘输入和读入到String对象中的简单方法。它嘉定输入的字符数不多于String::CINLIM的字符数，并丢弃多余的字符。在if条件下，由于某种原因（如到达文件尾或get(char*, int)读取的是一个空行）导致输入失败，istream对象的值将置为false。
-```C++
 
+```C++
+// sayings1.cpp -- using expanded String class
+// compile with string1.cpp
+#define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
+#include "string1.h"
+
+const int ArSize = 10;
+const int MaxLen = 81;
+
+int main()
+{
+	using std::cout;
+	using std::cin;
+	using std::endl;
+
+	String name;
+	cout << "Hi, what't your name?\n>> ";
+	cin >> name;
+	cout << name << ", please enter up to " << ArSize
+		<< " short sayings <empty> line to quit>:\n";
+	
+	String sayings[ArSize];    // array of objects
+	char temp[MaxLen];         // temporary string storage
+	int i;
+	for (i = 0; i < ArSize; i++)
+	{
+		cout << i + 1 << ": ";
+		cin.get(temp, MaxLen);
+
+		while (cin && cin.get() != '\n')
+			continue;
+
+		if (!cin || temp[0] == '\0')    // empty line?
+		{
+			break;						// i not incremented
+		}
+		else
+		{
+			sayings[i] = temp;
+		}
+	}
+
+	int total = i;						// total # of lines read
+	
+	if (total > 0)
+	{
+		cout << "Here are your sayings:\n";
+
+		for (i = 0; i < total; i++)
+		{
+			cout << sayings[i][0] << ": " << sayings[i] << endl;
+		}
+
+		int shortest = 0;
+		int first = 0;
+
+		for (i = 1; i < total; i++)
+		{
+			if (sayings[i].length() < sayings[shortest].length())
+			{
+				shortest = i;
+			}
+
+			if (sayings[i] < sayings[first])
+			{
+				first = i;
+			}
+		}
+
+		cout << "Shortest saying:\n" << sayings[shortest] << endl;
+		cout << "First alphabetically:\n" << sayings[first] << endl;
+		cout << "This program used " << String::HowMany()
+			<< " String objects.Bye\n";
+	}
+	else
+	{
+		cout << "No input! Bye.\n";
+	}
+
+	return 0;
+}
 ```
+- [ ] 为什么main函数中，第49行要使用“sayings[i][0]” 而不是 “syaings[i]”
+
 ## 12.3 在构造函数中使用new时应注意的事项
 - 用new初始化对象的指针成员时必须特别小心
 	- 如果在构造函数使用new来初始化指针成员，则应在析构函数中delete。
@@ -671,12 +754,287 @@ cout << (force1+ force2 = net).magval() << endl;	// 3.demented programing
 String* favorite = new String(sayings(choice));
 ```
 这里指针favorite指向new创建的未被命名对象。这种特殊的语法意味着使用对象saying[choice]来初始化新的String对象，这将调用复制构造函数。因为复制构造函数（const String&）的参数类型与初始化值（saying[choice]）匹配。
+```C++
+// sayings2.cpp -- using pointers to objects
+// compile with string1.cpp
+#define _CRT_SECURE_NO_WARNINGS
+#include <iostream>
+#include <cstdlib>
+#include "string1.h"
+const int ArSize = 10;
+const int MaxLen = 81;
 
+int main()
+{
+	using namespace std;
 
+	String name;
+	cout << "Hi, what't your name?\n>> ";
+	cin >> name;
 
+	cout << name << ", please enter up to " << ArSize
+		<< " short sayings <empty line to quit>:\n";
 
+	String sayings[ArSize];    // array of objects
+	char temp[MaxLen];         // temporary string storage
+	int i;
+	for (i = 0; i < ArSize; i++)
+	{
+		cout << i + 1 << ": ";
+		cin.get(temp, MaxLen);
 
+		while (cin && cin.get() != '\n')
+			continue;
 
+		if (!cin || temp[0] == '\0')    // empty line?
+		{
+			break;						// i not incremented
+		}
+		else
+		{
+			sayings[i] = temp;
+		}
+	}
+
+	int total = i;						// total # of lines read
+
+	if (total > 0)
+	{
+		cout << "Here are your sayings:\n";
+
+		for (i = 0; i < total; i++)
+		{
+			cout << sayings[i][0] << ": " << sayings[i] << endl;
+		}
+
+		String* shortest = &sayings[0];  // initialize to first object
+		String* first = &sayings[0];
+
+		for (i = 1; i < total; i++)
+		{
+			if (sayings[i].length() < shortest->length())
+			{
+				shortest = &sayings[i];
+			}
+
+			if (sayings[i] < *first)
+			{
+				first = &sayings[i];
+			}
+		}
+
+		cout << "Shortest saying:\n" << *shortest << endl;
+		cout << "First alphabetically:\n" << *first << endl;
+		
+		srand(time(0));
+		int choice = rand() % total; // pick index at random
+		// uew new to create, initialize new String object
+		String* favorite = new String(sayings[choice]);
+		cout << "My favorite saying:\n " << *favorite << endl;
+		delete favorite;
+	}
+	else
+	{
+		cout << "No input! Bye.\n";
+	}
+
+	return 0;
+}
+```
+```C++
+// 通常，如果Class_name是类，value的类型为Type_name，则下面的语句：
+Class_name* pclass = new Class_name(value);
+// 将调用如下构造函数：
+Class_name(Type_name)
+// 这里可能还有一些琐碎的转换，例如：
+Class_name(const Type_name&);
+// 另外，如果不存在二义性，则将发生由原型匹配导致的转换（如从int到double）。下面的初始化将调用默认构造函数：
+Class_name* ptr = new Class_name;
+```
+
+### 12.5.1 再谈new和delete
+- 如果对象是动态变量，则当执行完定义该对象的程序块时，将调用该对象的析构函数。
+- 如果对象是静态变量（外部、静态、静态外部或来自名称空间），则在程序结束时调用对象的析构函数
+- 如果对象是用new创建的，则仅当您显示使用delete删除对象时，其析构函数才会被调用
+
+### 12.5.3 再谈定位new运算符
+```C++
+// placenew1.coo --  plant
+#include <iostream>
+#include <string>
+#include <new>
+using namespace std;
+const int BUF = 512;
+class JustTesting
+{
+private:
+	string words;
+	int number;
+public:
+	JustTesting(const string& s = "Just Testing", int n = 0)
+	{
+		words = s; number = n; cout << words << " constructed\n";
+	}
+
+	~JustTesting() 
+	{
+		cout << words << " destroyed\n";
+	}
+
+	void Show() const { cout << words << ", " << number << endl; }
+};
+
+int main()
+{
+	char* buffer = new char[BUF];			// get a block of memory
+	JustTesting* pc1, * pc2;
+
+	pc1 = new(buffer) JustTesting;			// place object in buffer
+	pc2 = new JustTesting("Heap1", 20);		// place object on heap
+
+	cout << "Memory block addewsses:\n" << "buffer: "
+		<< (void*)buffer << " heap: " << pc2 << endl;
+	cout << "Memory contents:\n";
+	cout << pc1 << ": ";
+	pc1->Show();
+	cout << pc2 << ": ";
+	pc2->Show();
+
+	JustTesting* pc3, * pc4;
+	pc3 = new (buffer) JustTesting("Bad Idea", 6);
+	pc4 = new JustTesting("Heap2", 10);
+
+	cout << "Memory contents:\n";
+	cout << pc3 << ": ";
+	pc3->Show();
+	cout << pc4 << ": ";
+	pc4->Show();
+
+	delete pc2;
+	delete pc4;
+}
+```
+- [ ] 记得当时对于buffer有段迷惑。复习下chatgtp提问过的new (buffer
+- 程序清单12.8 在使用定位new运算符时存在两个问题：
+	- 首先，在创建第二个对象时，定位new运算符使用一个新对象来覆盖用于第一个对象的内存单元。显然，如果类动态地为其成员分配内存，这将引发问题。
+	- 其次，将delete用于pc2和pc4时，将自动调用为pc2和pc4指向的对象调用析构函数；然而，将delete[ ]用于buffer时，不会为使用定位new运算符创建的对象调用析构函数。
+- 这里的教训与第9章相同：程序员必须负责管理定位new运算符中使用的缓存器内存单元。可以这样做：
+```C++
+pc1 = new(buffer) JustTesting;
+pc3 = new(buffer + sizeof(JustTesting)) JustTesting("Better Idea", 6);
+
+// 释放时应该使用``` delete[] buffer```。对于他们的析构函数，需要显式去调用
+pc3->~JustTesting();
+pc1->~JustTesting();
+delete[] buffer
+```
+- 新的程序如下：
+
+```C++
+// placenew2.cpp -- new, placement new, no delete
+#include <iostream>
+#include <string>
+#include <new>
+
+using namespace std;
+const int BUF = 512;
+class JustTesting
+{
+private:
+	string words;
+	int number;
+public:
+	JustTesting(const string& s = "Just Testing", int n = 0)
+	{
+		words = s; number = n; cout << words << " constructed\n";
+	}
+
+	~JustTesting()
+	{
+		cout << words << " destroyed\n";
+	}
+
+	void Show() const { cout << words << ", " << number << endl; }
+};
+
+int main()
+{
+	char* buffer = new char[BUF];			// get a block of memory
+
+	JustTesting* pc1, * pc2;
+
+	pc1 = new(buffer) JustTesting;			// place object in buffer
+	pc2 = new JustTesting("Heap1", 20);		// place object on heap
+
+	cout << "Memory block addewsses:\n" << "buffer: "
+		<< (void*)buffer << " heap: " << pc2 << endl;
+	cout << "Memory contents:\n";
+	cout << pc1 << ": ";
+	pc1->Show();
+	cout << pc2 << ": ";
+	pc2->Show();
+
+	JustTesting* pc3, * pc4;
+	pc3 = new (buffer + sizeof(JustTesting)) JustTesting("Bad Idea", 6);
+	pc4 = new JustTesting("Heap2", 10);
+
+	cout << "Memory contents:\n";
+	cout << pc3 << ": ";
+	pc3->Show();
+	cout << pc4 << ": ";
+	pc4->Show();
+
+	delete pc2;
+	delete pc4;
+
+	pc3->~JustTesting();
+	pc4->~JustTesting();
+	delete[] buffer;  // free buffer
+	cout << "Done\n";
+	return 0;
+}
+```
+
+## 12.6 复习各种技术
+### 12.6.1 重载<<运算符
+
+### 12.6.2 转换函数
+```C++
+c_name(type_name value);
+
+operator type_name();
+```
+
+### 12.6.3 其构造函数使用new的类
+- 应定义一个分配内存（而不是将指针指向已有内存）的复制构造函数。这样程序将能够将类对象初始化为另一个类对象。这种构造函数的原型通常如下：
+```C++
+className(const className& )
+```
+- 应定义一个重载赋值运算符放类成员函数，其函数定义如下（其中c_pointer是c_name的类成员，类型为指向type_name的指针）。下面的示例假设使用new[]来初始化变量c_pointer:
+```C++
+c_name& c_name::operator=(const c_name& cn)
+{
+	if (this == &cn)
+		return *this;
+	
+	delete[] c_pointer;
+	// set size number of type_name units to be copied
+	c_pointer = new type_name[size];
+	// then copy data pointed to by cn.c_pointer to location pointed to by c_pointer
+	return *this;
+}
+```
+
+## 12.7队列模拟
+### 嵌套结构和类
+- 在类声明中声明的结构、类或枚举被称为是嵌套在类中，其作用域为整个类。这种声明不会创建数据对象，而只是制定了可以在类中使用的类型。
+- 如果声明是在类的私有部分进行的，则只能在这个类使用被声明的类型
+- 如果声明是在公有部分进行的，则可以从类的外部通过作用域解析运算符使用被声明的类型
+
+#### 3.类方法
+- 对于const数据成员，必须在执行到构造体之前，即创建对象时进行初始化。C++提供了一种特殊的语法来完成上述工作，它叫做成员初始化列表（member initializer list）
+- **只有构造函数可以使用这种语法，对于const类成员必须使用这种语法**
+- 另外对于被声明为引用的类成员，也必须使用这种语法。这是因为引用与const数据类似，只能在被创建是进行初始化。
 
 
 
