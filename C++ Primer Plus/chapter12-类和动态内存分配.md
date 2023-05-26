@@ -1035,6 +1035,336 @@ c_name& c_name::operator=(const c_name& cn)
 - 对于const数据成员，必须在执行到构造体之前，即创建对象时进行初始化。C++提供了一种特殊的语法来完成上述工作，它叫做成员初始化列表（member initializer list）
 - **只有构造函数可以使用这种语法，对于const类成员必须使用这种语法**
 - 另外对于被声明为引用的类成员，也必须使用这种语法。这是因为引用与const数据类似，只能在被创建是进行初始化。
+- 对于本身是类对象的成员来说，使用成员初始化列表的效率更高
 
+
+#### 成员列表初始化
+- 初始化工作在对象创建时完成
+- 这种格式只能用于构造函数
+- 必须用这种格式来初始化非静态const数据成员（至少在C++11之前是这样的）
+- 必须用这种格式来初始化引用数据成员
+```C++
+// 成员列表初始化也可用于常规初始化。也就是说，如果愿意，可以将下述代码
+int games = 162;
+double talk = 2.71828;
+// 替换为
+int games(162);
+double talk(2.71828);
+```
+
+#### C++11的类内初始化
+```C++
+class Classy
+{
+	int mem1 = 10;		// in-class initialization
+	const int mem2 = 20;	// in-class initialization
+};  // 丹哥之前让我用的方式
+// 这与在构造函数中使用成员初始化列表等价：
+Classay::Classy(int n):mem1(n) { .. }
+```
+- 如果两种都使用，成员列表初始化的值将覆盖类内初始化的值
+
+#### 4.是否需要其他类方法
+- 幸运的是，有一种小小的技巧可以避免这些额外的工作，并确保程序不会崩溃。这就是将所需的方法定义为伪私有方法：
+```C++
+class Queue
+{
+private:
+	Queue(const Queue& q) : qsize(0) { }	// preemptive definition
+	Queue& operator=(const Queue& q) {return *this;}
+};
+```
+- 这样有两个好处：
+	- 1. 它避免了本来自动生成的默认方法定义。
+	- 2. 因为这些方法是私有的，所以不能被广泛使用。
+```C++
+// 也就是说，如果nip和tuck是Queue对象，则编译器就不允许这样做：
+Queue snick(nip);		// not allowed
+tuck = nip;   			// npt allowed
+```
+- C++11提供了另一种禁用方法的方式——使用了关键字delete，这将在第18章介绍。
+- 还有一个点：当对象按值传递（返回）时，复制构造函数将被调用。然而，如果遵循优先采用按引用传递对象的惯例，将不会有任何问题。
+
+```C++
+// 12.10 -- interface for a queu
+#ifndef _QUEUE_H_
+#define _QUEUE_H_
+// This queue will contain Customer items
+class Customer
+{
+
+private:
+	long arrive = 0;				// arrival tiem for customer
+	long processtime = 0;			// processing timer for customer
+
+public:
+	Customer(){};
+
+	void set(long when);
+	long when() const { return arrive; }
+	int ptime() const { return processtime; }
+};
+
+typedef Customer Item;
+
+class Queue
+{
+private:
+	struct Node
+	{
+		Item item;
+		struct Node* next;
+	};
+	enum {Q_SIZE = 10};
+	Node* front;
+	Node* rear;
+	int items;
+	const int qsize;
+	Queue(const Queue* q): qsize(0){ }
+	Queue& operator=(const Queue& q) { return *this; }
+
+public:
+	Queue(int qs = Q_SIZE);		// create queue with a qs
+	~Queue();
+	bool isempty() const;
+	bool isfull() const;
+	int queuecount() const;
+	bool enqueue(const Item& item);		// add item to end
+	bool dequeue(Item& item);			// remove item from front
+};
+
+#endif  // _QUEUE_H_
+```
+
+```C++
+// queue.cpp -- Queue and Customer methods
+#include "queue.h"
+#include <cstdlib>  // for rand()
+
+// Queue methods
+Queue::Queue(int qs) : qsize(qs)
+{
+	front = rear = nullptr;
+	items = 0;
+}
+
+Queue::~Queue()
+{
+	Node* temp;
+
+	while (front != nullptr)
+	{
+		temp = front;
+		front = front->next;
+		delete temp;
+	}
+}
+
+bool Queue::isempty() const
+{
+	return 0 == items;
+}
+
+bool Queue::isfull() const
+{
+	return qsize == items;
+}
+
+int Queue::queuecount() const
+{
+	return items;
+}
+
+bool Queue::enqueue(const Item& item)
+{
+	if (isfull())
+	{
+		return false;
+	}
+
+	Node* add = new Node;		// create node
+	// on failure, new throws std::bad_alloc exception
+	add->item = item;			// set node pointers
+	add->next = nullptr;		// or nullptr
+	items++;
+
+	if (front == nullptr)
+	{
+		front = add;
+	}
+	else
+	{
+		rear->next = add;
+	}
+
+	rear = add;
+	return true;
+}
+
+bool Queue::dequeue(Item& item)
+{
+	if (front == nullptr)
+	{
+		return false;
+	}
+
+	item = front->item;
+	Node* temp = front;
+	front = front->next;
+
+	delete temp;
+
+	if (items == 0)
+	{
+		rear = nullptr;
+	}
+
+	return true;
+}
+
+// time set to a random value in the range 1 - 3
+void Customer::set(long when)
+{
+	processtime = std::rand() % 3 + 1;
+	arrive = when;
+}
+```
+
+### 12.7.3 ATM模拟
+```C++
+// 12.12 bank.cpp -- using the Queue interface
+// compile with queue.cpp
+#include <iostream>
+#include <cstdlib>							// for rand() and srand()
+#include <ctime>							// for time()
+#include "queue.h"
+const int MIN_PER_HR = 60;
+
+bool newcustomer(double x);					// is there a new customer?
+
+int main()
+{
+	using namespace std;
+	srand(time(0));
+
+	cout << "Case Study: Bank of Heather Automatic Teller\n";
+	cout << "Enter maximum size of queue: ";
+	int qs;
+	cin >> qs;
+	Queue line(qs);							// line queue holds up to qs people
+
+	cout << "Enter the number of simulation hours: ";
+	int hours;
+	cin >> hours;
+	// simulation will run 1 cycle per minute
+	long cyclelimit = MIN_PER_HR * hours;	// # of cycles
+
+	cout << "Enter the average number of customers per hour: ";
+	double perhour;
+	cin >> perhour;
+	double min_per_cust;					// average time berween arrivals
+	min_per_cust = MIN_PER_HR / perhour;
+
+	Item temp;								// new customer data
+	long turnaways = 0;						// turned away by full queue
+	long customers = 0;						// joined the queue
+	long served = 0;						// served during the simulation
+	long sum_line = 0;						// cumulative line length
+	int wait_time = 0;						// time until autoteller is free
+	long line_wait = 0;						// cumulative time in line
+
+	// runing the simulation
+	for (int cycle = 0; cycle < cyclelimit; cycle++)
+	{
+		if (newcustomer(min_per_cust))		// have newcomer
+		{
+			if (line.isfull())
+			{
+				turnaways++;
+			}
+			else
+			{
+				customers++;
+				temp.set(cycle);			// cycle = time of arrival
+				line.enqueue(temp);			// add newcomer to line
+			}
+		}
+		
+		if (wait_time <= 0 && !line.isempty())
+		{
+			line.dequeue(temp);				// attend next customer
+			wait_time = temp.ptime();		// for wait_time minutes
+			line_wait += cycle - temp.when();
+			served++;
+		}
+
+		if (wait_time > 0)
+		{
+			wait_time--;
+		}
+
+		sum_line += line.queuecount();
+	}
+
+	// reporting results
+	if (customers > 0)
+	{
+		cout << "customers accepted: " << customers << endl;
+		cout << " customers served: " << served << endl;
+		cout << "		turnaways: " << turnaways << endl;
+		cout << "average queue size: ";
+		cout.precision(2);
+		cout.setf(ios_base::fixed, ios_base::floatfield);
+		cout << (double)sum_line / cyclelimit << endl;
+		cout << " average wait time: "
+			<< (double)line_wait / served << " minutes\n";
+	}
+	else
+	{
+		cout << "No customers!\n";
+	}
+	cout << "Done!\n";
+
+	return 0;
+}
+
+// x = average time, in minutes, between customers
+// return value is true if customer shows up this minute
+bool newcustomer(double x)
+{
+	return (std::rand() * x / RAND_MAX < 1);
+}
+```
+- [ ] 每小时达到的客户从15名增加到30名时，等候时间并不是加倍，而是增加15倍。
+
+## 12.8 总结
+
+## 12.9 复习题
+- 1
+```C++
+
+```
+- 2
+```C++
+
+```
+- 3
+```C++
+
+```
+
+## 12.10 编程练习
+- 1
+```C++
+
+```
+- 1
+```C++
+
+```
+- 1
+```C++
+
+```
 
 
