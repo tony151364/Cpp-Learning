@@ -192,7 +192,7 @@ StringBad* pStringBad = new StringBad(motto)  // call StringBad(const StringBad 
 
 #### 4.默认的复制构造函数的功能
 - 默认的复制构造函数逐个复制非静态成员(成员复制也称为浅复制)，复制的是成员的值。
-- [ ] 如果成员本身就是类对象，则将使用这个类的复制构造函数来复制成员对象。静态函数(如num_strings)不受影响，因为他们属于整个类
+- [x] 如果成员本身就是类对象，则将使用这个类的复制构造函数来复制成员对象。静态函数(如num_strings)不受影响，因为他们不属于整个类
 
 
 ### 12.1.3 回到Stringbad：复制构造函数到底哪里出了问题
@@ -200,8 +200,6 @@ StringBad* pStringBad = new StringBad(motto)  // call StringBad(const StringBad 
 ```C++
 StringBad ...
 ```
-
-- [ ] 感觉还是有点说不太通
 
 #### 1.定义一个显示复制构造函数以解决问题
 - （浅拷贝和深拷贝，这Python的列表也有啊）
