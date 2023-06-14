@@ -320,7 +320,7 @@ if (operator == (String("love"), answer))
 	- city\[0] 
 
 ```C++
-String opera("The Magic Flute");
+String operator("The Magic Flute");
 
 opera.operatpr[](4)
 
@@ -375,8 +375,8 @@ String & String::operator=(const char * s)
 ```
 - 一般来说，必须释放str指向的内存，并为新字符串分配足够的内存。
 
-- [ ] 构造函数难道不能直接用 = 吗，如果你重载了，构造函数是不是就不用std::strcpy()
-- [ ] \[]的重载，是不是有点多余
+- [x] 构造函数难道不能直接用 = 吗，如果你重载了，构造函数是不是就不用std::strcpy()。太混乱，其实已存在的用赋值运算符，初始化用复制构造函数。
+- [x] \[]的重载，是不是有点多余。并不是，有些情况比如字符流输出，限定const的话用非const的版本是不可行的。
 - [x] 为啥CINLIM就可以在类声明中进行初始化？ 答：加了const的是可以的
 ```C++
 #pragma once
@@ -548,7 +548,7 @@ istream& operator>>(istream& is, String& st)
 	return is;
 }
 ```
-- 重载>>运算符提供了一种将键盘输入和读入到String对象中的简单方法。它嘉定输入的字符数不多于String::CINLIM的字符数，并丢弃多余的字符。在if条件下，由于某种原因（如到达文件尾或get(char*, int)读取的是一个空行）导致输入失败，istream对象的值将置为false。
+- 重载>>运算符提供了一种将键盘输入和读入到String对象中的简单方法。它假定输入的字符数不多于String::CINLIM的字符数，并丢弃多余的字符。在if条件下，由于某种原因（如到达文件尾或get(char*, int)读取的是一个空行）导致输入失败，istream对象的值将置为false。
 
 ```C++
 // sayings1.cpp -- using expanded String class
@@ -633,7 +633,7 @@ int main()
 	return 0;
 }
 ```
-- [ ] 为什么main函数中，第49行要使用“sayings[i][0]” 而不是 “syaings[i]”
+- [x] 为什么main函数中，第49行要使用“sayings[i][0]” 而不是 “syaings[i]”。程序的要求而已，要输出字符串第一个字符
 
 ## 12.3 在构造函数中使用new时应注意的事项
 - 用new初始化对象的指针成员时必须特别小心
