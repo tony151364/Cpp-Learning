@@ -189,6 +189,7 @@ StringBad also = StringBad(motto);  // calls StringBad(const StringBad&)
 StringBad* pStringBad = new StringBad(motto)  // call StringBad(const StringBad &)
 ```
 - 其中中间的2种声明可能会使用复制构造函数直接创建metoo和also，也可能使用复制构造函数生成一个临时对象，这取决于具体的时间。最后一种声明使用motto初始化一个匿名对象，并将新对象的指针赋给pstring指针。
+- 由于按值传递对象会调用拷贝构造函数，所以传递**对象推荐按引用传递**
 
 #### 4.默认的复制构造函数的功能
 - 默认的复制构造函数逐个复制非静态成员(成员复制也称为浅复制)，复制的是成员的值。
@@ -223,7 +224,7 @@ StringBad::StringBad(const StringBad& st)
 ### 12.1.4  Stringbad 的其他问题：赋值运算符
 - ANSI C 允许结构复制，而C++允许类对象赋值，这是通过自动为类重载赋值运算符实现的。这种运算符的原型如下：
 ```C++
-Class_name& Class_name::operator={const Class_name &};
+Class_name& Class_name::operator=(const Class_name &){};
 ```
 
 #### 1.赋值运算符的功能以及何时使用它
@@ -266,8 +267,11 @@ StringBad& StringBad::operator=(const StringBad& st)
 ```
 - 第10章介绍过，赋值运算符是只能由类成员函数重载的运算符之一
 - 复制操作并不创建新的对象，因此不需要调整静态数据成员num_strings的值
-
 - 将复制构造函数和赋值运算符调价到StringBad类后，所有的问题都解决了。
+
+#### 一点思考
+- 一个已存在的对象初始化另一个对象时调用复制构造函数
+- 两个已存在的对象之间赋值时调用赋值运算符
 
 ## 12.2 修订后的默认构造函数
 
