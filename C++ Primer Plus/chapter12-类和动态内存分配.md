@@ -273,7 +273,7 @@ StringBad& StringBad::operator=(const StringBad& st)
 - 一个已存在的对象初始化另一个对象时调用复制构造函数
 - 两个已存在的对象之间赋值时调用赋值运算符
 
-## 12.2 修订后的默认构造函数
+## 12.2 改进后的新String类
 
 ### 12.2.1 修订后的默认构造函数
 ```C++
@@ -534,7 +534,6 @@ ostream& operator<<(ostream& os, const String& st)
 istream& operator>>(istream& is, String& st)
 {
 	char temp[String::CINLIM];
-
 	is.get(temp, String::CINLIM);
 
 	if (is)
@@ -543,7 +542,9 @@ istream& operator>>(istream& is, String& st)
 	}
 	
 	while (is && is.get() != '\n')
+	{
 		continue;
+	}
 
 	return is;
 }
