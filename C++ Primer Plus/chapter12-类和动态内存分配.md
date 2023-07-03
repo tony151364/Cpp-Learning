@@ -410,7 +410,7 @@ public:
 	char& operator[](int i);
 	const char& operator[](int i) const;
 
-	// overloaded operatpr friends
+	// overloaded operator friends
 	friend bool operator<(const String& st1, const String& st2);
 	friend bool operator>(const String& st1, const String& st2);
 	friend bool operator==(const String& st1, const String& st2);
@@ -1396,20 +1396,409 @@ bool newcustomer(double x)
 ```
 
 ## 12.10 编程练习
+- [ ] 第二题有点头大，字符串连接到底怎样才算合理
 - 1
 ```C++
+#ifndef _COW_H_
+#define _COW_H_
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <iostream>
+
+class Cow
+{
+	enum { HOBBY_SIZE = 20 };
+	char name[20];
+	char* hobby;
+	double weight;
+public:
+	Cow();
+	Cow(const char* nm, const char* ho, double wt);
+	Cow(const Cow& c);
+	~Cow();
+	Cow& operator=(const Cow& c);
+	void ShowCow() const;   // display all cow data
+};
+
+#endif
+```
+
+```C++
+#include "cow.h"
+#include <cstring>
+
+Cow::Cow()
+{
+	strcpy(name, "DefaultCow");
+
+	hobby = new char[4];
+	strcpy(hobby, "Cow");
+
+	weight = 10;
+}
+
+Cow::Cow(const char* nm, const char* ho, double wt)
+{
+	strcpy(name, nm);
+
+	int len = strlen(ho);
+	hobby = new char[len + 1];
+	strcpy(hobby, ho);
+
+	weight = wt;
+}
+
+Cow::Cow(const Cow& c)
+{
+	std::cout << "Cow(const Cow& c)" << std::endl;
+	strcpy(name, c.name);
+
+	int len = strlen(c.hobby);
+	hobby = new char[len + 1];
+	strcpy(hobby, c.hobby);
+
+	weight = c.weight;
+}
+
+Cow::~Cow()
+{
+	delete[] hobby;
+}
+
+Cow& Cow::operator=(const Cow& c)
+{
+	std::cout << "call operator= "<< std::endl;
+	if (this == &c)
+	{
+		return *this;
+	}
+
+	strcpy(name, c.name);
+
+	delete[] hobby;
+	int len = strlen(c.hobby);
+	hobby = new char[len + 1];
+	strcpy(hobby, c.hobby);
+	
+	return *this;
+}
+
+void Cow::ShowCow() const
+{
+	std::cout << "Name: " << name << std::endl;
+	std::cout << "Hobby: " << hobby << std::endl;
+	std::cout << "weight: " << weight << std::endl;
+}
 
 ```
-```C++
 
+```C++
+#include "cow.h"
+
+int main()
+{
+	Cow c1;
+	Cow c2("hahaha", "heiheihei", 200.3);
+	Cow c3 = c2;
+
+	c1.ShowCow();
+	c2.ShowCow();
+	c3.ShowCow();
+
+	c1 = c2;
+	c1.ShowCow();
+}
 ```
 
 - 2
 ```C++
+#include <iostream>
 
+#ifndef _STRNG2_H_
+#define _STRNG2_H_
+
+
+using std::istream;
+using std::ostream;
+
+class String2
+{
+private:
+	char* str;
+	int len;
+	static int num_strings;
+	static const int CINLIM = 80;
+
+public:
+	// constructors and other methods
+	String2(const char* s);
+	String2();
+	String2(const String2&);
+	~String2();
+	int length() const { return len; }
+	void stringlow();
+	void stringup();
+	int has(const char& ch);
+
+	// overloaded operator methods
+	String2& operator=(const String2& st);
+	String2& operator=(const char* s);
+	char& operator[](int i);
+	const char& operator[](int i) const;
+
+	// overloaded operator friends
+	friend String2 operator+(const String2& st1, const String2& st2);
+	friend bool operator<(const String2& st1, const String2& st2);
+	friend bool operator>(const String2& st1, const String2& st2);
+	friend bool operator==(const String2& st1, const String2& st2);
+	friend ostream& operator<<(ostream& os, const String2& st);
+	friend istream& operator>>(istream& is, String2& st);
+
+	// static function
+	static int HowMany();
+};
+
+#endif  // _STRNG2_H_
 ```
 ```C++
+#define _CRT_SECURE_NO_WARNINGS
+#include "string2.h"
+#include <cstring>	
+#include <cctype>
 
+using std::cout;
+
+// initializing static class member
+int String2::num_strings = 0;
+
+// static method
+int String2::HowMany()
+{
+	return num_strings;
+}
+
+// class methods
+String2::String2(const char* s)
+{
+	len = std::strlen(s);
+	str = new char[len + 1];
+	std::strcpy(str, s);
+	num_strings++;
+}
+
+String2::String2()
+{
+	len = 4;
+	char* str = new char[4];
+	std::strcpy(str, "C++");
+	num_strings++;
+}
+
+String2::String2(const String2& st)
+{
+	num_strings++;
+	len = st.len;
+	str = new char[len + 1];
+	std::strcpy(str, st.str);
+}
+
+String2::~String2()
+{
+	cout << "~String2(): " << str << std::endl;
+
+	--num_strings;
+	delete[] str;
+}
+
+void String2::stringlow()
+{
+	// method 0: 用不了，因为字符数组不是容器，没有迭代器
+	//for (auto ch: str)
+	//{
+	//	ch = std::tolower(ch);
+	//} 
+
+	// method 1: 用指针
+	for (char* ptr = str; *ptr != '\0'; ++ptr)
+	{
+		if (std::isupper(*ptr))
+		{
+			*ptr = std::tolower(*ptr);
+		}
+	}
+
+
+}
+
+void String2::stringup()
+{
+	// method2: 索引变量
+	for (int i = 0; i < len; ++i)
+	{
+		if (std::islower(str[i]))
+		{
+			str[i] = std::toupper(str[i]);
+		}
+	}
+}
+
+int String2::has(const char& ch)
+{
+	int count = 0;
+
+	for (char* ptr = str; *ptr != '\0'; ++ptr)
+	{
+		if (*ptr == ch)
+		{
+			count++;
+		}
+	}
+
+	return count;
+}
+
+// overloaded operator methods
+String2& String2::operator=(const String2& st)
+{
+	if (this == &st)
+	{
+		return *this;
+	}
+
+	delete[] str;
+	len = st.len;
+	str = new char[len + 1];
+	std::strcpy(str, st.str);
+	return *this;
+}
+
+// assign a C string to a String
+String2& String2::operator=(const char* s)
+{
+	delete[] str;
+	len = std::strlen(s);
+	str = new char[len + 1];
+	std::strcpy(str, s);
+	return *this;
+}
+
+// read-write char access for non-const String
+char& String2::operator[](int i)
+{
+	return str[i];
+}
+
+// read-only char access for const string
+const char& String2::operator[](int i) const
+{
+	return str[i];
+}
+
+String2 operator+(const String2& st1, const String2& st2)
+{
+	int len = st1.len + st2.len;
+
+	char* result = new char[len + 1];
+	std::strcpy(result, st1.str);
+	std::strcat(result, st2.str);
+
+	String2 temp(result);
+	delete[] result;
+
+	return temp;
+}
+
+bool operator<(const String2& st1, const String2& st2)
+{
+	return (std::strcmp(st1.str, st2.str) < 0);
+}
+
+bool operator>(const String2& st1, const String2& st2)
+{
+	return st2 < st1;
+}
+
+bool operator==(const String2& st1, const String2& st2)
+{
+	return (std::strcmp(st1.str, st2.str) == 0);
+}
+
+ostream& operator<<(ostream& os, const String2& st)
+{
+	os << st.str;
+	return os;
+}
+
+istream& operator>>(istream& is, String2& st)
+{
+	char temp[String2::CINLIM];
+	is.get(temp, String2::CINLIM);
+
+	if (is)
+	{
+		st = temp;
+	}
+
+	while (is && is.get() != '\n')
+	{
+		continue;
+	}
+
+	return is;
+}
+```
+```C++
+#include "string2.h"
+#include <iostream>
+using namespace std;
+
+int main()
+{
+	String2 s1(" and I am a C++ student.");
+	String2 s2 = "Please enter your name: ";
+	String2 s3;
+
+	cout << s2;
+	cin >> s3;
+
+	s2 = "My name is " + s3;
+
+	cout << s2 << ".\n";
+	s2 = s2 + s1;
+	s2.stringup();
+
+	cout << "The String\n" << s2 << "\ncontains " << s2.has('A')
+		<< " 'A' characters in it.\n";
+
+	s1 = "red"; // String(const char*)，
+				// then String & operator= (const String&)
+
+	String2 rgb[3] = { String2(s1), String2("green"),String2("blue") };
+	cout << "Enter the name of a primary color for mixing light: ";
+	String2 ans;
+	bool success = false;
+	while (cin >> ans)
+	{
+		ans.stringlow();
+		for (int i = 0; i < 3; i++)
+		{
+			if (ans == rgb[i])  // overloaded == operator
+			{
+				cout << "That 's right ! \n";
+				success = true;
+				break;
+			}
+
+		}
+
+		if (success)
+			break;
+		else
+			cout << "Try again!\n";
+	}
+	cout << "Bye\n";
+	return 0;
+}
 ```
 - 3
 ```C++
@@ -1418,7 +1807,9 @@ bool newcustomer(double x)
 ```C++
 
 ```
+```C++
 
+```
 - 4
 ```C++
 
@@ -1426,7 +1817,9 @@ bool newcustomer(double x)
 ```C++
 
 ```
+```C++
 
+```
 - 5
 ```C++
 
@@ -1434,7 +1827,13 @@ bool newcustomer(double x)
 ```C++
 
 ```
+```C++
+
+```
 - 6
+```C++
+
+```
 ```C++
 
 ```
