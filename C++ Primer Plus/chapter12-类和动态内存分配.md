@@ -1380,7 +1380,19 @@ bool newcustomer(double x)
 ```
 - 5
 ```C++
+// a:
+// #1 Golfer();
+// #2 Golfer(const char* name, int g = 0);
+// #3 Golfer(const char* name, int g = 0);
+// #4 Golfer(); Golfer(const Golfer& g);
+// #5 Golfer(const Golfer& g); 
+// #6 Golfer(const char* name, int g = 0);
+// #7 赋值运算符
+// #8 Golfer(const char* name, int g = 0);
 
+// b :
+// ~Golger(); // 析构函数用于使用字符串分配的空间
+// Golfer friend operator = (const Golfer& g1, const Golfer& g2);
 ```
 
 ## 12.10 编程练习
