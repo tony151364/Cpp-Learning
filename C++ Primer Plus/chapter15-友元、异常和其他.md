@@ -174,6 +174,7 @@ int main()
 ```
 
 ### 15.1.2 友元成员函数
+
 - **能否像下面这样排列呢？**
 ```C++
 class Remote;    // forward declaration
@@ -258,4 +259,31 @@ inline void Remote::set_chan(Tv& t, int c) { t.channel = c; }
 - 本书前面介绍过，内联函数的链接性是内部的，这意味着函数定义必须在使用函数的文件中。在这个例子中，内联定义位于头文件中，因此在使用函数的文件中包括头文件可确保将定义放在正确的地方。也可以将定义放在实现文件中，但必须删除关键字inline，这样函数的链接性是外部的。
 - 顺便说一句，让整个Remote类称为友元并不需要前向声明，因为友元语句本身已经指出Remote是一个类：```C++ friend class Remote; ```
 
+### 15.1.3 其他友元关系
+- 电脑对手柄进行控制，比如上古卷轴5开门的时候手柄会震动。两个类互为友元
+- **需要记住的一点是**，对于使用Remote对象的Tv方法，其原型可在Remote类声明之前声明
+- 
+```C++
+class Tv
+{
+friend class Remote;
+public:
+	void buzz(Remote& r);
+	...
+};
 
+class Remote
+{
+friend class Tv;
+public:
+	void Bool volup(TV& t) { t.volup(); }
+	...
+};
+
+inline void Tv::buzz(Remote& r)
+{
+	...
+}
+```
+
+### 15.1.4 共同的友元
