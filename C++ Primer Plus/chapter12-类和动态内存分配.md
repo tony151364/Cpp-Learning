@@ -869,11 +869,40 @@ Class_name* ptr = new Class_name;
 - 如果对象是动态变量，则当执行完定义该对象的程序块时，将调用该对象的析构函数。
 - 如果对象是静态变量（外部、静态、静态外部或来自名称空间），则在程序结束时调用对象的析构函数
 - 如果对象是用new创建的，则仅当您显示使用delete删除对象时，其析构函数才会被调用
+- 图12.4
 
-### 12.5.2 指针和对象小结
-- [ ] 12.5 节的核心在于此
-- [ ] 图12.6也总结一下
-- [ ] 图12.4
+### 12.5.2 指针和对象小结（核心）
+- 图12.5 + 图12.6
+使用对象指针时需要注意的几点：
+- 1 使用常规表示法来声明指向对象的指针
+```C++  String* glamour; ```
+- 2 可以将指针初始化为指向已有的对象：
+ ```C++  String* first = &sayings[0]; ```
+- 3 可以使用new来初始化指针，这将创建一个新的对象
+```C++
+// invokes String(const String&)
+String* favorite = new String (sayings[choice]);
+ ```
+- 4 对类使用new将调用相应的类构造函数来初始化新创建的对象
+ ```C++
+// invokes default constructor
+String* gleep = new String;
+
+// invokes the String(const char*) constructor
+String* glop = new String("my my my");
+
+// invokes the String(const String& ) constructor
+String* favorite = new String(sayings[choice]);
+```
+- 5 可以使用->运算符通过指针访问类方法：
+```C++
+if (sayings[i].length() < shortest->length())
+```
+- 6 可以对对象指针应用解除引用运算符（*）来获得对象：
+```C++
+if (sayings[i] < *first)	// compare object values
+	first = &sayings[i];	// assign object address
+``` 
 
 ### 12.5.3 再谈定位new运算符
 ```C++
@@ -911,7 +940,7 @@ int main()
 	pc2 = new JustTesting("Heap1", 20);		// place object on heap
 
 	cout << "Memory block addewsses:\n" << "buffer: "
-		<< (void*)buffer << " heap: " << pc2 << endl;
+		<< (void*)buffer << " heap: " << pc2 << endl;  // 注意：如果转换为(char *)，打印出的依然是字符串
 	cout << "Memory contents:\n";
 	cout << pc1 << ": ";
 	pc1->Show();
@@ -932,22 +961,22 @@ int main()
 	delete pc4;
 }
 ```
-- [ ] 记得当时对于buffer有段迷惑。复习下chatgtp提问过的new (buffer
 - 程序清单12.8 在使用定位new运算符时存在两个问题：
 	- 首先，在创建第二个对象时，定位new运算符使用一个新对象来覆盖用于第一个对象的内存单元。显然，如果类动态地为其成员分配内存，这将引发问题。
 	- 其次，将delete用于pc2和pc4时，将自动调用为pc2和pc4指向的对象调用析构函数；然而，将delete[ ]用于buffer时，不会为使用定位new运算符创建的对象调用析构函数。
+
 - 这里的教训与第9章相同：程序员必须负责管理定位new运算符中使用的缓存器内存单元。可以这样做：
 ```C++
 pc1 = new(buffer) JustTesting;
 pc3 = new(buffer + sizeof(JustTesting)) JustTesting("Better Idea", 6);
 
-// 释放时应该使用``` delete[] buffer```。对于他们的析构函数，需要显式去调用
+// 释放时应该使用 delete[] buffer 。对于他们的析构函数，需要显式去调用
 pc3->~JustTesting();
 pc1->~JustTesting();
 delete[] buffer
 ```
-- 新的程序如下：
 
+- 新的程序如下：
 ```C++
 // placenew2.cpp -- new, placement new, no delete
 #include <iostream>
@@ -1006,7 +1035,7 @@ int main()
 	delete pc4;
 
 	pc3->~JustTesting();
-	pc4->~JustTesting();
+	pc1->~JustTesting();
 	delete[] buffer;  // free buffer
 	cout << "Done\n";
 	return 0;
@@ -1055,7 +1084,6 @@ c_name& c_name::operator=(const c_name& cn)
 - 另外对于被声明为引用的类成员，也必须使用这种语法。这是因为引用与const数据类似，只能在被创建是进行初始化。
 - 对于本身是类对象的成员来说，使用成员初始化列表的效率更高
 
-
 #### 成员列表初始化
 - 初始化工作在对象创建时完成
 - 这种格式只能用于构造函数
@@ -1069,6 +1097,7 @@ double talk = 2.71828;
 int games(162);
 double talk(2.71828);
 ```
+- 分配内存（创建）-> 初始化（构造函数花括号之前，参数列表之后）-> 赋值（构造函数花括号内）
 
 #### C++11的类内初始化
 ```C++
@@ -1353,7 +1382,7 @@ bool newcustomer(double x)
 	return (std::rand() * x / RAND_MAX < 1);
 }
 ```
-- [ ] 每小时达到的客户从15名增加到30名时，等候时间并不是加倍，而是增加15倍。
+- [x] 每小时达到的客户从15名增加到30名时，等候时间并不是加倍，而是增加15倍。
 
 ## 12.8 总结
 - 对于诸如复制构造函数等概念，都是在由于忽略它们而遇到了麻烦后逐步理解。
