@@ -287,3 +287,78 @@ inline void Tv::buzz(Remote& r)
 ```
 
 ### 15.1.4 共同的友元
+- [ ] 没搞懂
+
+## 15.2 嵌套类
+- 包含类的成员函数可以创建和使用被嵌套类的对象
+- 仅当声明位于公有部分，才能在包含类的外面使用嵌套类，而且必须使用作用域解析运算符。
+- 包含：意味着将类对象作为另一个类的成员，而对类进行嵌套不创建类成员，而是定义了一种类型，该类型仅在包含嵌套类声明的类中有效。
+- 嵌套：对类进行嵌套通常是为了帮助实现另一个类，并避免名称冲突。
+- 嵌套结构体也是一种变相的嵌套类。因为结构是一种其成员在默认情况下为公有的类
+- [ ] 假设想在方法文件中定义构造函数，则定义必须指出Node类是在Queue类中定义的。这是通过两次类解析运算符来完成的 ```C++  Queue::Node::Node(const Item& i) : item(i), next(0) { } ```
+
+### 15.2.1 嵌套类的访问权限
+- 在那些地方可以使用嵌套类以及如何使用嵌套类，取决于作用域和访问权限
+
+#### 1.作用域
+- 如果嵌套类是在另一个类的**私有部分**声明的，则只有后者知道它。例子中，Queue成员可以使用Node对象和指向Node对象的指针，但是呈现出的其他部分甚至不知道Node类。
+- 如果嵌套类是在另一个类的**保护部分**声明的，则它对于后者来说是可见的，但对于外部世界则是不可见的。这时候，派生类知道嵌套类，并可以直接创建这种类型的对象
+- 如果嵌套类是在另一个类的**公有部分**声明的，允许后者、后者的派生类以及外部世界使用它。由于嵌套类为包含它的类，因此在外部世界使用它是，必须使用类限定符。
+- 表 15.1
+
+#### 2.访问控制
+- 对嵌套类访问权的控制规则与对常规类相同。
+- 总之，类声明的位置决定了类的作用域或可见性。类可见之后，访问控制规则（公有、保护、私有、友元）将决定程序对件套类成员的访问权限
+
+### 15.2.2 模板中的嵌套
+- 模板很适合用于实现诸如Queue等容器类
+
+```C++
+#pragma once
+// 15.5 queuetp.h -- queue template with a nested class
+#ifndef _QUEUETP_H_
+#define _QUEUETP_H_
+
+template <class Item>
+class QueueTP
+{
+private:
+	enum { Q_SIZE = 10 };
+
+	// Node is a nested class definition
+	class Node
+	{
+	public:
+		Item item;
+		struct Node* next;
+
+		Node(const Item& i) :item(i), next(0) {}
+	};
+	
+	Node* front;
+	Node* rear;
+	int items;
+	const int qsize;
+	QueueTP(const QueueTP* q) : qsize(0) { }
+	QueueTP& operator=(const QueueTP& q) { return *this; }
+
+public:
+	QueueTP(int qs = Q_SIZE);
+	~QueueTP();
+	bool isempty() const { return items == 0; }
+	bool isfull() const { return items == qsize; }
+	int queuecount() const { return items; }
+	bool enqueue(const Item& item);	
+	bool dequeue(Item& item);
+
+
+};
+
+#endif // _QUEUETP_H_
+```
+```C++
+
+```
+```C++
+
+```
