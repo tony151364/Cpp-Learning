@@ -16,7 +16,7 @@
 
 ## 13.1 一个简单的基类
 ```C++
-// tabtenn0.h -- a table-tennis base class
+// 13.1 tabtenn0.h -- a table-tennis base class
 #ifndef TABTENN0_H_
 #define TABTENN0_H_
 #include <string>
@@ -39,7 +39,7 @@ public:
 ```
 
 ```C++
-// tabtenn0.cpp -- simple base-class methods
+// 13.2 tabtenn0.cpp -- simple base-class methods
 #include "tabtenn0.h"
 #include <iostream>
 
@@ -123,7 +123,7 @@ derived::derived(type1 x, type2 y): base(x, y)  // initializer list
 
 ### 13.1.2 使用派生类
 ```C++
-// tabtenn1.h -- a table-tennis base class
+// 13.4 tabtenn1.h -- a table-tennis base class
 #ifndef TABTENN1_H_
 #define TABTENN1_H_
 #include <string>
@@ -161,7 +161,7 @@ public:
 ```
 
 ```C++
-// tabtenn1.cpp -- simple base-class methods
+// 13.5 tabtenn1.cpp -- simple base-class methods
 #include "tabtenn1.h"
 #include <iostream>
 
@@ -188,15 +188,27 @@ RatedPlayer::RatedPlayer(unsigned int r, const TableTennisPlayer& tp)
 }
 ```
 ```C++
-// 13.3 usett1.cpp -- using a base class and derived class
+// 13.6 usett1.cpp -- using a base class and derived class
 #include <iostream>
 #include "tabtenn1.h"
 
 int main()
 {
 	using std::cout;
-	TableTennisPlayer player1("Chuck", "Blizzard", true);
-	TableTennisPlayer player2("Tara", "Boomdea", false);
+	using std::endl;
+
+	TableTennisPlayer player1("Chuck", "Blizzard", false);
+	RatedPlayer rPlayer1(1140, "Mallory", "Duck", true);
+
+	rPlayer1.Name();
+	if (rPlayer1.HasTable())
+	{
+		cout << ": has a table.\n";
+	}
+	else
+	{
+		cout << ": hasn't a table.\n";
+	}
 
 	player1.Name();
 	if (player1.HasTable())
@@ -208,15 +220,16 @@ int main()
 		cout << ": hasn't a table.\n";
 	}
 
-	player2.Name();
-	if (player2.HasTable())
-	{
-		cout << ": has a table.\n";
-	}
-	else
-	{
-		cout << ": hasn't a table.\n";
-	}
+	cout << "Name: ";
+	rPlayer1.Name();
+
+	cout << "; Rating: " << rPlayer1.Rating() << endl;
+
+	// initialize RatedPlayer using TableTennisPlayer object
+	RatedPlayer rPlayer2(1212, player1);
+	cout << "Name: ";
+	rPlayer2.Name();
+	cout << "; Rating: " << rPlayer2.Rating() << endl;
 
 	return 0;
 }
