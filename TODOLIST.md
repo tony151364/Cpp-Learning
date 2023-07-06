@@ -80,7 +80,7 @@
 - [ ] 英雄三国编辑器、魔兽世界编辑器
 - [ ] 联合编译
 - [ ] VA使用技巧
-- [ ] WinDebug等内存泄漏工具的使用，并总结相应技巧
+- [ ] WinDebug等内存泄漏工具的使用，并总结相应技巧：“https://blog.csdn.net/weixin_72979606/article/details/128834022”
 - [ ] CMake、Makefile
 - [ ] Git
 
