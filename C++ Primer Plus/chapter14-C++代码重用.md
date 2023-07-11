@@ -811,11 +811,16 @@ int main()
 ```
 
 ### 14.3.1 有多少Worker
-
 ```C++
+class SingingWaiter: public Singer, public Waiter { ... };
+SingingWaiter ed;
+Worker* pw = &ed;  // ambigous 出现二义性
+// 通常，这种复制将把基类指针设置为派生对象中的基类对象的地址。但ed中包含两个Worker对象，有两个地址可供选择，所以应使用类型转换来指定对象
 Worker* pw1 = (Waiter *) &ed;  // the Worker in Waiter
 Worker* pw1 = (Singer *) &ed;  // the Worker in Singer
+// 这将使得使用基类指针来引用不同的对象（多态化）复杂化
 ```
+- 包含两个Worker对象拷贝还会导致其他的问题。然而，真正的问题是：为什么需要Worker对象的两个拷贝？唱歌的侍者和其他Worker对象一样，也应值包含一个姓名和一个ID
 - C++引入多重继承的同时，引入了一种新技术——虚基类（virtual base class），使MI成为可能
 
 #### 1.虚基类
@@ -823,13 +828,23 @@ Worker* pw1 = (Singer *) &ed;  // the Worker in Singer
 ```C++
 class Singer : virtual public Worker {...};
 class Waiter : public virtual  Worker {...};
-
 // 然后，可以将SingingWaiter类定义为：
-class SingingWaiter: public Singer, public 
+class SingingWaiter: public Singer, public Waiter { ... };
 ```
-- 现在，SingingWaiter对象只包含Worker对象的一个副本。从本质上说，它们共享一个Worker对象。因为SingingWaiter现在只包含了一个Worker对象，所以可以使用多态。
+- 现在，SingingWaiter对象只包含Worker对象的一个副本。从本质上说，它们共享一个Worker对象。
+- 因为SingingWaiter现在只包含了一个Worker对象，所以可以使用多态。
+- 首先：虚函数和虚基类之间并不存在明显的联系。C++对这种新特性也使用关键字virtual——有点像关键字重载
+- 其次：略
+- 最后，是否存在麻烦？是的，为了使虚基类能够工作，需要对C++规则进行调整，必须以不同的方式编写一些代码。还需要修改已有的代码...
 		
-#### 2.新的构造规则
+#### 2.新的构造函数规则
+- 如果Worker是虚基类，这种通过构造函数构造基类的方式将不起作用。对于下面的MI构造函数
+```C++
+SingingWaiter(const Worker& wk, int p = 0, int v = Singer::other)
+	: Waiter(wk, p), Singer(Wk, p), Singer(wk, v) {}
+```
+- 存在的问题是：自动传递信息时,将通过2条不同的途径（Waiter和Singer）将wk传递给Worker对象。
+- 为了避免这样的冲突，C++在基类是虚的时，禁止信息通过中间类自动传递给基类。因此，上述构造函数将初始化成员panache和voice，但wk参数中的信息将不会传递给子对象Waiter
 
 
 
