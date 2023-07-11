@@ -86,12 +86,17 @@
 - [ ] WinDebug等内存泄漏工具的使用，并总结相应技巧：“https://blog.csdn.net/weixin_72979606/article/details/128834022”
 - [ ] CMake、Makefile
 - [ ] Git
+- [ ] 调试技巧待多练习
 
 ## 引擎自身
 - [ ] IMPLEMENT_LCLASS(Tween)什么意思
 - [ ] typedef TVar<4> CVar;
 - [ ] 3.UI要逐渐向更底层去深入
 - [ ] Hermes里面的yaml文件什么含义
+- [ ] 星火编辑器、Y3编辑器、魔兽争霸编辑器
 
 ## 思考下引擎有哪些问题
 - 网络同步，组件属性网络同步，容器数据网络同步都有问题
+
+## 教训
+- [ ] 频繁点击的教训
