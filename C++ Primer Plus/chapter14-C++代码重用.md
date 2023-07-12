@@ -1026,7 +1026,7 @@ public:
 #endif  // WORKERMI_H_
 ```
 ```C++
-// workermi.cpp -- working class methods with MI
+// 14.11 workermi.cpp -- working class methods with MI
 #include "workermi.h"
 #include <iostream>
 
@@ -1171,6 +1171,10 @@ void SingingWaiter::Show() const
 ```C++
 
 ```
+
+## 14.4 类模板
+
+### 14.4.1 定义类模板
 ```C++
 
 ```
