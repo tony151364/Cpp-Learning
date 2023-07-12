@@ -1,5 +1,5 @@
 [课程地址](https://www.bilibili.com/video/BV1dT4y1N7de)
-
+[官方文档](https://docs.unrealengine.com/4.27/zh-CN/InteractiveExperiences/Networking/)
 ## 01 内容概要
 ### 1.1前言
 - 明确我们所讲的网络
@@ -175,8 +175,10 @@ void AMyActor::OnRep_Armor()
 - 弹幕答：因为PIE所有窗口运行在同一个Process里
 - [ ] 暂时还不是太懂
 
-
-
+## 06 Ownership 所有权
+- [ ] Connection -> PlayerCOntroller -> Pawn
+- 这个关系链就叫做Ownership所有权
+- 场景中的建筑、NPC等是没有所有权的
 
 
 
