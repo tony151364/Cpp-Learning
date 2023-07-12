@@ -824,7 +824,7 @@ Worker* pw1 = (Singer *) &ed;  // the Worker in Singer
 - C++引入多重继承的同时，引入了一种新技术——虚基类（virtual base class），使MI成为可能
 
 #### 1.虚基类
-- 虚基类使得从多个类（它们的基类相同）派生出的对象只继承一个基类对象。例如，通过在类声明中使用关键字virtual，可以使Worker被用作Singer和Waiter的虚基类（virtual 和 public的次序无关紧要
+- 虚基类使得从多个类（它们的基类相同）派生出的对象只继承一个基类对象。例如，通过在类声明中使用关键字virtual，可以使Worker被用作Singer和Waiter的虚基类（virtual 和 public的次序无关紧要）
 ```C++
 class Singer : virtual public Worker {...};
 class Waiter : public virtual  Worker {...};
@@ -841,10 +841,503 @@ class SingingWaiter: public Singer, public Waiter { ... };
 - 如果Worker是虚基类，这种通过构造函数构造基类的方式将不起作用。对于下面的MI构造函数
 ```C++
 SingingWaiter(const Worker& wk, int p = 0, int v = Singer::other)
-	: Waiter(wk, p), Singer(Wk, p), Singer(wk, v) {}
+	: Waiter(wk, p), Singer(Wk, v) {}
 ```
 - 存在的问题是：自动传递信息时,将通过2条不同的途径（Waiter和Singer）将wk传递给Worker对象。
-- 为了避免这样的冲突，C++在基类是虚的时，禁止信息通过中间类自动传递给基类。因此，上述构造函数将初始化成员panache和voice，但wk参数中的信息将不会传递给子对象Waiter
+- 为了避免这样的冲突，C++在基类是虚的时，禁止信息通过中间类自动传递给基类。因此，上述构造函数将通过p,v参数初始化成员panache和voice，但wk参数中的信息将不会传递给子对象Waiter。然而，编译器必须在构造派生对象之前构造基类对象组件；在上述情况下，编辑器将使用Worker的默认构造函数
+```C++
+SingingWaiter(const Worker& wk, int p = 0, int v = Singer::other)
+	: Worker(wk), Waiter(wk,p), Singer(wk, v) {}
+```
+- [ ] 上述代码将显式地调用构造函数worker(const Worker&)。请注意，这种用法是合法的，对于虚基类必须这样做。但对于非虚基类，则是非法的。
+- [ ] **警告：**如果类有简介虚基类，则除非只使用该虚基类的默认构造函数，否则必须显式的调用该虚基类的某个构造函数。
+
+### 14.3.2 哪个方法
+- 没有在派生类中重新定义Show()方法，调用时，在单继承中将使用最近祖先中的定义。而在多重继承中，每个组件都有一个Show()函数，这将导致二义性
+```C++
+// 可以使用作用域解析运算符来澄清编程者的意图：
+SingingWaiter newhire("Elise Hawks", 2005, 6, soprano);
+newhire.Singer:Show();  // use Singer version
+```
+- 更好的方法是在SingerWaiter中重新定义
+- 对于单继承，可用递增调用派生类方法。每个派生类调用基类显示信息并添加自己的信息
+```C++
+void Worker::Show() const
+{
+	cout << "Name: " << fullname << "\n";
+	cout << "Employee ID: " << id << "\n";
+}
+
+void Waiter::Show() const
+{
+	Worker::Show();
+	cout << "Panache rating: " << panache << "\n"l
+}
+
+void HeadWaiter::Show() const
+{
+	Waiter::Show();
+	cout << "Presence rating: " << presence << "\n";
+}
+```
+- [ ] 对于多继承的SingerWaiter来说，下面的方法不可行。因为它忽略了Waiter组件
+```C++
+void SingerWaiter::Show()
+{
+	Singer::Show();
+};
+
+void SingerWaiter::Show()
+{
+	Singer::Show();
+	Waiter::Show();
+};
+```
+- 如果同时两个基类的都调用，姓名和ID将显式两次。该怎么办呢？
+- 一种方法是采用模块化方式，而不是递增方式。
+```C++
+void Worker::Data() const
+{
+	cout << "Name: " << fullname << "\n";
+	cout << "Employee ID: " << id << "\n";
+}
+
+void Waiter::Data() const
+{
+	cout << "Panache rating: " << panache << "\n"l
+}
+
+void Singer::Data() const
+{
+	cout << "Vocal ranger: " << pv[voice] << "\n";
+}
+
+void SingingWaiter::Data() const
+{
+	Singer::Data();
+	Waiter::Data();
+}
+
+void SingingWaiter::Show() const
+{
+	cout << "Category: singing waiter\n";
+	Worker::Data();
+	Data();
+}
+```
+- 由于Data()方法只在类内部可用，所以可用private、或Protected。由于private将阻止Waiter中的代码使用Worker::Data(), 所以这是protected的用武之地。
+- 如果Data()方法是保护的，则只能在继承层次结构中的类中使用它，在其他地方则不能使用。
+- [ ] 另一种方法是将所有的数据组件都设置为保护的，而不是私有的，不过使用保护方法（而不是保护数据）将可以更严格地控制对数据的访问。（具体看代码）
+```C++
+// 14.10 workermi.h  -- working classes with MI
+#ifndef WORKERMI_H_
+#define WORKERMI_H_
+
+#include <string>
+using std::string;
+
+class Worker  // an abstract base class
+{
+private:
+	string fullname;
+	long id;
+
+protected:
+	virtual void Data() const;
+	virtual void Get();
+
+public:
+	Worker() : fullname("no one"), id(0L) {}
+	Worker(const string& s, long n) : fullname(s), id(n) {}
+
+	virtual ~Worker() = 0;  // pure virtual destructor
+	virtual void Set() = 0;
+	virtual void Show() const = 0;
+};
+
+class Waiter : public Worker
+{
+private:
+	int panache;
+
+protected:
+	virtual void Data() const;
+	virtual void Get();
+
+public:
+	Waiter() : Worker(), panache(0) {}
+	Waiter(const std::string& s, long n, int p = 0)
+		: Worker(s, n), panache(p) {}
+	Waiter(const Worker& wk, int p = 0)
+		: Worker(wk), panache(p) {}
+
+	void Set();
+	void Show() const;
+};
+
+class Singer : public Worker
+{
+protected:
+	enum {
+		other, alto, contralto, soprano,
+		bass, baritone, tenor
+	};
+	enum { Vtypes = 7 };
+
+	virtual void Data() const;
+	virtual void Get();
+
+private:
+	static const char* pv[Vtypes];
+	int voice;
+
+public:
+	Singer() : Worker(), voice(other) {}
+	Singer(const std::string& s, long n, int v = other)
+		: Worker(s, n), voice(v) {}
+	Singer(const Worker& wk, int v = other)
+		: Worker(wk), voice(v) {}
+
+	void Set();
+	void Show() const;
+};
+
+class SingingWaiter : public Singer, public Waiter
+{
+protected:
+	virtual void Data() const;
+	virtual void Get();
+
+public:
+	SingingWaiter() {}
+	SingingWaiter(const std::string& s, long n, int p = 0, int v = other)
+		: Worker(s, n), Waiter(s, n, p), Singer(s, n, v) {}
+	SingingWaiter(const Worker& wk, int p = 0, int v = other)
+		: Worker(wk), Waiter(wk, p), Singer(wk, v) {}
+	SingingWaiter(const Waiter& wt, int v = other)
+		: Worker(wt), Waiter(wt), Singer(wt, v) {}
+	SingingWaiter(const Singer& wt, int p = 0)
+		: Worker(wt), Waiter(wt, p), Singer(wt) {}
+
+	void Set();
+	void Show() const;
+};
+
+#endif  // WORKERMI_H_
+```
+```C++
+// workermi.cpp -- working class methods with MI
+#include "workermi.h"
+#include <iostream>
+
+using std::cout;
+using std::cin;
+using std::endl;
+// Worker methods
+Worker::~Worker() 
+{
+	// must implement virtual destructor, even if pure
+}  
+
+void Worker::Data() const
+{
+	cout << "Name: " << fullname << "\n";
+	cout << "Employee ID: " << id << "\n";
+}
+
+void Worker::Get()
+{
+	cout << "Enter worker's name: ";
+	getline(cin, fullname);
+	cout << "Enter worker's ID: ";
+	cin >> id;
+	while (cin.get() != '\n')
+		continue;
+}
+
+// Waiter methods
+void Waiter::Set()
+{
+	cout << "Enter waiter's name";
+	Worker::Get();
+	Get();
+}
+
+void Waiter::Show() const
+{
+	cout << "Category: waiter\n";
+	Worker::Data();
+	Data();
+}
+
+void Waiter::Data() const
+{
+	cout << "Panache rating: " << panache << endl;
+}
+
+void Waiter::Get()
+{
+	cout << "Enter waiter's panache rating: ";
+	cin >> panache;
+
+	while (cin.get() != '\n')
+		continue;
+}
+
+// Singer methods
+const char* Singer::pv[] = { "other", "alto", "contralto",
+			"soproano", "bass", "baritone", "tenor" };
+
+void Singer::Set()
+{
+	cout << "Enter singer's name: ";
+	Worker::Get();
+	Get();
+}
+
+void Singer::Show() const
+{
+	cout << "Category: singer\n";
+	Worker::Data();
+	Data();
+}
+
+void Singer::Data() const 
+{
+	cout << "Vocal range: " << pv[voice] << endl;
+}
+
+void Singer::Get()
+{
+	cout << "Enter number for singer's vocal ranger:\n";
+	int i;
+
+	for (i = 0; i < Vtypes; i++)
+	{
+		cout << i << ": " << pv[i] << "    ";
+
+		if (i % 4 == 3)
+		{
+			cout << endl;
+		}
+	}
+
+	if (i % 4 != 0)
+	{
+		cout << endl;
+	}
+
+	while (cin >> voice && (voice < 0 || voice >= Vtypes))
+	{
+		cout << "Please enter a value >= 0 and < " << Vtypes << endl;
+	}
+
+	while (cin.get() != '\n')
+	{
+		continue;
+	}
+}
+
+// SingingWaiter methods
+void SingingWaiter::Data() const
+{
+	Singer::Data();
+	Waiter::Data();
+}
+
+void SingingWaiter::Get()
+{
+	Waiter::Get();
+	Singer::Get();
+}
+
+void SingingWaiter::Set()
+{
+	cout << "Enter singing waiter's name: ";
+	Worker::Get();
+	Get();
+}
+
+void SingingWaiter::Show() const 
+{
+	cout << "Category: singing waiter\n";
+	Worker::Data();
+	Data();
+}
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
