@@ -1115,13 +1115,77 @@ int main()
  	- Flyweight  
 
 ### 动机
+- 在软件系统中，经常有这样一些特殊的类，必须保证它们在系统中只存在一个实例，才能确保它们的逻辑正确性、以及良好的效率。
+- 如何绕过常规的构造器，提供一种机制来保证一个类只有一个实例？
+- 这应该是类设计者的责任，而不是使用者的责任
 
 ### 模式定义
-
-
 ```C++
 
+class Singleton
+{
+private:
+	// 写成私有的，外界不能用，编译器也不会默认生成
+	Singleton();
+	Singleton(const Singleton& other);
+
+public:
+	static Singleton* getInstance();
+	static Singleton* m_instance;
+};
+
+Singleton* Singleton::m_instance = nullptr;
+
+// 线程非安全版本：单线程OK，多线程不行
+Singleton* Singleton::getInstance()
+{
+	if (m_instance == nullptr)
+	{
+		m_instance = new Singleton();
+	}
+
+	return m_instance;
+}
+
+// 线程安全版本：但锁的代价过高（锁前检查）
+Singleton* Singleton::getInstance()
+{
+	Lock lock; // 虽然保证了全局唯一和线程安全，但锁的代价过高。怎么高了？
+
+	if (m_instance == nullptr)
+	{
+		m_instance = new Singleton();
+	}
+
+	return m_instance;
+}
+
+// 双检查锁(double check lock)：但由于内存读写reorder不安全（锁后检查）
+Singleton* Singleton::getInstance()
+{
+	if (m_instance == nullptr)
+	{
+		Lock lock;
+		if (m_instance = nullptr)
+		{
+			m_instance = new Singleton();
+		}
+	}
+
+	return m_instance;
+}
+
+// C++11版本之后的跨平台实现（volatile）
+std::atomic<Singleton*>Singleton::m_instance;
+std::mutex Singleton::m_mutex;
+
+Singleton* SIngleton::getInstance()
+{
+	Singleton* tmp = m_instance.load
+}
 ```
+
+
 ```C++
 
 ```
