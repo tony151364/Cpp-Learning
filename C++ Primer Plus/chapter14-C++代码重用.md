@@ -1166,14 +1166,90 @@ void SingingWaiter::Show() const
 }
 ```
 ```C++
+#pragma once
+// 14.12 workmi.cpp -- multiple inheritance
+#include <iostream>
+#include <cstring>
+#include "workermi.h"
+const int SIZE = 5;
 
+int main()
+{
+	using std::cin;
+	using std::cout;
+	using std::endl;
+	using std::strchr;
+
+	Worker* lolas[SIZE];
+
+	int ct;
+	
+	for (ct = 0; ct < SIZE; ++ct)
+	{
+		char choice;
+
+		cout << "Enter the employee category:\n"
+			<< "w: waiter s: singer t: singing waiter q: quit\n";
+		cin >> choice;
+		
+		while (strchr("wstq", choice) == nullptr)
+		{
+			cout << "Please enter a w, s, t, or q: ";
+			cin >> choice;
+		}
+
+		if ('q' == choice)
+		{
+			break;
+		}
+
+		switch (choice)
+		{
+		case 'w': 
+			lolas[ct] = new Waiter;
+			break;
+		case 's':
+			lolas[ct] = new Singer;
+			break;
+		case 't':
+			lolas[ct] = new SingingWaiter;
+			break;
+		}
+		cin.get();
+		lolas[ct]->Set();
+	}
+
+	cout << "\nHere is your staff:\n";
+	int i;
+	for (i = 0; i < ct; i++)
+	{
+		cout << endl;
+		lolas[i]->Show();
+	}
+	for (i = 0; i < ct; i++)
+	{
+		delete lolas[i]; // 直接delete[] lolas不行是吧？前面是不是讲过这个
+	}
+
+	cout << "Bye.\n";
+	return 0;
+}
 ```
+- [ ] 代码还没正确运行
+
+下面介绍一些有关MI的问题：
+
+#### 1.混合使用虚基类和非虚基类
+- 如果基类是虚基类，派生类将包含基类的一个子对象。如果基类不是虚基类，派生类将包含多个子对象。
+- [ ] 当虚基类和非虚基类混合使用时，情况将如何？
+
+#### 2.虚基类和支配
 ```C++
 
 ```
+### 14.3.3 MI小结
 
 ## 14.4 类模板
-
 ### 14.4.1 定义类模板
 ```C++
 
