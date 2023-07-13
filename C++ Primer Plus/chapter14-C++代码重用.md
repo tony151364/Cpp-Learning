@@ -1274,10 +1274,75 @@ bool Stack<Type>::push(const Type& item)
 - 不能将模板成员函数放在独立的实现文件中。由于模板不是函数，他们不能单独编译。
 - [ ] 模板必须与特定的模板实例化请求一起使用。为此，最简单的方法是将所有模板信息放在一个头文件中，并在要使用这些模板的文件中包含该头文件
 ```C++
+// 14.13 stacktp.h -- a stack template
+#ifndef _STACKTP_H_
+#define _STACKTP_H__
 
+template <typename Type>
+class Stack
+{
+private:
+	enum { MAX = 10 };
+	Type items[MAX];
+	int top;
+public:
+	Stack();
+	bool isempty() const;
+	bool isfull() const;
+	bool push(const Type& item);
+	bool pop(Type& item);
+};
+
+template <typename Type>
+Stack<Type>::Stack()  // Create an empty stack
+{
+	top = 0;
+}
+
+template <typename Type>
+bool Stack<Type>::isempty() const
+{
+	return top == 0;
+}
+
+template <typename Type>
+bool Stack<Type>::isfull() const
+{
+	return top == MAX;
+}
+
+template <typename Type>
+bool Stack<Type>::push(const Type& item)
+{
+	if (top < MAX)
+	{
+		items[top++] = item;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+template <typename Type>
+bool Stack<Type>::pop(Type& item)
+{
+	if (top > 0)
+	{
+		item = items[--top];
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+#endif  // _STACKTP_H__
 ```
 
 ### 14.4.2 使用模板类
+
 ```C++
 
 ```
