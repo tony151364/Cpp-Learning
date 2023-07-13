@@ -1,4 +1,4 @@
-![0F141C6A](https://github.com/tony151364/Cpp-Learning/assets/36122007/6a62bb15-c62b-471b-a7e7-3e9c88d19bfa)# 第14章 C++中的代码重用
+# 第14章 C++中的代码重用
 
 - C++的一个主要目标就是促进代码重用。
 - [x] 本章介绍其他方法，其中之一就是使用这样的类成员：本身是另一个类的对象。这种方法称为包含(containment)、组合(composition)或层次化(layering)。
