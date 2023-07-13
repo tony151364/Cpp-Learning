@@ -926,14 +926,292 @@ public:
 - 如何应对这种变化？如何提供一种“封装机制”来隔离出“复杂对象的各个部分”的变化，从而保持系统中的“稳定构建算法”不随着需求改变而改变？
 
 ### 模式定义
-- 将一个复杂对象的构建与其表示相分离，使得同样的构建过程（稳定）可以创造不同的表示（变化）
+- 将一个复杂对象的构建与其表示相分离，使得同样的构建过程（稳定）可以创造不同的表示（变化）		—— 《设计模式》GoF
+```C++
+// 简单版本
+class House
+{
+public:
+	// 不能写成构造函数，因为在C++里面，构造函数调用虚函数完成的是静态绑定
+	// 其实就是这几个Build函数没有实现，编译会出错的（代码以及移动）
+	void Init()
+	{
+		// 构建过程是一样的，所以这5个步骤的顺序是不变的
+		this->BuildPart1();
+
+		for (int i = 0; i < 4; i++)
+		{
+			this->BuildPart2();  // 构建4面窗户
+		}
+
+		bool flag = this->BuildPart3();
+
+		if (flag)
+		{
+			this->BuildPart4();
+		}
+
+		this->BuildPart5();
+	}
+
+	virtual ~House() {}
+
+protected:
+	// 这5个步骤需要组合一起使用
+	virtual void BuildPart1() = 0;
+	virtual void BuildPart2() = 0;
+	virtual bool BuildPart3() = 0;
+	virtual void BuildPart4() = 0;
+	virtual void BuildPart5() = 0;
+};
+
+class StoneHouse : public House
+{
+protected:
+	virtual void BuildPart1()
+	{
+
+	}
+
+	virtual void BuildPart2()
+	{
+
+	}
+
+	virtual bool BuildPart3()
+	{
+
+	}
+
+	virtual void BuildPart4()
+	{
+
+	}
+
+	virtual void BuildPart5()
+	{
+
+	}
+};
+
+int main()
+{
+	House* pHouse = new StoneHouse();
+	pHouse->Init();
+}
+```
+
+```C++
+// 复杂版本：最大的作用在于将对象的表示和构建相分离
+
+class House
+{
+
+};
+
+class HouseBuilder  // 专门做构建
+{
+public:
+	House* GetResult()
+	{
+		return pHouse;
+	}
+	virtual ~HouseBuilder(){}
+
+	House* pHouse;
+
+	virtual void BuildPart1() = 0;
+	virtual void BuildPart2() = 0;
+	virtual bool BuildPart3() = 0;
+	virtual void BuildPart4() = 0;
+	virtual void BuildPart5() = 0;
+};
+
+class StoneHouse : public House
+{
+
+};
+
+class StoneHouseBuilder : public HouseBuilder
+{
+protected:
+	virtual void BuildPart1()
+	{
+
+	}
+
+	virtual void BuildPart2()
+	{
+
+	}
+
+	virtual bool BuildPart3()
+	{
+
+	}
+
+	virtual void BuildPart4()
+	{
+
+	}
+
+	virtual void BuildPart5()
+	{
+
+	}
+};
+
+class HouseDirector  // 稳定的部分
+{
+public:
+	HouseBuilder* pHouseBuilder = nullptr;
+
+	HouseDirector(HouseBuilder* pHouseBuilder)
+	{
+		this->pHouseBuilder = pHouseBuilder;
+	}
+
+	House* Construct()
+	{
+		pHouseBuilder->BuildPart1();
+
+		for (int i = 0; i < 4; i++)
+		{
+			pHouseBuilder->BuildPart2();
+		}
+
+		bool flag = pHouseBuilder->BuildPart3();
+
+		if (flag)
+		{
+			pHouseBuilder->BuildPart4();
+		}
+
+		pHouseBuilder->BuildPart5();
+
+		return pHouseBuilder->GetResult();
+	}
+};
+
+int main()
+{
+	HouseBuilder* pHouseBuilder = new StoneHouseBuilder();
+	HouseDirector* pHouseDirector = new HouseDirector(pHouseBuilder);
+	pHouseDirector->Construct();
+}
+```
+### 要点总结
+- Builder模式主要用于“分步骤构建一个复杂对象”。在这其中“分步骤”是一个稳定的算法，而复杂对象的各个部分则经常变化
+- 变化点在哪里，封装哪里————Builder模式主要在于应对“复杂对象各个部分”的频繁需求变动。其缺点在于难以应对“分步骤构建算法”的需求变动
+- Builder模式中，要注意不同语言中构造器内调用函数的差别（C++ VS. C#）
+- 老师：从变化里面能找出稳定的部分才可以使用设计模式，否则没有设计模式适合你
+
+## 12. Singleton 单件模式（对象性能模式）
+
+### 对象性能模式
+- 面向对象很好地解决了“抽象”的问题，但是必不可免地要付出一定的代价。对于通常情况来讲，面向对象的成本大都可以忽略不计。但是某些情况，面向对象所带来的成本必须谨慎处理。
+- 典型模式
+	- Singleton
+ 	- Flyweight  
+
+### 动机
+
+### 模式定义
+
+
 ```C++
 
 ```
+```C++
 
+```
+```C++
 
+```
+```C++
 
+```
+```C++
 
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
+```C++
+
+```
 
 
 
