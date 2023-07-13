@@ -1,4 +1,4 @@
-# 第14章 C++中的代码重用
+![0F141C6A](https://github.com/tony151364/Cpp-Learning/assets/36122007/6a62bb15-c62b-471b-a7e7-3e9c88d19bfa)# 第14章 C++中的代码重用
 
 - C++的一个主要目标就是促进代码重用。
 - [x] 本章介绍其他方法，其中之一就是使用这样的类成员：本身是另一个类的对象。这种方法称为包含(containment)、组合(composition)或层次化(layering)。
@@ -955,7 +955,7 @@ public:
 	virtual void Show() const = 0;
 };
 
-class Waiter : public Worker
+class Waiter : virtual public Worker
 {
 private:
 	int panache;
@@ -975,7 +975,7 @@ public:
 	void Show() const;
 };
 
-class Singer : public Worker
+class Singer : virtual public Worker
 {
 protected:
 	enum {
@@ -1235,8 +1235,6 @@ int main()
 	return 0;
 }
 ```
-- [ ] 代码还没正确运行
-
 下面介绍一些有关MI的问题：
 
 #### 1.混合使用虚基类和非虚基类
@@ -1244,19 +1242,42 @@ int main()
 - [ ] 当虚基类和非虚基类混合使用时，情况将如何？
 
 #### 2.虚基类和支配
+- 使用虚基类将改变C++解析二义性的方式。
+- 使用虚基类将不一定会导致二义性。在这种情况下，如果某个名称优先于（dominates）其他所有名称，则使用它时，即便不使用限定符，也不会导致二义性。
+- [ ] 那么一个成员名如何优先于零一个成员名呢？派生类中的名称优先于直接或间接祖先类中的相同名称
 ```C++
 
 ```
 ### 14.3.3 MI小结
 
 ## 14.4 类模板
+- 不如把前面的Queue类和Stack类编写成泛型（独立于类型的）形式。这样可以用通用的代码生成存储不同类型值的栈
+- 第10章使用typedef来处理这种需求。这种方法有两个缺点：
+	- 首先，每次修改类型时都需要编辑头文件
+ 	- 其次，在每个程序中只能使用这种技术生成一种栈，即不能让typedef同时代表两种不同的类型，因此不能使用这种方法在同一个程序中同时定义int栈和string栈。
+- 模板提供参数化（parameterized）类型 ，即能够将类型名作为参数传递给接收方来建立类或函数。传入个int就能创建个int队列
+
 ### 14.4.1 定义类模板
 ```C++
+// 每个函数头都将以相同的模板声明打头
+template <class Type>
 
+// 还需要将类限定符从Stack::改为Stack<Type>::
+template <class Type>  // or template <typename Type>
+bool Stack<Type>::push(const Type& item)
+{
+	...
+}
 ```
+- 如果在类声明中定义了方法（内联定义），则可以省略模板前缀和类限定符
+- 这些模板不是类和成员函数定义。它们是C++编译指令，说明了如何生成类和成员函数定义。
+- 不能将模板成员函数放在独立的实现文件中。由于模板不是函数，他们不能单独编译。
+- [ ] 模板必须与特定的模板实例化请求一起使用。为此，最简单的方法是将所有模板信息放在一个头文件中，并在要使用这些模板的文件中包含该头文件
 ```C++
 
 ```
+
+### 14.4.2 使用模板类
 ```C++
 
 ```
