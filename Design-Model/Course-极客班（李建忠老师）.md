@@ -1120,8 +1120,8 @@ int main()
 - 这应该是类设计者的责任，而不是使用者的责任
 
 ### 模式定义
+- 保证一个类仅有一个实例，并提供一个该实例的全局访问点
 ```C++
-
 class Singleton
 {
 private:
@@ -1179,107 +1179,433 @@ Singleton* Singleton::getInstance()
 std::atomic<Singleton*>Singleton::m_instance;
 std::mutex Singleton::m_mutex;
 
-Singleton* SIngleton::getInstance()
+Singleton* Singleton::getInstance()
 {
-	Singleton* tmp = m_instance.load
+	// 声明一个原子指针，可以帮助屏蔽编译器的reorder
+	Singleton* tmp = m_instance.load(std::memory_order_relaxed);
+	// 获取内存fence。fence可以理解为内存的屏障，内存reorder的一个保护。
+	// 之后这个tmp变量就不会被reorder了
+	std::atomic_thread_fence(std::memory_order_acquire);  // 
+	
+	if (tmp == nullptr)
+	{
+		// 双检查锁还是要锁上的
+		std::lock_guard<std::mutex> lock(m_mutex);
+		// 取变量都以这种方式来取了
+		tmp = m_instance.load(std::memory_order_relaxed);
+		
+		if (tmp = nullptr)
+		{
+			// 之前的操作保证了这一行不会reorder
+			tmp = new Singleton;
+			std::atomic_thread_fence(std::memory_order_release);  // 释放内存fence
+			// tmp再交给m_instance
+			m_instance.store(tmp, std::memory_order_relaxed);
+		}
+	}
+
+	return tmp;
 }
 ```
+### 要点总结
+- Singleton模式中的实例构造器可以设置为protected以允许子类派生。
+- Singleton模式一般不要支持拷贝构造函数和Clone接口，因为这有可能导致多个对象实例，与Singleton模式的初衷违背
+- 如何实现多线程环境下安全的Singleton？注意对双检查锁的正确实现
 
+## 13 Flyweight享元模式（对象性能模式）
+
+### 动机（Motivation）
+- 在软件系统采用纯粹对象方案的问题在于大量细粒度的对象会很快充斥在系统中，从而带来很高的运行时代家————主要指内存需求方面的代价
+- 如何在避免大量细粒度对象问题的同时，让外部客户程序仍然能够透明地使用面向对象的方式来进行操纵？
+
+### 模式定义
+- 运用共享技术有效地支持大量细粒度的对象		———— 《设计模式》GoF
+- 量多大才算大？需要评估
+
+```C++
+class Font
+{
+private:
+	// unique object key
+	string key;
+
+	// object state
+	// ...
+
+public:
+	Font(const string& key)
+	{
+		// ...
+	}
+};
+
+class FontFactory
+{
+private:
+	map<string, Font*> fontPool;
+
+public:
+	Font* GetFont(const string& key)
+	{
+		map<string, Font*>::iterator item = fontPool.find(key);
+
+		if (item != fontPool.end())
+		{
+			return fontPool[key];
+		}
+		else
+		{
+			Font* font = new Font(key);
+			fontPool[key] = font;
+			return font;
+		}
+	}
+
+	void Clear()
+	{
+		// ...
+	}
+};  // 平台上实现起来五花八门，但总体的思想是一样的
+```
+### 要点总结
+- 面向对象很好地解决了抽象性的问题，但是作为一个运行在机器中的程序实体，我们需要考虑对象的代价问题。Flyweight主要解决面向对象的代价问题，一般不触及面向对象的抽象性问题。
+- Flyweight采用对象共享的做法来降低系统中对象的个数，从而降低细粒度对象给系统带来的内存压力。再具体实现方面，要注意对象状态的处理。
+- 对象的数量太大从而导致对象内存开销加大——什么样的数量才算大？这需要我们仔细的根据具体应用情况进行评估，而不能凭空臆断。
+
+## 14 Facade门面模式（“接口隔离”模式）
+### “接口隔离”模式
+- 在组件构建过程中，某些接口之间直接的依赖常常会带来很多问题、甚至根本无法实现。采用添加一层间接（稳定）接口，来隔离本来互相紧密关联的接口是一种常见的解决方案
+- 典型模式
+	- Facade
+	- Proxy
+	- Adapter
+	- Mediator
+### 动机（Motivation）
+- 上述A方案的问题在于组件的客户和组件中各种复杂的子系统有了过多的耦合，随着外部客户程序和各个子系统的演化，这种过多的耦合面临很多变化的挑战。
+- 如何简化外部客户程序和系统间的交互接口？如何将外部客户程序的演化和内部子系统的变化之间的依赖相互解耦。
+### 模式定义
+- 为子系统中的一组接口提供一个一致（稳定））的界面，Facade模式定义了一个高层接口，这个接口使得这一子系统更加容易使用（复用）
+
+- 相差很大的代码用的可能都是facade模式，这节课不给代码了
+
+### 要点总结
+- 从客户程序的角度来看，Facade模式建华路整个组件系统的接口，对于组件内部与外部客户程序来说，达到了一种“解耦”的效果————内部子系统的任何变化不会影响到Facade接口的变化
+- Facade设计模式更注重从架构的层次去看整个系统，而不是单个类的层次。Facade很多时候更是一种架构设计模式。
+- Facade设计模式并非一个集装箱，可以任意地放任何多个对象。Facade模式中组件的内部应该是“相互耦合关系比较大的一系列组件”，而不是一个简单的功能集合。
+
+## 15 Proxy代理模式（“接口隔离”模式）
+### 动机（Motivation）
+- 在面向对象系统中，有些对象由于某种原因（比如对象创建的开销很大，或者某些系统需要安全控制，或者需要进程外的访问等）直接访问会给使用者、或者系统结构带来很多麻烦。
+- 如何在不失去透明操作对象的同时来管理/控制这些对象特有的复杂性？增加一层间接层是软件开发中常见的解决方式。
+### 模式定义
+```C++
+class ISubject
+{
+public:
+	virtual void process();
+
+};
+
+class RealSubject : public ISubject
+{
+public:
+	virtual void process()
+	{
+		// ...
+	}
+};
+
+class ClientApp
+{
+	ISubject* subject;
+
+public:
+	ClientApp()
+	{
+		subject = new RealSubject;
+	}
+
+	void DoTask()
+	{
+		// ...
+		subject->process();
+	}
+};
+```
+```C++
+class ISubject
+{
+public:
+	virtual void process();
+
+};
+
+// proxy的设计。针对RealSubject的代理
+class SubjectProxy : public ISubject
+{
+public:
+	virtual void process()
+	{
+		// 对RealSubject的一种间接访问
+		// 采用一致的接口，从而让客户端感觉是一致的
+	}
+};
+
+class ClientApp
+{
+	ISubject* subject;
+
+public:
+	ClientApp()
+	{
+		subject = new SubjectProxy;
+	}
+
+	void DoTask()
+	{
+		// ...
+		subject->process();
+	}
+};
+```
+### 要点总结
+- “增加一层间接层”是软件系统中对许多复杂问题的一种常见解决方法。在面向对象系统中，直接使用某些对象会带来很多问题，作为间接层的Proxy对象便是解决这一问题的常用手段。
+- 具体Proxy设计模式的实现方法、实现粒度都相差很大，有些可能对丹哥对象做细粒度的控制，如copy-on-write技术，有些可能对组件模块提供抽象代理层，在架构层次对对象做Proxy。
+- Proxy并不一定要求保持接口完整的一致性，只要能够实现间接控制，有时候损失一些透明性是可以接收到
+
+## 16 Adapter 适配器（“接口隔离”模式）
+### 动机（Motivation）
+- 在软件系统中，由于应用环境的变化，常常需要将“一些现存的对象”放在新的环境中应用，但是新环境要求的接口是这些现存对象所不满足的
+- 如何应对这种“迁移的变化”？如何技能利用现有对象的良好实现，同时又能满足新的应用环境所要求的接口？
+
+### 模式定义
+- 将一个类的接口转换成客户希望的另一个接口。Adapter模式是的原本由于接口不兼容而不能在一起工作的那些类可以一起工作
+```C++
+// 目标接口（新接口）
+class ITarget
+{
+public:
+	virtual void process()
+	{
+		// ...
+	}
+};
+
+// 遗留接口（老接口）
+class IAdaptee
+{
+public:
+	virtual void foo(int data) = 0;
+	virtual int bar() = 0;
+};
+
+class OldClass: public IAdaptee
+{
+public:
+	virtual void foo(int data)
+	{
+
+	}
+
+	virtual int bar()
+	{
+
+	}
+
+	// 两者内部有关联性，才可以进行接口的转换
+};
+
+// 对象适配器
+class Adapter :public ITarget  // 继承
+{
+protected:
+	IAdaptee* pAdaptee;  // 组合。这就是对象适配器，通过组合对象来实现
+
+public:
+	Adapter(IAdaptee* pAdaptee)
+	{
+		this->pAdaptee = pAdaptee;
+	}
+
+	virtual void process()
+	{
+		int data = pAdaptee->bar();
+
+		pAdaptee->foo(data);
+
+	}
+};
+
+// 类适配器
+class Adapter :public ITarget, protected OldClass  // 多继承
+{
+	// 固定了OldClass就缺乏灵活性，固定死了。
+};
+
+int main()
+{
+	IAdaptee* pAdaptee = new OldClass();
+
+	ITarget* pTarget = new Adapter(pAdaptee);
+	pTarget->process();
+}
+
+// STL里面的队列和栈也相互转换
+// 它们既是接口又是实现，所以没有ITarget
+class stack
+{
+	dequeue container;
+};
+
+class queue
+{
+	dequeue container;
+};
+```
+### 要点总结
+- Adapter模式主要应用于“希望复用一些现存的类，但是接口又与复用环境要求不一致的情况”，在遗留代码复用、类库迁移等方面非常有用
+- GoF23 定义了两种Adapter模式的实现结构：对象适配器和类适配器。但类适配器采用“多继承”的实现方式，一般不推荐使用。对象适配器采用“对象组合”的方式，更符合松耦合精神
+- Adapter模式可以实现的非常灵活，不必拘泥于GoF23中定义的两种结构。例如，完全可以将Adapter模式中的“现存对象”作为新的接口方法参数，来达到适配的目的。
+- 老师：类适配器今天已经用的很少很少了。可以这么说，类适配器只有坏处没有好处。直接换成对象适配器多好。
+
+## 17 Mediator 中介者（“接口隔离”模式）
+### 动机（Motivation）
+- 在软件构建过程中，经常会出现多个对象互相关联交互的情况，对象之间常常会维持一种复杂的引用关系，如果遇到一些需求的更改，这种直接的引用关系将不断得面临变化
+- 在这种情况下，我们可使用一个“中介对象”来管理对象的关联关系，避免相互交互的对象之间的紧耦合引用关系，从而更好地抵御变换
+
+### 模式定义
+- 用一个中介对象来封装（封装变化）一些列的对象交互。中介者使各对象不需要显式的相互引用（编译时依赖 -> 运行时依赖），从而使其耦合松散（管理变化），而且可以独立地改变它们之间的交互。
+
+### 要点总结
+- 将多个对象间复杂的关联关系解耦，Mediator模式将多个对象间的控制逻辑进行集中管理，变“多个对象互相关联”为“多个对象和一个中介者关联”，简化了系统的维护，抵御了可能的变化
+- 随着控制逻辑的复杂化，Mediator具体对象的实现可能相当复杂。这时候可以对Mediator对象进行分解处理
+- Facade模式是解耦系统间（单向）的对象关联关系；Mediator模式是解耦系统内各个对象之间（双向）的关联关系
+
+## 18 State 状态模式（“状态变化”模式）
+### “状态变化”模式
+- 在组件构建过程中，某些对象的状态经常面临变化，如何对这些变化进行有效的管理？同时又维持高层模块的稳定？“状态变化”模式违者一问题提供了一种解决方案
+- 典型模式
+	- State
+ 	- Memento
+### 动机（Motivation）
+- 在软件构建过程中，某些对象的状态如果改变，其行为也会随之发生变化，比如文档处于只读状态，其支持的行为和读写状态支持的行为就可能完全不同。
+- 如何在运行时根据对象的状态来透明地更改对象的行为？而不会为对象操作和状态转化之间引入紧耦合
+
+### 模式定义
+
+```C++
+enum NetworkState
+{
+	Network_Open,
+	Network_Close,
+	Network_Connect,
+};
+
+class NetworkProcessor
+{
+	NetworkState state;
+
+public:
+	void Operation1()
+	{
+		if (state == Network_Open)
+		{
+			state = Network_Close;
+		}
+		else if (state == Network_Close)
+		{
+			state = Network_Connect;
+		}
+		else if (state == Network_Connect)
+		{
+			state = Network_Open;
+		}
+	}
+
+	void Operation2()
+	{
+		if (state == Network_Open)
+		{
+			state = Network_Connect;
+		}
+		else if (state == Network_Close)
+		{
+			state = Network_Open;
+		}
+		else if (state == Network_Connect)
+		{
+			state = Network_Close;
+		}
+	}
+
+	void Operation3()
+	{
+
+	}
+};
+```
+
+### 要点总结
+
+## 19 Memento（“状态变化”模式）
+### 动机（Motivation）
+
+
+### 模式定义
 
 ```C++
 
 ```
-```C++
 
-```
-```C++
+### 要点总结
 
-```
-```C++
+## 20
+### 动机（Motivation）
 
-```
-```C++
 
-```
-```C++
+### 模式定义
 
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
 ```C++
 
 ```
 
+### 要点总结
+
+## 21
+### 动机（Motivation）
 
 
+### 模式定义
 
+```C++
+
+```
+
+### 要点总结
+
+## 22
+### 动机（Motivation）
+
+
+### 模式定义
+
+```C++
+
+```
+
+### 要点总结
+
+## 23
+### 动机（Motivation）
+
+
+### 模式定义
+
+```C++
+
+```
+
+### 要点总结
 
 
 
