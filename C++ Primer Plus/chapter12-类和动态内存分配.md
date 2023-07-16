@@ -1398,7 +1398,13 @@ bool newcustomer(double x)
 ```C++
 // a：成员未初始化，指针是野指针，指向未知的内存块，可能引发程序崩溃。
 // b：str与s指向同一内存地址，如果s为临时的字符串，s释放后str将引发错误。
-// c：如果内存不够，str的长度将小于s，len的值将不能准确描述str的长度
+// c：如果内存不够，str的长度将小于s，len的值将不能准确描述str的长度（X）
+```
+```C++
+// 答案
+// a: 设为NULL（nullptr）或用new来初始化
+// b: 应当使用new[ ] 和strcpy()
+// c: 没有分配内存空间，应当使用new char[len + 1]来分配适当数量的内存 
 ```
 - 2
 ```C++
@@ -1406,17 +1412,69 @@ bool newcustomer(double x)
 // 2.未重写复制构造函数，导致两个对象共用同一个实例。需要重写复制构造函数
 // 3.未重写赋值运算符（=）。导致的问题和上面一样。
 ```
+```C++
+// 答案
+// 1. 应当析构
+// 2. 赋值时不指向相同的数据，否则析构时将释放两次出现错误。删除之前的，重新分配内存并进行赋值
+// 3. 和我答的一样
+```
+
 - 3
 ```C++
 // 1.构造函数。用于初始化操作
 // 2.析构函数。用于释放操作
 // 3.复制构造函数。用于拷贝对象
 ```
+```C++
+// 答案
+// 1. 构造函数：不完成任何工作，但使得能够声明数组和未初始化的对象（ ？）
+// 2. 复制构造函数：使用成员赋值
+// 3. 赋值运算符：使用成员赋值
+// 4. 析构函数：不完成任何工作
+// 5. 地址运算符：隐式地址运算符返回调用对象的地址（即this指针的值）
+```
+
 - 4
 ```C++
-// 正确的方式
-// 错误1,2,3
+// 答案：方案一
+char personality[40];
+
+public:
+	nifty(const char* s)l
+	friend ostream& operator<<(ostream& os, const nitify& n);
+};
+
+nifty::nitfy()
+{
+	personality[0] = '\0';
+	talents = 0;
+}
+
+nifty::nifty(const char* s)
+{
+	strcpy(personality, s);
+	talents = 0;
+}
+
+ostream& operator<<(ostream& os, const nitify& n)
+{
+	os << n.personality << '\n';
+	os << n.talent << '\n';
+	return os;
+}
 ```
+```C++
+// 答案：方案二
+char* personality;
+
+nifty::nifty(const char* s)
+{
+	personality = new char[strlen(s) + 1];
+	strcpy(personality, s);
+	talents = 0;
+}
+```
+
 - 5
 ```C++
 // a:
@@ -1426,12 +1484,18 @@ bool newcustomer(double x)
 // #4 Golfer(); Golfer(const Golfer& g);
 // #5 Golfer(const Golfer& g); 
 // #6 Golfer(const char* name, int g = 0);
-// #7 赋值运算符
+// #7 默认赋值运算符
 // #8 Golfer(const char* name, int g = 0);
 
 // b :
 // ~Golger(); // 析构函数用于使用字符串分配的空间
 // Golfer friend operator = (const Golfer& g1, const Golfer& g2);
+```
+```C++
+// 答案
+// #4 只有默认构造函数，不需要拷贝构造函数
+// #8 Golfer(const char* name, int g = 0);然后调用默认构造函数
+// 注意：对于语句5和6，有些编译器还将调用默认的赋值运算符。
 ```
 
 ## 12.10 编程练习
