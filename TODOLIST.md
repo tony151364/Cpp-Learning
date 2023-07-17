@@ -68,6 +68,7 @@
 - [ ] c++网络编程
 - [ ] 计算机教育缺失一课https://missing-semester-cn.github.io/
 - [ ] 智能指针
+- [ ] 设计模式画一下类图，用Markdown去做
 
 ## 计算机工具
 - [ ] relase 与 debug区别
