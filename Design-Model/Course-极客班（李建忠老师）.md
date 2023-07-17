@@ -1,3 +1,5 @@
+- [ ] 后面把各个模式的类图总结一下，画一画。
+
 ## 一、 设计模式简介
 - 变化！！！
 - 复用！！！
@@ -7,7 +9,7 @@
 	- Template Method
 	- Strategy
 	- Observer / Event
-- 单一职责
+- 单一职责：在软件组件的设计中，如果责任划分的不清晰，使用继承得到的结果往往是随需求的变化，子类急剧膨胀，同时充斥着重复的代码，这时候的关键是划清责任。
 	- Decorator
 	- Bridge
 - 对象创建
@@ -249,11 +251,16 @@ int main()
 	- 容易出现只见树木不见森林。要试图去了解程序的主流程  
 
 ### 模式定义
+- 定义一个操作中的算法的骨架（稳定），而将一些步骤延迟（变化）到子类中。Template Method使得子类可以不改变（复用）一个算法的结构即可重定义（override 重写）该算法的某些特定步骤。  ———— 《设计模式》GoF
 - 老师：template method的前提是Run是稳定的，也就是你有一个算法的骨架可以被重用。
 - 老师：设计模式的一个假设是存在一个稳定点，如果没有一个稳定点，那么设计模式没有任何作用。同样的，如果所有东西都是稳定的，设计也没有任何意义
 - 老师：设计模式的最大作用是在变化与稳定之间寻找隔离点，然后来分离它们，从而来管理变化。把兔子关进笼子里。
 ### 要点总结
+- Template Method模式是一种非常基础性的设计模式，在面向对象系统中有着大量的应用。它用最简洁的机制（虚函数的多态性）为很多应用程序框架提供了灵活的扩展点，是代码复用方面的基本实现结构。
+- 除了可以灵活应对子步骤的变化外，“不要调用我，让我来调用你”的反向控制结构是Template Method的典型应用。
+- 在具体实现方面，被Template Method调用的虚方法可以具体实现，也可以没有任何实现（抽象方法，纯虚方法），但一般推荐将它们设置为protected方法。
 - 老师：扩展 = 继承 + 多态。子类去继承父类然后去override，这个就叫做扩展。
+- 老师：虚函数表底层就是函数指针
 
  
 ## 四、策略模式（“组件协作”模式）
@@ -265,98 +272,113 @@ enum TaxBase {
 	CN_Tax,
 	US_Tax,
 	DE_Tax,
-	FR_Tax       //更改
+	FR_Tax       // 更改
 };
 
-class SalesOrder{
-    TaxBase tax;
+class SalesOrder {
+	TaxBase tax;
 public:
-    double CalculateTax(){
-        //...
-        
-        if (tax == CN_Tax){
-            //CN***********
-        }
-        else if (tax == US_Tax){
-            //US***********
-        }
-        else if (tax == DE_Tax){
-            //DE***********
-        }
-		else if (tax == FR_Tax){  //更改
-			//...
+	double CalculateTax()
+	{
+		// ...
+
+		if (tax == CN_Tax)
+		{
+			// CN***********
+		}
+		else if (tax == US_Tax)
+		{
+			// US***********
+		}
+		else if (tax == DE_Tax)
+		{
+			// DE***********
+		}
+		else if (tax == FR_Tax)  // 更改
+		{
+			// ...
 		}
 
-        //....
-     }
-    
+		// ....
+	}
 };
 ```
 ```C++
 // 设计模式说的复用性是编译之后的二进制级别的复用，不是代码层面的复用
 // 当你的代码出现多个if else时，这就是策略模式需要的特征
 // if else 绝对不变的情况下，即情况不会增加，比如一周七天。这时候不用strategy
-class TaxStrategy{
+
+class TaxStrategy
+{
 public:
-    virtual double Calculate(const Context& context)=0;
-    virtual ~TaxStrategy(){}
+	virtual double Calculate(const Context& context) = 0;
+	virtual ~TaxStrategy() {}
 };
 
 
-class CNTax : public TaxStrategy{
+class CNTax : public TaxStrategy
+{
 public:
-    virtual double Calculate(const Context& context){
-        //***********
-    }
+	virtual double Calculate(const Context& context)
+	{
+		//***********
+	}
 };
 
-class USTax : public TaxStrategy{
+class USTax : public TaxStrategy
+{
 public:
-    virtual double Calculate(const Context& context){
-        //***********
-    }
+	virtual double Calculate(const Context& context)
+	{
+		//***********
+	}
 };
 
-class DETax : public TaxStrategy{
+class DETax : public TaxStrategy
+{
 public:
-    virtual double Calculate(const Context& context){
-        //***********
-    }
+	virtual double Calculate(const Context& context)
+	{
+		//***********
+	}
 };
-
-
 
 //扩展
 //*********************************
-class FRTax : public TaxStrategy{
+class FRTax : public TaxStrategy {
+
 public:
-	virtual double Calculate(const Context& context){
+	virtual double Calculate(const Context& context)
+	{
 		//.........
 	}
 };
 
 
-class SalesOrder{
+class SalesOrder
+{
 private:
-    TaxStrategy* strategy;
+	TaxStrategy* strategy;
 
 public:
-    SalesOrder(StrategyFactory* strategyFactory){
-        this->strategy = strategyFactory->NewStrategy();
-    }
-    ~SalesOrder(){
-        delete this->strategy;
-    }
+	SalesOrder(StrategyFactory* strategyFactory)  // 用工厂模式去创建
+	{
+		this->strategy = strategyFactory->NewStrategy();
+	}
 
-    public double CalculateTax(){
-        //...
-        Context context();
-        
-        double val = 
-            strategy->Calculate(context); //多态调用
-        //...
-    }
-    
+	~SalesOrder()
+	{
+		delete this->strategy;
+	}
+
+	public double CalculateTax()
+	{
+		//...
+		Context context();
+		double val = strategy->Calculate(context); //多态调用
+		//...
+	}
+
 };
 ```
 ### 模式定义
@@ -369,6 +391,9 @@ public:
 
 ## 五、观察者模式（Observer）（“组件协作”模式）
 - 广播就是观察者模式
+### 动机
+- 在软件构建过程中，我们需要为某些对象建立一种“通知依赖关系” ———— 一个对象（目标对象）的状态发生改变，所有的依赖对象（观察者对象）都将得到通知。如果这样的依赖关系过于紧密，将使软件不能很好地抵御变化。
+- 使用面向对象技术，可以将这种依赖关系弱化，并形成一种稳定的依赖关系。从而实现软件体系结构的松耦合。
 ```C++
 // C++推荐的形式是：一个主继承类，其他的都是接口或者抽象基类
 class MainForm: public Form, public IProgress
@@ -467,7 +492,7 @@ protected:
 ```
 
 #### 模式定义
-- 定义对象间的一种一对多的（变化）的依赖关系，以便当一个对象（Subject）的状态发生改变时，所有依赖于它的对象得到通知并自动更新
+- 定义对象间的一种一对多的（变化）的依赖关系，以便当一个对象（Subject）的状态发生改变时，所有依赖于它的对象得到通知并自动更新。   ———— 《设计模式》GoF
 
 #### 要点总结
 - 使用面向对象的抽象，Observer模式使得我们可以独立地改变目标与观察者，从而使二者之间的依赖关系达至松耦合
@@ -477,12 +502,13 @@ protected:
 
 
 ## 6.装饰模式（"单一职责" 模式）
-
 ### "单一职责" 模式
 - 在软件组件的设计中，如果责任划分的不清晰，使用继承得到的结果往往是随需求的变化，子类急剧膨胀，同时充斥着重复的代码，这时候的关键是划清责任。
 	- Decorator
 	- Bridge
-	
+### 动机
+- 在某些情况下我们可能会“过度地使用继承来扩展对象的功能”，由于继承为类型引入的静态特质，使得这种扩展方式缺乏灵活性；并且随着子类的增多（扩展功能的增多），各种子类的组合（扩展功能的组合）会导致更多子类的膨胀。
+- 如何使“对象功能的扩展”能够根据需要来动态地实现？同时避免“扩展功能的增多”带来的子类膨胀问题？从而使得任何“功能扩展变化”所导致的影响降到最低？
 ```C++
 // 业务操作
 class stream
@@ -513,20 +539,14 @@ public:
 	}
 }
 ```
-
+### 模式定义
+- 动态（组合）的给一个对象增加一些额外的职责。就增加功能而言，Decorator模式比生成子类（继承）更为灵活（消除重复代码&减少子类个数）。    ———— 《设计模式》GoF
 
 ### 要点总结
-- 通过采用组合而非继承的手法，Decorator模式实现了在运动时动态扩展对象功能的能力，而且可以根据需要扩展多个功能
-。避免了使用继承带来的“灵活性差”和“多子类衍生问题”
-
-- Decorator类在接口上表现为is-a Component的继承关系，
-即Decorator类继承了Component类所具有的接口。但在实现上又表现为has-a Component的组合关系，即Decorator类又使用了另外一个Component类
-
+- 通过采用组合而非继承的手法，Decorator模式实现了在运动时动态扩展对象功能的能力，而且可以根据需要扩展多个功能。避免了使用继承带来的“灵活性差”和“多子类衍生问题”
+- Decorator类在接口上表现为is-a Component的继承关系，即Decorator类继承了Component类所具有的接口。但在实现上又表现为has-a Component的组合关系，即Decorator类又使用了另外一个Component类
 - Decorator模式的目的并非解决“多子类衍生的多继承”问题，Decorator模式应用的要点在于解决“主体类在多个方向上的扩展功能”——是为“装饰”的含义
-
-
-
-- 同时继承又同时组合，基本就是Decorator设计模式了
+- 老师：同时继承又同时组合，基本就是Decorator设计模式了
 
 
 ## 7.桥模式（"单一职责" 模式）
@@ -814,7 +834,6 @@ void Process()
 - 将抽象部分（业务功能）与实现部分（平台实现）分离，使它们都可以独立地变化
 
 ## 8.工厂方法（“对象创建”模式）
-
 ### “对象创建”模式
 - 通过“对象创建”模式绕开new，来避免对象创建（new）过程中所导致的紧耦合（依赖具体类），从而支持对象创建的稳定。它是接口抽象之后的第一步
 ```C++
