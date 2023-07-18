@@ -1452,20 +1452,65 @@ const Stock& stock::topval(const Stock& s) const
  	- 赋值运算符确实有一些有趣的特征，下面介绍它们。 
 
 #### 3.赋值运算符
+- 正如多次提到的，如果类构造函数使用new来初始化指针，则需要提供一个显式赋值运算符。
+- [ ] 如果派生类也使用了new，必须给类的每个成员提供赋值运算符，而不仅仅是新成员。
+```C++
+hasDMA& hasDMA::operator=(const hadDMA& hs)
+{
+	if (this == &hs)
+		return *this;
+	baseDMA::operator=(hs);  // copy base portion
+	delete[] style;  // prepare for new style
+	style = new char[std::strlen(hs.style) + 1];
+	std::strcpy(style, hs.style);
+	return *this;
+}
+```
+- [ ] 总之，可以将派生对象赋给基类对象，但这只涉及基类的成员。
+```C++
+// 基类直接赋值给派生类是不可行的，除非有下面的转换构造函数
+BrassPlus(const Brass&);
+BrassPlus(const Brass& ba, double ml = 500, double r = 0.1);  // 也是可行的
+
+// 另一种方法是，定义一个用于将基类赋给派生类的赋值运算符
+BrassPlus& BrassPlus::operator=(const Brass&) { ... }
+// 该赋值运算符的类型与赋值语句完全匹配，因此无需类型转换
+```
+- 这两种方法都没有，用强制类型转换也可以，但可能会出现问题。
 
 #### 4.私有成员和保护成员
+- 将基类成员设置为私有的可以提高安全性，而将它们设置为保护成员则可简化代码的编写工作，并提供访问速度。
+- Stroustrup 在其 《The Design and Evolution of C++》一书中指出，使用私有数据成员比保护数据成员更好，但保护方法很有用
 
 #### 5.虚方法
+- 如果不希望重新定义方法，则不必将其声明为虚的，这样虽然无法禁止他人重新定义方法，但表达了这样的意思：您不希望它被重新定义。
 
 #### 6.析构函数
+- 析构函数应当是虚的。这样，当通过指向对象的基类指针或删除派生对象时，程序将首先调用派生类的析构函数，然后调用基类的析构函数，而不仅仅是调用基类的析构函数。
 
 #### 7.友元函数
+- 由于友元函数并非类成员，因此不能被继承。
+- 如果你希望派生类的友元函数能够基类的友元函数，可以通过强制类型转换来实现。
+```C++
+ostream& operator<<(ostream& os, const hasDMA& hs)
+{
+	// type cast to match operator<<(ostream&, const baseDMA&）
+	os << (const baseDMA& ) hs;
+	os << "Style: " << hs.style << endl;
+	return os;
+}
+```
+- 也可以使用第15章将讨论的dynamic_cast<>来进行强制类型转换：
+```C++
+os << dynamic_cast<const baseDMA& > (hs);
+```
 
 #### 8.有关使用基类方法的说明
+- 派生类构造函数显式地调用成员初始化列表中指定的基类构造函数。
+- 派生类可以使用作用域解析运算符来调用公有的和受保护的基类方法。
 
 ### 13.8.4 类函数小结
-
-## 13.9 总结
+- [ ] 有些运算符既可以是成员函数，也可以是友元，而有些运算符函数只能是成员函数。表总结了这些特征
 
 ## 13.10 复习题
 
