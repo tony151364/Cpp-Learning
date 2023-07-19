@@ -881,7 +881,7 @@ int main()
 		case 'P':
 		case 'p':
 			if (st.isempty())
-				cout << "stack already full\n";
+				cout << "stack already empty\n";
 			else
 			{
 				st.pop(po);
