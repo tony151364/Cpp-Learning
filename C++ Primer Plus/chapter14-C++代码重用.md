@@ -1342,10 +1342,75 @@ bool Stack<Type>::pop(Type& item)
 ```
 
 ### 14.4.2 使用模板类
+- 仅在程序包含模板并不能生成模板类，而必须请求实例化。
+```C++
+Stack<int> kernels;  // create a stack of ints
+Stack<string> colonels;  // create a stack of string objects
+```
+- 泛型标识符——例如这里的Type——称为类型参数（type parameter），这意味着它们类似于变量，但赋给它们的不能是数字，而只能是类型。
+- 类模板必须显式提供所需的类型。常规的模板类型可以由编译器来确定的。
 
 ```C++
+// 14.15 stacktem.cpp -- testing the template Stack class
+#include <iostream>
+#include <string>
+#include <cctype>
+#include "stacktp.h"
+int main()
+{
+	using namespace std;
+	Stack<std::string> st;  // create an empty stack
+	char ch;
+	std::string po;
 
+	cout << "Please enter A to add a purchese order,\n"
+		<< "P to process a PO, or Q to quit.\n";
+	while (cin >> ch && toupper(ch) != 'Q')
+	{
+		while (cin.get() != '\n')
+		{
+			continue;
+		}
+		if (!isalpha(ch))
+		{
+			cout << '\a';
+			continue;
+		}
+		switch (ch)
+		{
+		case 'A':
+		case 'a':
+			cout << "Enter a PO number to add: ";
+			cin >> po;
+			if (st.isfull())
+			{
+				cout << "stack already full\n";
+			}
+			else
+			{
+				st.push(po);
+			}
+			break;
+		case 'P':
+		case 'p':
+			if (st.isempty())
+				cout << "stack already empty\n";
+			else
+			{
+				st.pop(po);
+				cout << "PO #" << po << " popped\n";
+			}
+			break;
+		}
+		cout << "Please enter A to add a purchase order, \n"
+			<< "P to process a Po, or Q to qiut.\n";
+	}
+	cout << "Bye\n";
+	return 0;
+}
 ```
+
+### 14.4.3 深入探讨模板类
 ```C++
 
 ```
