@@ -1463,8 +1463,100 @@ char* po = new char[40];
 - 用一个指针数组模拟Plodson这些行为，其中的指针指向表示车中文件的字符串。每个字符串都包含文件所描述的人的姓名。可以用栈表示收取篮，并使用第二个指针数组来表示发出篮
 - 栈的大小可变。动态数组。
 ```C++
+// 14.15 stacktp1.h -- modified stack template
+#ifndef _STACKTP1_H_
+#define _STACKTP1_H_
 
+template <typename Type>
+class Stack
+{
+private:
+	enum { SIZE = 10 };  // default size
+	int stacksize;
+	Type* items;  // holds stack items
+	int top;  // index for top stack item
+public:
+	explicit Stack(int ss = SIZE);
+	Stack(const Stack& st);
+	~Stack() { delete[] items; }
+	bool isempty() const { return top == 0; }
+	bool isfull() const { return top == 0; }
+	bool push(const Type& item);
+	bool pop(Type& item);
+	Stack& operator=(const Stack& st);
+};
+
+template <typename Type>
+Stack<Type>::Stack(int ss) : stacksize(ss), top(0)
+{
+	items = new Type[stacksize];
+}
+
+template <typename Type>
+Stack<Type>::Stack(const Stack& st)
+{
+	stacksize = st.stacksize;
+	top = st.top;
+	items = new Type[stacksize];
+
+	for (int i = 0; i < top; i++)
+	{
+		items[i] = st.items[i];
+	}
+}
+
+template <typename Type>
+bool Stack<Type>::push(const Type& item)
+{
+	if (top < stacksize)
+	{
+		items[top++] = item;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+template <typename Type>
+bool Stack<Type>::pop(Type& item)
+{
+	if (top > 0)
+	{
+		item = items[--top];
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+template <typename Type>
+Stack<Type> & Stack<Type>::operator=(const Stack<Type>& st)
+{
+	if (this == &st)
+	{
+		return *this;
+	}
+
+	delete[] items;
+	stacksize = st.stacksize;
+	top = st.top;
+	items = new Type[stacksize];
+
+	for (int i = 0; i < top; i++)
+	{
+		items[i] = st.items[i];
+	}
+
+	return *this;
+}
+
+#endif  // _STACKTP1_H_
 ```
+- 原型将赋值运算符函数的返回类型声明为Stack引用，而实际的模板函数定义将类型定义为Stack<Type>。前者是后者的缩写，只能在类中使用。
 ```C++
 
 ```
@@ -1543,63 +1635,6 @@ char* po = new char[40];
 ```C++
 
 ```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-
-
-
-
-
-
 
 
 
