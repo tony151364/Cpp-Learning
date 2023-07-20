@@ -20,6 +20,7 @@
 - 2.CSDN：https://blog.csdn.net/qq_40162965/article/details/112374406
 - 3.Qt，C++开发炫酷圆形扇形菜单面板：https://blog.csdn.net/wastelandboy/article/details/123492815
  - [ ] 安宁大佬的入门项目
+ - [ ] 能不能用QT或者UE写个命令行窗口。Hermes以及之前的方块星球都有的，上古卷轴这些大作也都有
 
 ## 游戏知识
 - [ ] AINPC
