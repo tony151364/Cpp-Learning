@@ -1582,7 +1582,8 @@ Cow& Cow::operator=(const Cow& c)
 	int len = strlen(c.hobby);
 	hobby = new char[len + 1];
 	strcpy(hobby, c.hobby);
-	
+
+	weight = c.weight;
 	return *this;
 }
 
@@ -1592,9 +1593,7 @@ void Cow::ShowCow() const
 	std::cout << "Hobby: " << hobby << std::endl;
 	std::cout << "weight: " << weight << std::endl;
 }
-
 ```
-
 ```C++
 #include "cow.h"
 
@@ -1602,7 +1601,7 @@ int main()
 {
 	Cow c1;
 	Cow c2("hahaha", "heiheihei", 200.3);
-	Cow c3 = c2;
+	Cow c3(c2);  // attention
 
 	c1.ShowCow();
 	c2.ShowCow();
@@ -1902,6 +1901,17 @@ int main()
 	cout << "Bye\n";
 	return 0;
 }
+```
+- 注意：有两种将C字符串和C++字符串连接的方法：
+	- 第一种比较直接，但是针对C字符串和C++字符的连接需要写两个函数。
+ 	- 第二种表面上简单，用一个函数就可以完成C字符与C++字符串的连接和C++字符串之间的连接，但是需要注意当第一个参数是C字符串时，会调用构造函数先把C字符串构造成C++字符串，然后再进行连接。
+```C++
+// method 1: concatenate c string and C++ string
+String2 operator+(const String2& st);
+friend String2 operator+(const char* s, const String2& st);
+
+// method 2: concatenate c string and C++ string
+friend String2 operator+(const String2& st1, const String2& st2);
 ```
 - 3
 ```C++
