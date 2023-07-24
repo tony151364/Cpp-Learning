@@ -1480,7 +1480,7 @@ public:
 	Stack(const Stack& st);
 	~Stack() { delete[] items; }
 	bool isempty() const { return top == 0; }
-	bool isfull() const { return top == 0; }
+	bool isfull() const { return top == stacksize; }
 	bool push(const Type& item);
 	bool pop(Type& item);
 	Stack& operator=(const Stack& st);
@@ -1556,86 +1556,141 @@ Stack<Type> & Stack<Type>::operator=(const Stack<Type>& st)
 
 #endif  // _STACKTP1_H_
 ```
+- [ ] 注意： 将isfull写错为下面导致溢出
+```C++
+bool isfull() const { return top == 0; }
+```
 - 原型将赋值运算符函数的返回类型声明为Stack引用，而实际的模板函数定义将类型定义为Stack<Type>。前者是后者的缩写，只能在类中使用。
 ```C++
+// 14.16 stkoptr1.cpp -- testing stack of pointers
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include "stcktp1.h"
+const int Num = 10;
 
+int main()
+{
+	std::srand(std::time(0));  // randomize rand()
+	std::cout << "Please enter stack size: ";
+	int stacksize;
+	std::cin >> stacksize;
+
+	// create an empty stack with stacksize slots
+	Stack<const char*> st(stacksize);
+
+	// in basket
+	const char* in[Num] =
+	{
+		" 1: Hank Gilgamesh", " 2: Kiki Ishtar",
+		" 3: Betty Rocker", " 4: Ian Flagranti",
+		" 5: Wolfgang Kibble", " 6: Portia Koop",
+		" 7: Joy Almondo", " 8: Xaverie Paprika",
+		" 9: Juan Moore", " 10: Misha Mache"
+	};
+
+	// out basket
+	const char* out[Num];
+
+	int processed = 0;
+	int nextin = 0;
+
+	while (processed < Num)
+	{
+		if (st.isempty())
+		{
+			st.push(in[nextin++]);
+		}
+		else if (st.isfull())
+		{
+			st.pop(out[processed++]);
+		}
+		// 这里通过随机生成0和1，来模拟掷硬币的结果
+		else if (std::rand() % 2 && nextin < Num)  // 50-50 chance
+		{
+			st.push(in[nextin++]);
+		}
+		else
+		{
+			st.pop(out[processed++]);
+		}
+	}
+
+	for (int i = 0; i < Num; i++)
+	{
+		std::cout << out[i] << std::endl;
+	}
+	
+	std::cout << "Bye\n";
+	return 0;
+}
+```
+
+### 14.4.4 数组模板示例和非类型参数
+- 模板常用作容器类，这是因为类型参数的概念非常适合于将相同的存储方案用于不同的类型。确实，为容器类提供可重用代码是引入模板的主要动机。
+- [ ] 下面探讨一些非类型（或表达式）参数以及如何使用数组来处理继承族。
+```C++
+// 14.17 arraytp.h -- Array Template
+#ifndef ARRAYTP_H_
+#define ARRAYTP_H_
+
+#include <iostream>
+#include <cstdlib>
+
+template <typename T, int n>
+class ArrayTP
+{
+private:
+	T ar[n];
+public:
+	ArrayTP() {}
+	explicit ArrayTP(const T& v);
+	virtual T& operator[](int i);
+	virtual T operator[](int i) const;
+};
+
+template<typename T, int n>
+inline ArrayTP<T, n>::ArrayTP(const T& v)
+{
+	for (int i = 0; i < n; i++)
+	{
+		ar[i] = v;
+	}
+}
+
+template<typename T, int n>
+inline T& ArrayTP<T, n>::operator[](int i)
+{
+	if (i < 0 || i >= n)
+	{
+		std::cerr << "Error in array limits: " << i
+			<< " is out of range\n";
+		std::exit(EXIT_FAILURE);
+	}
+
+	return ar[i];
+}
+
+template<typename T, int n>
+inline T ArrayTP<T, n>::operator [](int i) const
+{
+	if (i < 0 || i >= n)
+	{
+		std::cerr << "Error in array limits: " << i
+			<< " is out of range\n";
+		std::exit(EXIT_FAILURE);
+	}
+
+	return ar[i];
+}
+
+#endif
 ```
 ```C++
-
+template<typename T, int n>
 ```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-```C++
-
-```
-
+- 这种参数（指定特殊的类型而不是用作泛型名）称为非类型（non-type）或表达式（expression）参数。表达式参数有一些限制。表达式参数可以是整型、枚举、引用或指针。因此，double m是不合法的，但double* pm是合法的。另外，模板代码不能修改参数的值，也不能使用参数的地址。所以在ArrayTP模板中不能使用诸如n++和&n等表达式。另外，实例化模板时，用作表达式参数的值必须是常量表达式。
+- 与Stack中使用的
 
 
 
