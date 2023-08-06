@@ -1898,17 +1898,177 @@ public:
 
 ## 19 Memento（“状态变化”模式）
 ### 动机（Motivation）
-
+- 在软件构建过程中，某些对象的状态在转换过程中，可能由于某种需要，要求程序能够回溯到对象之前处于某个点时的状态。如果使用一些公有接口来让其他对象得到对象的状态，便会暴露对象的细节实现。
+- 如何实现对象状态的良好保存与恢复？但同时又不会因此而破坏对象本身的封装性。
 
 ### 模式定义
+- 在不破坏封装性的前提下，捕获一个对象的内部状态，并在该对象之外保存这个状态。这样以后就可以将该对象恢复到原先保存的状态。		———— 《设计模式》 GoF
 
 ```C++
+#include <string>
+using std::string;
 
+class Memento
+{
+	string state;
+	// ...
+public:
+	Memento(const string& s) :state(s) {}
+	string getState() const { return state; }
+	void setState(const string& s) { state = s; }
+};
+
+class Originator
+{
+	string state;
+	// ......
+public:
+	Originator() {}
+	Memento createMemento()
+	{
+		// 在实际的实现中可能相当复杂
+		Memento m(state);  // 这句话就是“拍照”，当前内存状态的快照
+		return m;
+	}
+	void setMomento(const Memento& m)
+	{
+		state = m.getState();
+	}
+};
+
+// caretacker
+int main()
+{
+	Originator originator;
+
+	// 捕获对象状态，存储到备忘录。类似深拷贝的 内存快照方式
+	Memento mem = originator.createMemento();
+
+	//  ... 改变originator状态
+
+	// 从备忘录中恢复
+	originator.setMomento(mem);
+}
+```
+- 老师：这个模式在今天其实有点过时的，效率有点低，这本书是94年出的，思想的是不变的。
+- 老师：有了序列化，和内存编码之后，已经不采用面向对象的方式实现。
+
+### 要点总结
+- 备忘录（Memento）存储原发器（Originator）对象的内部状态，在需要时恢复原发器的状态。
+- Memento模式的核心是数据隐藏，即Originator需要向外界隐藏信息，保持其封装性。但同时有需要将状态保存到外界（Memento）
+- 由于现代语言运行时（如C#、Java等）都需要相当的对象序列化支持，因此往往采用效率较好、又较容易正确是现代序列化方案来实现Memento模式
+
+## 20 组合模式（Composite）
+### “数据结构”模式
+- 常常有一些组件在内部具有特定的数据结构，如果让客户程序依赖这些特定的数据结构，将极大地破坏组件的复用。这时候，将这些特定数据结构封装在内部，在外部提供统一的接口，来实现与特定数据结构无关的访问，是一种行之有效的解决方案。
+- 典型模式:
+	- Composite
+	- Iterator
+	- Chain of Resposibility
+
+### 动机（Motivation）
+- 在软件的某些情况下，客户代码过多地依赖于对象容器复杂的内部实现结构，对象容器内部实现结构（而非抽象接口）的变化将引起客户代码的频繁变化，带来了代码的维护性、扩展性等弊端。
+- 如何将“客户代码与复杂的对象容器结构”解耦？让对象容器自己来实现自身的复杂结构，从而使得客户代码就像处理简单对象一样来处理复杂的容器对象？
+
+### 模式定义
+- 将对象组合成树形结构以表示“部分-整体”的层次结构。Composite使得用户对单个对象和组合对象的使用具有一致性（稳定）。		———— 《设计模式》 GoF
+```C++
+#include <algorithm>
+#include <string>
+
+using namespace std;
+
+class Component
+{
+public:
+	virtual void process() = 0;
+	virtual ~Component() {}
+};
+
+class Composite :public Component
+{
+	string name;
+	list<Component*> element;
+public:
+	Composite(const string& s) :name(s) {}
+	void add(Component* element)
+	{
+		if (this == element)
+		{
+			return;
+		}
+
+		element->push_back(element);
+	}
+	void remove(Component* element)
+	{
+		if (this == element)
+		{
+			return;
+		}
+
+		element->remove(element);
+	}
+	void process()  // 对父类override
+	{
+		// 1.process current node
+
+		// 2. process leaf nodes
+		for (auto& e : elements)
+		{
+			e->process();  // 多态调用
+		}
+	}
+};
+
+class Leaf :public Component
+{
+	string name;
+public:
+	Leaf(string s) : name(s) {}
+	void process()
+	{
+		// process current node
+	}
+};
+
+void Invoke(Component& c)
+{
+	// ...
+	c.process();
+	//
+}
+
+int main()
+{
+	Composite root("root");
+	Composite treeNode1("treeNode1");
+	Composite treeNode2("treeNode2");
+	Composite treeNode3("treeNode3");
+	Composite treeNode4("treeNode4");
+	Leaf leaf1("leaf1");
+	Leaf leaf2("leaf2");
+
+	root.add(&treeNode1);
+	treeNode1.add(&treeNode2);
+	treeNode2.add(&leaf1);
+
+	root.add(&treeNode3);
+	treeNode3.add(&treeNode4);
+	treeNode4.add(&leaf2);
+
+	Invoke(root);
+	Invoke(leaf2);
+	Invoke(treeNode3);
+}
 ```
 
 ### 要点总结
+- Composite模式采用树形结构来实现普遍存在的对象容器，从而将“一对多”的关系转化为“一对一”的关系，使得客户代码可以一致地（复用）处理对象和对象容器
+- 将“客户代码与复杂的对象容器结构”解耦是Composite的核心思想，解耦之后，客户代码将于纯粹的抽象接口——而非对象容器的内部实现结构——发生依赖，从而更难“应对变化”。
+- Composite模式在具体实现中，可以让父对象中的子对象反向追溯。如果付对象有频繁的遍历需求，可使用缓存技巧来改善效率。
 
-## 20
+## 21 迭代器
 ### 动机（Motivation）
 
 
@@ -1920,7 +2080,7 @@ public:
 
 ### 要点总结
 
-## 21
+## 22 职责链
 ### 动机（Motivation）
 
 
@@ -1932,7 +2092,7 @@ public:
 
 ### 要点总结
 
-## 22
+## 23 命令模式
 ### 动机（Motivation）
 
 
@@ -1944,7 +2104,7 @@ public:
 
 ### 要点总结
 
-## 23
+## 24 访问器
 ### 动机（Motivation）
 
 
@@ -1956,6 +2116,29 @@ public:
 
 ### 要点总结
 
+## 25 解析器
+### 动机（Motivation）
+
+
+### 模式定义
+
+```C++
+
+```
+
+### 要点总结
+
+## 26
+### 动机（Motivation）
+
+
+### 模式定义
+
+```C++
+
+```
+
+### 要点总结
 
 
 
