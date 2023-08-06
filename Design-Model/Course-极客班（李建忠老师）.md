@@ -2068,15 +2068,60 @@ int main()
 - 将“客户代码与复杂的对象容器结构”解耦是Composite的核心思想，解耦之后，客户代码将于纯粹的抽象接口——而非对象容器的内部实现结构——发生依赖，从而更难“应对变化”。
 - Composite模式在具体实现中，可以让父对象中的子对象反向追溯。如果付对象有频繁的遍历需求，可使用缓存技巧来改善效率。
 
-## 21 迭代器
+## 21 迭代器（“数据结构模式”）
 ### 动机（Motivation）
-
+- 在软件构建过程中，集合对象内部结构常常变化各异。但对于这些集合对象，我们希望在不暴露其内部结构的同时，可以让外部客户代码透明地访问其中包含的元素；同时这种“透明遍历”也为“同一种算法在多种几何对象上进行操作”提供了可能。
+- 使用面向对象技术将这种编辑机制抽象为“迭代器对象”为“应对变化中的几何对象”提供一种优雅的方式。
 
 ### 模式定义
+- 提供一种方法顺序访问一个聚合对象中的各个元素，而又不暴露（稳定）该对象的内部表示。		———— 《设计模式》 GoF
 
 ```C++
+template<typename T>
+class Iterator
+{
+public:
+	virtual void first() = 0;
+	virtual void next() = 0;
+	virtual bool isDone() = 0;
+	virtual T& current() = 0;
+};
 
+template<typename T>
+class MyCollection
+{
+public:
+	Iterator<T> GetIterator()
+	{
+		// ... 
+	}
+};
+
+template<typename T>
+class CollectionIterator :public Iterator<T>
+{
+	MyCollection<T> mc;
+public:
+	CollectionIterator(const MyCollection<T>& c): mc(c){ }
+	void first() override
+	{
+
+	}
+	void next() override
+	{
+
+	}
+	bool isDone() override
+	{
+
+	}
+	T& current() override
+	{
+
+	}
+};
 ```
+- 老师：这个模式其实已经过时了，因为STL里面现在已经有了迭代器，不需要我们单独 再去写了。但是两者的思想是相通的。
 
 ### 要点总结
 
