@@ -2140,26 +2140,203 @@ void MyAlgorithm()
 - 迭代多态：为遍历不同的集合结构提供一个统一的接口，从而支持同样的算法在不同的集合结构上进行操作
 - 迭代器的健壮性考虑：遍历的同时更改迭代器所在的集合结构，会导致问题。
 
-## 22 职责链
+## 22 职责链（Chain of Resposibility）（“数据结构”模式）
 ### 动机（Motivation）
-
+- 在软件构建过程中，一个请求可能被多个对象处理，但是每个请求在运行时只能有一个接受者，如果显式指定，将必不可少地带来请求发送者与接受者的紧耦合
+- 如何使请求的发送者不需要指定具体的接受者？让请求的接受者自己在运行时决定来处理请求，从而使两者解耦。
 
 ### 模式定义
+- 使多个对象都有机会处理请求，从而避免请求的发送者和接收者之间的耦合关系。将这些对象连成一条链，并沿着这条链传递请求，知道以一个对象处理它为止。		———— 《设计模式》 GoF
 
 ```C++
+#include <iostream>
+#include <string>
+using namespace std;
 
+enum class RequestType
+{
+	REQ_GANDLER1,
+	REQ_GANDLER2,
+	REQ_GANDLER3
+};
+
+class Request
+{
+	string description;
+	RequestType reqType;
+public:
+	Request(const string& desc, RequestType type) 
+		: description(desc), reqType(type) { }
+	RequestType getReqType() const { return reqType; }
+	const string& getDescription() const { return description; }
+};
+
+class ChainHandler
+{
+	ChainHandler* nextChain;  // 多态指针指向自身，形成了一个链表
+	void sendReqestToNextHandler(const Request& req)
+	{
+		if (nextChain != nullptr)
+		{
+			nextChain->handle(req);
+		}
+	}
+
+protected:
+	virtual bool canHandleRequest(const Request& rep) = 0;
+	virtual void processRequest(const Request& req) = 0;
+
+public:
+	ChainHandler() { nextChain = nullptr; }
+	void setNextChain(ChainHandler* next) { nextChain = next; }
+	void handle(const Request& req)
+	{
+		if (canHandleRequest(req))
+		{
+			// 能处理就不往下传递了
+			processRequest(req);
+		}
+		else
+		{
+			// 职责链的处理逻辑，如果我当前这个链表不能处理，就交给下一个链表来处理
+			sendReqestToNextHandler(req);
+		}
+	}
+};
+
+class Handler1 : public ChainHandler
+{
+protected:
+	bool canHandleRequest(const Request& req) override
+	{
+		return req.getReqType() == RequestType::REQ_GANDLER1;
+	}
+	void processRequest(const Request& req) override
+	{
+		cout << "Hander1 is handle reqest: " << req.getDescription() << endl;
+	}
+};
+
+class Handler2 : public ChainHandler
+{
+protected:
+	bool canHandleRequest(const Request& req) override
+	{
+		// 在实际情况下，这个判断可能会复杂很多
+		return req.getReqType() == RequestType::REQ_GANDLER2;
+	}
+	void processRequest(const Request& req) override
+	{
+		cout << "Hander2 is handle reqest: " << req.getDescription() << endl;
+	}
+};
+
+class Handler3 : public ChainHandler
+{
+protected:
+	bool canHandleRequest(const Request& req) override
+	{
+		return req.getReqType() == RequestType::REQ_GANDLER3;
+	}
+	void processRequest(const Request& req) override
+	{
+		cout << "Hander3 is handle reqest: " << req.getDescription() << endl;
+	}
+};
+
+int main()
+{
+	Handler1 h1;
+	Handler2 h2;
+	Handler3 h3;
+
+	h1.setNextChain(&h2);
+	h2.setNextChain(&h3);
+
+	Request req("process task ... ", RequestType::REQ_GANDLER3);
+	h1.handle(req);
+	return 0;
+
+}
 ```
 
 ### 要点总结
+- Chain of Responsibility 模式的应用场合在于“一个请求可能有多个接受者，但是最后真正的接受者只有一个”，这时候请求发送者与接收者的耦合有可能出现“变化脆弱”的症状，职责链的目的就是将二者解耦，从而更好的应对变化。
+- 应用了Chain of ResPonsibility模式后，对象的职责分派将更具灵活性。我们可以在运行时动态添加/修改请求的处理职责。
+- 如果请求传递到职责链的末尾仍得不到处理，应该有一个合理的缺省机制。这也是每一个接收对象的责任，而不是发出请求对象的责任。
 
 ## 23 命令模式
+### “行为变化”模式
+- 在组件的构建过程中，组件行为的变化经常导致组件本身剧烈的变化。“行为变化”模式将组件的行为和组件本身进行解耦，从而支持组件行为的变化，实现两者之间的松耦合。
+- 典例模式：
+	- Command
+ 	- Visitor
 ### 动机（Motivation）
-
+- 在软件构建过程中，“行为请求者”与“行为实现者”通常呈现一种“紧耦合”。但在某些场合——比如需要对行为进行“记录、撤销/重做(ndo/redo)、事务”等处理，这种无法抵御变化的紧耦合是不适合的。
+- 在这种情况下，如何将“行为请求者”与“行为实现者”解耦？将一组行为抽象为对象，可以实现二者之间的松耦合。
 
 ### 模式定义
-
+将一个请求（行为）封装成一个对象，从而使你可用不同的请求对客户进行参数化；对请求排队或记录请求日志，以及支持可撤销的操作。		———— 《设计模式》 GoF
 ```C++
+#include <vector>
+#include <string>
+#include <iostream>
+using namespace std;
 
+class Command
+{
+public:
+	virtual void execute() = 0;
+};
+
+class ConcreteCommand1 : public Command
+{
+	string arg;
+public:
+	ConcreteCommand1(const string& a) : arg(a) {}
+	void execute() override
+	{
+		cout << "#1 process..." << arg << endl;
+	}
+};
+
+class ConcreteCommand2 : public Command
+{
+	string arg;
+public:
+	ConcreteCommand2(const string& a) : arg(a) {}
+	void execute() override
+	{
+		cout << "#2 process..." << arg << endl;
+	}
+};
+
+class MacroCommand : public Command
+{
+	vector<Command*> commands;
+public:
+	void addCommand(Command* c) { commands.push_back(c); }
+	void execute() override
+	{
+		for (auto & c: commands)
+		{
+			c->execute();
+		}
+	}
+};
+
+int main()
+{
+	ConcreteCommand1 command1(receiver, "Arg ###");
+	ConcreteCommand2 command2(receiver, "Arg $$$");
+
+	MacroCommand macro;  // 既是对象，又同时表征行为
+	macro.addCommand(&command1);
+	macro.addCommand(&command2);
+
+	macro.execute();
+	return 0;
+}
 ```
 
 ### 要点总结
@@ -2169,7 +2346,7 @@ void MyAlgorithm()
 
 
 ### 模式定义
-
+		———— 《设计模式》 GoF
 ```C++
 
 ```
@@ -2181,24 +2358,14 @@ void MyAlgorithm()
 
 
 ### 模式定义
-
+		———— 《设计模式》 GoF
 ```C++
 
 ```
 
 ### 要点总结
 
-## 26
-### 动机（Motivation）
-
-
-### 模式定义
-
-```C++
-
-```
-
-### 要点总结
+## 26 设计模式总结
 
 
 
