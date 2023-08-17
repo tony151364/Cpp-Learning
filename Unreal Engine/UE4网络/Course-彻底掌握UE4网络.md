@@ -1,5 +1,6 @@
 [课程地址](https://www.bilibili.com/video/BV1dT4y1N7de)
 [官方文档](https://docs.unrealengine.com/4.27/zh-CN/InteractiveExperiences/Networking/)
+
 # 01 内容概要
 ### 1.1前言:明确我们所讲的网络
 - 实时（相对于弱联网）
@@ -199,9 +200,73 @@ void AMyActor::OnRep_Armor()
 - 注：这四种蓝图和C++都有接口
 
 # 07 Actor Role
+### 三种ROLE
+- Authority
+- Simulated Proxy
+- Autonomous Proxy
+
+### 解释
 - Role指的是在网络复制中，Actor可能扮演的三种角色：Authority、Simulated Proxy（模拟代理）、Autonomous Proxy（自主代理）
 - Server: 只有Authority
-- Client：只有Simulated和Autonomous
+- Client：只有Simulated和Autonomous 
+
+# 08 RPC
+## RPC是什么
+- 类似于函数调用，不过不一定本地执行
+- 可以实现：
+	- 客户端调用服务器执行
+ 	- 服务器调用客户端执行
+- 不可以有返回值
+- 默认是“不可靠的”（使它可靠Reliable）
+
+## RPC实现&类型
+### 蓝图
+CustomEvent的Replicates设置为下面中的一个：
+- Run On Server
+- Run On Owning Client
+- Net MultiCast
+### C++
+要将一个函数声明为RPC，只需将下面关键字添加到UFUNCTION声明：
+- Server
+- Client
+- Nex Multi  cast  
+
+![RPC01](RPC01.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
