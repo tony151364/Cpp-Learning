@@ -17,28 +17,28 @@
 	- Factory Method
 	- Abstract Factory
 	- Prototype
-	- Builder
+	- Builder（不常用）
 - 对象性能
 	- Singleton
 	- Flyweight
 - 接口隔离：
 	- Facade
 	- Proxy
-	- Mediator
+	- Mediator（不常用）
 	- Adapter
 - 状态变化：
-	- Memento
+	- Memento（不常用）
 	- State
 - 数据结构
 	- Composite
-	- Iterator
-	- Chain of
-	- Responsibility
+	- Iterator（不常用，被STL淘汰）
+	- Chain of（不常用，被函数对象淘汰）
+	- Responsibility（不常用）
 - 行为变化
-	- Command
-	- Visitor
+	- Command（不常用）
+	- Visitor（不常用）
 领域问题：
-	- Interpreter
+	- Interpreter（不常用）
 
 ### 重构获得模式 Refactoring to Patterns
 - 面向对象设计模式是“好的面向对象设计”，所谓“好的面向对象设计”指的是那些可以满足“应对变化，提高复用”的设计。
@@ -2350,29 +2350,386 @@ int main()
 
 ## 24 访问器
 ### 动机（Motivation）
-
+- 在软件构建过程中，由于需求的改变，某些类层次结构中常常需要增加新的行为（方法），如果直接在基类中做这样的更改，将会给子类带来很繁重的变更负担，甚至破坏原有设计。
+- 如何在不更改类层次结构的前提下，在运行时根据需要透明地为类层次结构上的各个类动态添加新的操作，从而避免上述问题？
 
 ### 模式定义
-		———— 《设计模式》 GoF
+- 表示一个作用于某个对象结构中的各个元素的操作。使得可以在不改变（稳定）各元素的类的前提下定义（扩展）作用域这些元素的新操作（变化）。		———— 《设计模式》 GoF
+- 原代码
 ```C++
+class Visitor;
 
+class Element
+{
+public:
+	virtual void Func1() = 0;
+	virtual void Func2(int data) = 0;
+	virtual void Func3(int data) = 0;
+	virtual ~Element() {}
+};
+
+class ElementA : public Element
+{
+public:
+	void Func1() override
+	{
+		// ...
+	}
+
+	void Func2(int data) override
+	{
+		// ...
+	}
+};
+
+class ElementB : public Element
+{
+public:
+	void Func1() override
+	{
+		// ***
+	}
+
+	void Func2(int data) override
+	{
+		// ...
+	}
+};
 ```
+- 修改后
+```C++
+#include <iostream>
+using namespace std;
 
+// Visitor有一个前提：我能预料到未来为这个类添加新的操作
+class Visitor;
+
+class Element
+{
+public:
+	virtual void accept(Visitor& visitor) = 0;  // 第一次多态辨析
+	virtual ~Element() {}
+};
+
+class ElementA : public Element
+{
+public:
+	void accept(Visitor& visitor) override
+	{
+		visitor.visitElementA(*this);  // 第二次多态辨析
+	}
+};
+
+class ElementB : public Element
+{
+public:
+	void accept(Visitor& visitor) override
+	{
+		visitor.visitElementB(*this);  // 第二次多态辨析
+	}
+};
+
+class Visitor
+{
+public:
+	virtual void visitElementA(ElementA& element) = 0;
+	virtual void visitElementB(ElementB& element) = 0;
+	virtual ~Visitor() {}
+};
+
+// -----------------------------------------------------
+// 扩展1
+class Visitor1: public Visitor
+{
+public:
+	void visitElementA(ElementA& element) override
+	{
+		cout << "Visitor1 is processing ElementA" << endl;
+	}
+
+	void visitElementB(ElementB& element) override
+	{
+		cout << "Visitor1 is processing ElementB" << endl;
+	}
+};
+
+// 扩展2
+class Visitor2 : public Visitor
+{
+public:
+	void visitElementA(ElementA& element) override
+	{
+		cout << "Visitor2 is processing ElementA" << endl;
+	}
+
+	void visitElementB(ElementB& element) override
+	{
+		cout << "Visitor2 is processing ElementB" << endl;
+	}
+};
+
+int main()
+{
+	Visitor2 visitor;
+
+	ElementB elementB;
+	elementB.accept(visitor);  // double dispatch
+
+	ElementA elementA;
+	elementA.accept(visitor);
+}
+```
+- 模式缺点：ConcreateElementA和ConcreteElementB必须也稳定1。也就是子类个数稳定，这是很大的一个前提，常常满足不了，导致这个模式很脆弱。
 ### 要点总结
+- Visitor模式通过所谓双重分发（double dispatch）来实现在不更改（不添加新的操作-编译时）Element类层次结构的前提下，在运行室透明地为类层次结构上的各个类动态添加新的操作（支持变化）
+- 所谓双重分发即Visistor模式中间包括了两个多态分发（注意其中的多态机制）：第一个为accept方法的多态辨析；第二个为visitElementX方法的多态辨析。
+- Visitor模式的最大缺点在与扩展类层次结构（增添新的Element子类）。会导致Visitor类的改变。因此Visitor模式适用于“Element”类层次结构稳定，而其中的操作却经常面临频繁改动。
+- 老师：Visitor模式前提太苛刻，导致用的很少。但是一旦用，就会用的很重，就是你整个类结构都要被“Visitor”所绑架
 
 ## 25 解析器
-### 动机（Motivation）
+### “领域规则”模式
+- 在特定领域中，某些变化虽然频繁，但可以抽象为某种规则。这时候，结合特定领域，将问题抽象为语法规则，从而给出在该领域下的一般性解决方案。
+- 典例模式
+	- Interpreter 
 
+### 动机（Motivation）
+-在软件构建过程中，如果某一特定领域的问题比较复杂，类似的结构不断重复出现，如果使用普通的编程方式来实现将面临频繁的变化。
+- 在这种情况下，将特定领域的问题表达为某种语法规则下的句子，然后侯建一个解释器来解释这样的句子，从而达到解决问题的目的。
 
 ### 模式定义
-		———— 《设计模式》 GoF
+给定一个语言，定义它的文法的一种表示，并定义一种解释器，这个解释器使用该表示来解释语言中的句子。		———— 《设计模式》 GoF
 ```C++
+#include <iostream>
+#include <map>
+#include <stack>
+#include <string>
 
+using namespace std;
+
+class Expression
+{
+public:
+	virtual int interpreter(map<char, int>) = 0;
+	virtual ~Expression() {}
+};
+
+// 变量表达式
+class VarExpression :public Expression
+{
+	char key;
+public:
+	VarExpression(const char& key)
+	{
+		this->key = key;
+	}
+
+	int interpreter(map<char, int>var) override
+	{
+		return var[key];
+	}
+};
+
+// 符号表达式（特点是左右两个节点又是表达式）
+class SymbolExpression :public Expression
+{
+protected:
+	// 运算符左右两个参数
+	Expression* left;
+	Expression* right;
+public:
+	SymbolExpression(Expression* left, Expression* right) :
+		left(left), right(right) {}
+};
+
+// 加法运算
+class AddExpression :public SymbolExpression
+{
+public:
+	AddExpression(Expression* left, Expression* right) :
+		SymbolExpression(left, right) {}
+
+	int interpreter(map<char, int>var) override
+	{
+		return left->interpreter(var) + right->interpreter(var);
+	}
+};
+
+// 减法运算
+class SubExpression :public SymbolExpression
+{
+public:
+	SubExpression(Expression* left, Expression* right) :
+		SymbolExpression(left, right) {}
+
+	int interpreter(map<char, int>var) override
+	{
+		return left->interpreter(var) - right->interpreter(var);
+	}
+};
+
+Expression* analyse(string expStr)
+{
+	stack<Expression*> expStack;
+	Expression* left = nullptr;
+	Expression* right = nullptr;
+
+	for (int i = 0; i < expStr.size(); i++)
+	{
+		switch (expStr[i])
+		{
+		case '+':
+			// 加法表达式
+			left = expStack.top();
+			right = new VarExpression(expStr[++i]);
+			expStack.push(new AddExpression(left, right));
+			break;
+		case '-':
+			// 减法表达式
+			left = expStack.top();
+			right = new VarExpression(expStr[++i]);
+			expStack.push(new SubExpression(left, right));
+			break;
+		default:
+			// 终结表达式(叶子结点，即变量表达式）
+			expStack.push(new VarExpression(expStr[i]));
+		}
+	}
+
+	Expression* expression = expStack.top();
+	
+	return expression;
+}
+
+void release(Expression* expression)
+{
+	// 释放表达式树的节点内存...
+}
+
+int main()
+{
+	string expStr = "a+b-c+d-e";
+	map<char, int>var;
+	var.insert(make_pair('a', 5));
+	var.insert(make_pair('b', 2));
+	var.insert(make_pair('c', 1));
+	var.insert(make_pair('d', 6));
+	var.insert(make_pair('e', 10));
+
+	Expression* expression = analyse(expStr);
+	int result = expression->interpreter(var);
+	cout << result << endl;
+	release(expression);
+
+	return 0;
+}
 ```
 
 ### 要点总结
+- Interpret模式的应用场合是Interpreter模式应用中的难点，只有满足“业务规则频繁变化，且类似的结构不断重复出现，并去容易抽象为语法规则的问题”才适合使用interpreter模式
+- 使用Interpret模式来表示文法规则，从而可以使用面向对象技巧来方便地“扩展”文法。
+- Interpreter模式比较适合简单的文法表示，对于复杂的文法表示，interpert模式会产生比较大的类层次结构，需要求助于语法分析生成器这样的标准工具。
+- 老师：解析器模式其实今天不常用，如果问题复杂的话面向对象解析器是不够用的，性能、管理、调试都是问题。它比较适合简单的文法。
 
 ## 26 设计模式总结
+
+### 一个目标
+- **管理变化，提高复用！**
+
+### 两种手段
+- **分解 VS. 抽象**
+
+### 八大原则
+- 依赖倒置原则（DIP）
+- 开放封闭原则（OCP）
+- 单依职责原则（SRP）
+- Liskov替换原则（LSP）
+- 接口隔离原则（ISP）
+- 优先使用对象组合，而不是继承
+- 封装变化点
+- 针对接口编程，而不是针对实现编程
+- 总结：这些原则是相辅相成的，违背一个原则往往别的原则也会违背
+
+### 重构记法
+- 静态 -> 动态
+- 早绑定 -> 晚绑定
+- 继承 -> 组合
+- 编译时依赖 -> 运行时依赖
+- 紧耦合 -> 松耦合
+- 
+### 从封装变化角度对模式分类
+- 组件协作
+	- Template Method
+	- Strategy
+	- Observer / Event
+- 单一职责
+	- Decorator
+	- Bridge
+- 对象创建
+	- Factory Method
+	- Abstract Factory
+	- Prototype
+	- Builder（不常用）
+- 对象性能
+	- Singleton
+	- Flyweight
+- 接口隔离：
+	- Facade
+	- Proxy
+	- Mediator（不常用）
+	- Adapter
+- 状态变化：
+	- Memento（不常用）
+	- State
+- 数据结构
+	- Composite
+	- Iterator（不常用，被STL淘汰）
+	- Chain of（不常用，被函数对象淘汰）
+	- Responsibility（不常用）
+- 行为变化
+	- Command（不常用）
+	- Visitor（不常用）
+领域问题：
+	- Interpreter（不常用）
+
+### 关注变化点和稳定点
+- 大多数情况下都是变化点和稳定点交错出现，很少有绝对稳定和绝对变化
+- 设计模式最大的艺术就是把变化点和稳定点择出来，将其隔离。然后在变化点的地方应用设计模式
+
+### 什么时候不用模式
+- 代码可读性很差时
+- 需求理解还很浅时
+- 变化没有显现时
+- 不是系统的关键依赖点
+- 项目没有复用价值时
+- 项目将要发布时
+- 补充：不要为了装X而使用模式。看看马丁福勒的书
+
+### 经验之谈
+- 不要为模式而模式
+- 关注抽象类&接口
+- 理清变化点和稳定点
+- 审视依赖关系
+- 要有Framework和Application的区隔思维
+- 良好的设计是演化的结果
+
+### 设计模式成长之路
+- “手中无剑，心中无剑”：见模式而不知
+- “手中有剑，心中无剑”：可以识别模式，作为应用开发人员使用模式
+- “手中有剑，心中有剑”：作为框架开发人员为应用设计某些模式
+- “手中无剑，心中无剑”：忘掉模式，只有原则
+
+### 老师再见，完结撒花^_^
+
+
+
+
+
+
+
+
+
+
+
 
 
 
