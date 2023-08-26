@@ -1137,8 +1137,8 @@ Queue snick(nip);  	// not allowed
 tuck = nip;		// not allowed
 ```
 - 这样有两个好处：
-	- 1. 它避免了本来自动生成的默认方法定义。
-	- 2. 因为这些方法是私有的，所以不能被广泛使用。
+1. 它避免了本来自动生成的默认方法定义。
+2. 因为这些方法是私有的，所以不能被广泛使用。
 ```C++
 // 也就是说，如果nip和tuck是Queue对象，则编译器就不允许这样做：
 Queue snick(nip);		// not allowed
@@ -1146,7 +1146,7 @@ tuck = nip;   			// npt allowed
 ```
 - **所以，与其将来面对无法预料的运行故障，不如得到一个易于追踪的编译错误，指出这些方法是不可访问的。**
 - C++11提供了另一种禁用方法的方式——使用了关键字delete，这将在第18章介绍。
-- 还有一个点：当对象按值传递（返回）时，复制构造函数将被调用。然而，如果遵循优先采用按引用传递对象的惯例，将不会有任何问题。另外，赋值否早函数还被用于创建其他的临时对象，但Queue定义中并没有导致创建临时对象的操作，例如重载加法运算符
+- 还有一个点：当对象按值传递（返回）时，复制构造函数将被调用。然而，如果遵循优先采用按引用传递对象的惯例，将不会有任何问题。另外，赋值构造函数还被用于创建其他的临时对象，但Queue定义中并没有导致创建临时对象的操作，例如重载加法运算符
 
 ```C++
 // 12.10 -- interface for a queu
@@ -1926,128 +1926,37 @@ friend String2 operator+(const String2& st1, const String2& st2);
 ```
 - 3
 ```C++
-#include "stock20.h"
-#include <cstring>
+#ifndef STOCK20_H_
+#define STOCK20_H_
 
-// constructors (verbose versions)
-Stock::Stock()  // default constructor
+#include <iostream>
+
+using std::ostream;
+
+class Stock
 {
-	std::cout << "Default constructor called\n";
-	len = 7;
-	company = new char[len + 1];
-	std::cout << "sizeof company: " << sizeof(company) << std::endl;
-	strcpy_s(company, sizeof(company), "on name");
-	
-	shares = 0;
-	share_val = 0.0;
-	total_val = 0.0;
-}
+private:
+	char* company;
+	int len;
+	long shares;  // 所持有的股票数量
+	double share_val;  // 每股的价格
+	double total_val;  // 股票总价格
+	void set_tot() { total_val = shares * share_val; }
+public:
+	Stock();
+	Stock(const char* co, long n = 0, double pr = 0.0);
+	~Stock();
+	void buy(long num, double price);
+	void sell(long num, double price);
+	void update(double price);
 
-Stock::Stock(const char* co, long n, double pr)
-{
-	std::cout << "Constructor using " << co << "called\n";
-	len = (int)std::strlen(co);
-	company = new char[len + 1];
-	strcpy_s(company, sizeof(company), co);
+	const Stock& topval(const Stock& s) const;
+	friend ostream& operator<<(ostream& os, const Stock& st);
+};
 
-	if (n < 0)
-	{
-		std::cout << "Number of shares can't be negative; "
-			<< company << " shares set to 0.\n";
-		shares = 0;
-	}
-	else
-		shares = n;
-	share_val = pr;
-	set_tot();
-}
-
-// class destructor
-Stock::~Stock()
-{
-	std::cout << "Bey, " << company << "\n";
-	delete[] company;
-}
-
-// other methods
-void Stock::buy(long num, double price)
-{
-	if (num < 0)
-	{
-		std::cout << "Number of shares purchased can't be negative."
-			<< "Transaction is aborted.\n";
-	}
-	else
-	{
-		shares += num;
-		share_val = price;
-		set_tot();
-	}
-}
-
-void Stock::sell(long num, double price)
-{
-	using std::cout;
-	if (num < 0)
-	{
-		cout << "Number of share sold can't be negative. "
-			<< "Transaction is aborted.\n";
-	}
-	else if (num > shares)
-	{
-		cout << "You can't sell more than you have! "
-			<< "Transaction is aborted.\n";
-	}
-	else
-	{
-		shares -= num;
-		share_val = price;
-		set_tot();
-	}
-}
-
-void Stock::update(double price)
-{
-	share_val = price;
-	set_tot();
-}
-
-const Stock& Stock::topval(const Stock& s) const {
-	if (s.total_val > total_val)
-	{
-		return s;
-	}
-	else
-	{
-		return *this;
-	}
-}
-
-ostream& operator<<(ostream& os, const Stock& st)
-{
-	using std::cout;
-	using std::ios_base;
-
-	// set format to #.###
-	ios_base::fmtflags orig =
-		cout.setf(ios_base::fixed, ios_base::floatfield);
-	std::streamsize prec = cout.precision(3);
-
-	std::cout << "Company: " << st.company
-		<< "Share: " << st.shares << '\n'
-		<< " Share Price: $" << st.share_val;
-
-	// set format to #.##
-	cout.precision(2);
-	std::cout << " Total Worth: $" << st.total_val << '\n';
-
-	// restore original format
-	cout.setf(orig, ios_base::floatfield);
-	cout.precision(prec);
-
-	return os;
-}
+#endif // STOCK20_H_
 ```
+
 ```C++
 #include "stock20.h"
 #include <cstring>
@@ -2060,7 +1969,7 @@ Stock::Stock()  // default constructor
 	company = new char[len + 1];
 	std::cout << "sizeof company: " << sizeof(company) << std::endl;
 	strcpy_s(company, len + 1, "on name");
-	
+
 	shares = 0;
 	share_val = 0.0;
 	total_val = 0.0;
@@ -2205,19 +2114,211 @@ int main()
 
 	// now top points to the most valuable holding
 	std::cout << "\nMost valuable holding:\n";
-	std::cout << top << std::endl;
+	std::cout << *top << std::endl;
 	return 0;
 }
 ```
 - 4
 ```C++
+// 10.10 stack.h -- class definition for the stack ADT
+#ifndef STACK_H_
+#define STACK_H__
 
+typedef unsigned long Item;
+
+class Stack
+{
+private:
+	enum { MAX = 10 };  // constant specific to class
+	Item* pItems;  // holds stack items
+	int size;  // number or elements in stack
+	int top;  // index for top stack item
+public:
+	Stack(int n = MAX);
+	Stack(const Stack& st);
+	~Stack();
+	bool isempty() const;
+	bool isfull() const;
+	// push() returns false if static already is full, true otherwise
+	bool push(const Item& item);  // add item to stack
+	// pop() returns false if stack already is empth, true otherwise
+	bool pop(Item& item);  // pop top into item
+	Stack& operator=(const Stack& st);
+};
+#endif
 ```
 ```C++
+#include "stack.h"
+
+Stack::Stack(int n)
+{
+	top = 0;
+	size = n;
+	pItems = new Item[size];
+}
+
+Stack::Stack(const Stack& st)
+{
+	top = st.top;
+	size = st.size;
+	pItems = new Item[size];
+
+	// 注意：
+	for (int i = 0; i < top; ++i)
+	{
+		pItems[i] = st.pItems[i];
+	}
+}
+
+Stack::~Stack()
+{
+	delete[] pItems;
+}
+
+bool Stack::isempty() const
+{
+	return top == 0;
+}
+
+bool Stack::isfull() const
+{
+	return top == size;
+}
+
+bool Stack::push(const Item& item)
+{
+	if (isfull())
+	{
+		return false;
+	}
+	else
+	{
+		pItems[top++] = item;
+		return true;
+	}
+}
+
+bool Stack::pop(Item& item)
+{
+	if (isempty())
+	{
+		return false;
+	}
+	else
+	{
+		item = pItems[--top];
+		return true;
+	}
+}
+
+Stack& Stack::operator=(const Stack& st)
+{
+	if (&st == this)
+	{
+		return *this;
+	}
+
+	delete[] pItems;
+
+	top = st.top;
+	size = st.size;
+	pItems = new Item[size];
+
+	for (int i = 0; i < top; ++i)
+	{
+		pItems[i] = st.pItems[i];
+	}
+	
+	return *this;
+}
 
 ```
+- 测试代码由ChatGPT代写
 ```C++
+#include "stack.h"
 
+Stack::Stack(int n)
+{
+	top = 0;
+	size = n;
+	pItems = new Item[size];
+}
+
+Stack::Stack(const Stack& st)
+{
+	top = st.top;
+	size = st.size;
+	pItems = new Item[size];
+
+	// 注意：
+	for (int i = 0; i < size; ++i)
+	{
+		pItems[i] = st.pItems[i];
+	}
+}
+
+Stack::~Stack()
+{
+	delete[] pItems;
+}
+
+bool Stack::isempty() const
+{
+	return top == 0;
+}
+
+bool Stack::isfull() const
+{
+	return top == size;
+}
+
+bool Stack::push(const Item& item)
+{
+	if (isfull())
+	{
+		return false;
+	}
+	else
+	{
+		pItems[top++] = item;
+		return true;
+	}
+}
+
+bool Stack::pop(Item& item)
+{
+	if (isempty())
+	{
+		return false;
+	}
+	else
+	{
+		item = pItems[--top];
+		return true;
+	}
+}
+
+Stack& Stack::operator=(const Stack& st)
+{
+	if (&st == this)
+	{
+		return *this;
+	}
+
+	delete[] pItems;
+
+	top = st.top;
+	size = st.size;
+	pItems = new Item[size];
+
+	// Copy the elements from the source stack to the current stack
+	for (int i = 0; i < size; ++i)
+	{
+		pItems[i] = st.pItems[i];
+	}
+
+	return *this;
+}
 ```
 - 5
 ```C++
