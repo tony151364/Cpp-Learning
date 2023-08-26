@@ -2235,89 +2235,67 @@ Stack& Stack::operator=(const Stack& st)
 ```
 - 测试代码由ChatGPT代写
 ```C++
+#include <iostream>
 #include "stack.h"
 
-Stack::Stack(int n)
+int main()
 {
-	top = 0;
-	size = n;
-	pItems = new Item[size];
-}
+	using namespace std;
 
-Stack::Stack(const Stack& st)
-{
-	top = st.top;
-	size = st.size;
-	pItems = new Item[size];
+	Stack st1(5);  // Create a stack with size 5
 
-	// 注意：
-	for (int i = 0; i < size; ++i)
+	// Push items onto the stack
+	st1.push(10);
+	st1.push(20);
+	st1.push(30);
+
+	// Display the content of the stack
+	cout << "Stack 1: ";
+	while (!st1.isempty())
 	{
-		pItems[i] = st.pItems[i];
+		Item item;
+		st1.pop(item);
+		cout << item << " ";
 	}
-}
+	cout << endl;
 
-Stack::~Stack()
-{
-	delete[] pItems;
-}
+	// Create another stack using the copy constructor
+	Stack st2 = st1;
 
-bool Stack::isempty() const
-{
-	return top == 0;
-}
+	// Push items onto the second stack
+	st2.push(100);
+	st2.push(200);
 
-bool Stack::isfull() const
-{
-	return top == size;
-}
-
-bool Stack::push(const Item& item)
-{
-	if (isfull())
+	// Display the content of the second stack
+	cout << "Stack 2: ";
+	while (!st2.isempty())
 	{
-		return false;
+		Item item;
+		st2.pop(item);
+		cout << item << " ";
 	}
-	else
+	cout << endl;
+
+	// Create a third stack and use the assignment operator
+	Stack st3;
+	st3 = st2;
+
+	// Push items onto the third stack
+	st3.push(1000);
+	st3.push(2000);
+	st3.push(3000);
+
+	// Display the content of the third stack
+	cout << "Stack 3: ";
+	while (!st3.isempty())
 	{
-		pItems[top++] = item;
-		return true;
+		Item item;
+		st3.pop(item);
+		cout << item << " ";
 	}
-}
+	cout << endl;
 
-bool Stack::pop(Item& item)
-{
-	if (isempty())
-	{
-		return false;
-	}
-	else
-	{
-		item = pItems[--top];
-		return true;
-	}
-}
-
-Stack& Stack::operator=(const Stack& st)
-{
-	if (&st == this)
-	{
-		return *this;
-	}
-
-	delete[] pItems;
-
-	top = st.top;
-	size = st.size;
-	pItems = new Item[size];
-
-	// Copy the elements from the source stack to the current stack
-	for (int i = 0; i < size; ++i)
-	{
-		pItems[i] = st.pItems[i];
-	}
-
-	return *this;
+	return 0;
 }
 ```
 - 5
