@@ -2,6 +2,7 @@
 
 ## 重点
 - [ ] 向量：点乘、叉乘、投影
+- [ ] 矩阵：正交投影(投影矩阵）
 
 ## 1. 坐标系
 ### 2D
@@ -233,16 +234,110 @@ int main()
 ```
 
 ## 5. 矩阵
+### 1. 基本运算：
 - 方阵
 - 对角阵
 - 单位阵
 - 向量可以当作矩阵（行列向量）
 - 转置:矩阵转置、向量转置
+
+### 2. 乘法编程：
 - 标量与矩阵相乘
-- 向量与矩阵相乘：行向量在左边、列向量在右边
-- 矩阵与矩阵相乘：第一个矩阵决定行，第二个矩阵决定列
-- 矩阵乘法公式
-- 矩阵和线性变换：旋转、缩放、投影、镜像、切变
+- 向量与矩阵相乘：
+	- 行向量要左乘：vABC
+ 	- 列向量要右乘：CBAv
+ 	- DirectX使用行向量
+  	- OpenGL使用列向量  
+- 矩阵与矩阵相乘：
+	- 第一个矩阵决定行，第二个矩阵决定列
+```C++
+int main()
+{
+	// 矩阵与矩阵相乘
+	Matrix3x3 a, b, c;
+	a.m11 = 1, a.m12 = -5, a.m13 = 3;
+	a.m21 = 0; a.m22 = -2, a.m23 = 6;
+	a.m31 = 7; a.m32 = 2, a.m33 = -4;
+
+	b.m11 = -8, b.m12 = 6, b.m13 = 1;
+	b.m21 = 7; b.m22 = 0, b.m23 = -3;
+	b.m31 = 2; b.m32 = 4, b.m33 = 5;
+	
+	c = a * b;  
+	print_m(c);
+
+	a *= b;
+	print_m(a);
+
+	// 矩阵与向量相乘，课程使用行向量
+	Matrix3x3 m;
+	Vector3 v(3, -1, 4);
+	m.m11 = -2, m.m12 = 0, m.m13 = 3;
+	m.m21 = 5, m.m22 = 7, m.m23 = -6;
+	m.m31 = 1; m.m32 = -4, m.m33 = 2;
+
+	Vector3 r = v * m;  
+	print_v(r);
+
+	v *= m;
+	print_v(v);
+
+	return 0;
+}
+```
+
+### 3. 矩阵和线性变换：
+- 旋转（后面课程会用欧拉角来计算3D中绕任意轴旋转的矩阵）
+```C++
+int main()
+{
+	// 旋转
+	Matrix3x3 M;
+	Vector3 a(10, 0, 0), b;
+
+	M.SetRotation(3, kPIOver2); // 绕Z轴，旋转90°
+	print_m(M);
+
+	b = a * M;
+	print_v(b);
+
+	M.SetRotation(3, kPI); // 绕Z轴，旋转180°
+	print_m(M);
+
+	b = a * M;
+	print_v(b);
+
+	M.SetRotation(1, -22 * kPI / 180); // 绕X轴，旋转-22°
+	print_m(M);
+
+	M.SetRotation(2, 30 * kPI / 180); // 绕Y轴，旋转-22°
+	print_m(M);
+
+	return 0;
+}
+```
+- 缩放
+```C++
+int main()
+{
+	// 缩放
+	Vector3 a(10, 20, 30), b;
+	print_v(a);
+
+	Matrix3x3 M;
+	M.SetupScale(Vector3(1, 2, 3));
+	print_m(M);
+
+	b = a * M;  // 对向量a缩放，得到向量b
+	print_v(b);
+
+	return 0;
+}
+
+```
+- 投影
+- 镜像
+- 切变
 
 ```C++
 // Matrix3X3.h
@@ -252,6 +347,4 @@ int main()
 // Matrix3X3.cpp
 ```
 
-```C++
-// main.cpp
-```
+
