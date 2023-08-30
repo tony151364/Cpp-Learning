@@ -189,7 +189,7 @@ RatedPlayer::RatedPlayer(unsigned int r, const string& fn,
 }
 
 RatedPlayer::RatedPlayer(unsigned int r, const TableTennisPlayer& tp)
-	: TableTennisPlayer(tp), rating(r)
+	: TableTennisPlayer(tp), rating(r)  // 调用基类的默认构造函数
 {
 
 }
@@ -255,7 +255,7 @@ pt->Name();  // invoke Name() with pointer
 ```
 - 然鹅，基类指针或引用只能用于调用基类方法，因此不能使用rt或pt来调用派生类的ResetRanking方法
 - 不可以将基类对象和地址赋给派生类对象。
-- [x] 如果允许基类隐式地引用派生类对象，则可以使用基类引用为派生类对象调用基类的方法。因为派生类继承了基类的方法，所以这样做不会出现问题。如果可以将基类对象赋给派生类引用，将发生什么情况呢？派生类引用能够为基对象调用派生类方法，这样做会出问题。
+- [x] 如果允许基类隐式地引用派生类对象，则可以使用基类引用派生类对象调用基类的方法。因为派生类继承了基类的方法，所以这样做不会出现问题。如果可以将基类对象赋给派生类引用，将发生什么情况呢？派生类引用能够使基对象调用派生类方法，这样做会出问题。
 - 如果基类引用和指针可以指向派生类对象，将出现一些很有趣的结果。其中之一是基类引用定义的函数或指针参数可以用于基类对象或派生类对象。例如，下面：
 ```C++
 void Show(const TableTennisPlayer& rt)
@@ -392,7 +392,7 @@ using std::endl;
 using std::string;
 
 // formatting stuff
-typedef std::ios_base::fmtflags format;  // ?
+typedef std::ios_base::fmtflags format;
 typedef std::streamsize precis;
 format setFormat();
 void restore(format f, precis p);
@@ -555,6 +555,7 @@ int main()
 	
 	Piggy.ViewAcct();
 	cout << endl;
+
 	Hoggy.ViewAcct();
 	cout << endl;
 
@@ -574,8 +575,8 @@ int main()
 }
 ```
 
-### 3.演示虚方法的行为
-- 可以创建只想Brass的指针数组。这样，每个元素的类型都相同，但由于使用的是公有继承模型，因此Brass指针既可以指向Brass对象，也可以指向BrassPlus对象。因此可以使用一个数组来表示多种类型的对象。这就是多态性
+#### 3.演示虚方法的行为
+- 可以创建指向Brass的指针数组。这样，每个元素的类型都相同，但由于使用的是公有继承模型，因此Brass指针既可以指向Brass对象，也可以指向BrassPlus对象。因此可以使用一个数组来表示多种类型的对象。这就是多态性
 ```C++
 // 13.10 usebrass2.cpp -- polymorphic example
 // compile with brass.cpp
