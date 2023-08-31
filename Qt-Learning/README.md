@@ -189,6 +189,8 @@ MyPushButton::~MyPushButton()
 ## 04 信号和槽
 - ``` connect(信号的发送者, 发送的具体信号, 信号的接受者, 信号的处理(槽)) ```
 - 信号和槽的优点：松散耦合，信号**发送端**和**接收端**本身没有关联，通过connect连接，将两端耦合在一起
+
+### 4.1 QT内置的信号和槽
 ```C++
 // QT内置的信号和槽
 Widget::Widget(QWidget *parent)
@@ -205,8 +207,9 @@ Widget::Widget(QWidget *parent)
 }
 ```
 
+### 4.2 自定义的信号和槽
 ```C++
-// 自定义的信号和槽
+
 ```
 
 ```C++
