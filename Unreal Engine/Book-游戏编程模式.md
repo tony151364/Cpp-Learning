@@ -1,2 +1,0 @@
-- 书本：[《Game Programming Patterns》](https://gameprogrammingpatterns.com/)
-- 视频：[游戏编程模式精读与实战](https://www.bilibili.com/video/BV1MU4y1U7jc)
